@@ -12,4 +12,10 @@ export { initializeDatabase, getDatabase, closeDatabase } from './db';
 export { useAppReady } from './hooks/useAppReady';
 
 // Types
-// Export shared types here as they're defined
+// TODO: Export shared types here as they're defined
+
+// TODO: Add feature module exports as features are implemented:
+// export * from './features/auth';
+// export * from './features/templates';
+// export * from './features/sessions';
+

@@ -30,6 +30,8 @@ export function useAppReady() {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function prepare() {
       try {
         console.log('[App] Initializing app...');
@@ -46,14 +48,21 @@ export function useAppReady() {
         console.log('[App] App initialization complete');
       } catch (error) {
         console.error('[App] Initialization error:', error);
-        // In production, you might want to show an error screen
-        // For now, we'll still mark as ready to prevent app from hanging
+        // TODO: In production, show an error screen or retry logic
+        throw error;
       } finally {
-        setIsReady(true);
+        // Only update state if component is still mounted
+        if (isMounted) {
+          setIsReady(true);
+        }
       }
     }
 
     prepare();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {

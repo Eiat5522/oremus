@@ -12,6 +12,7 @@ import { runMigrations } from './migrate';
 const DB_NAME = 'oremus.db';
 
 let dbInstance: SQLiteDatabase | null = null;
+let initializationPromise: Promise<SQLiteDatabase> | null = null;
 
 /**
  * Initialize the database
@@ -19,25 +20,43 @@ let dbInstance: SQLiteDatabase | null = null;
  * @returns Promise that resolves to the database instance
  */
 export async function initializeDatabase(): Promise<SQLiteDatabase> {
+  // Return cached instance if already initialized
   if (dbInstance) {
     return dbInstance;
   }
 
-  console.log('[DB] Opening database:', DB_NAME);
-  
-  // Open database
-  dbInstance = await SQLite.openDatabaseAsync(DB_NAME);
+  // Return in-progress initialization to prevent concurrent calls
+  if (initializationPromise) {
+    return initializationPromise;
+  }
 
-  // Enable foreign keys (MUST be done after opening)
-  await dbInstance.execAsync('PRAGMA foreign_keys = ON;');
-  console.log('[DB] Foreign keys enabled');
+  initializationPromise = (async () => {
+    try {
+      console.log('[DB] Opening database:', DB_NAME);
+      
+      // Open database
+      const db = await SQLite.openDatabaseAsync(DB_NAME);
 
-  // Run migrations
-  await runMigrations(dbInstance);
+      // Enable foreign keys (MUST be done after opening)
+      await db.execAsync('PRAGMA foreign_keys = ON;');
+      console.log('[DB] Foreign keys enabled');
 
-  console.log('[DB] Database initialized successfully');
-  
-  return dbInstance;
+      // Run migrations
+      await runMigrations(db);
+
+      console.log('[DB] Database initialized successfully');
+      
+      dbInstance = db;
+      return db;
+    } catch (error) {
+      // Reset state on failure to allow retry
+      initializationPromise = null;
+      dbInstance = null;
+      throw error;
+    }
+  })();
+
+  return initializationPromise;
 }
 
 /**

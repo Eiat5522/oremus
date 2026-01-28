@@ -52,9 +52,11 @@ Migrations are stored in `migrations/` and numbered sequentially (001, 002, etc.
 1. The migration runner checks `PRAGMA user_version` to determine the current schema version.
 2. It runs all migrations from `currentVersion + 1` to the latest version.
 3. Each migration:
-   - Executes in a single transaction (includes `BEGIN` and `COMMIT`)
-   - Sets `PRAGMA user_version = N` on success
-   - Rolls back on error
+   - Contains its own BEGIN/COMMIT transaction for the schema changes
+   - Sets `PRAGMA user_version = N` as a separate atomic operation after the migration succeeds
+   - If the migration SQL fails, the transaction rolls back automatically
+   - If the version update fails, the error propagates and can be retried
+4. Migration files must be idempotent (safe to run multiple times) using `IF NOT EXISTS` clauses.
 
 ### Adding a New Migration
 

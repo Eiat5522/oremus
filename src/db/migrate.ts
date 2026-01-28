@@ -29,9 +29,13 @@ async function getCurrentVersion(db: SQLiteDatabase): Promise<number> {
 /**
  * Set database schema version
  * @param db - The SQLite database instance
- * @param version - The version to set
+ * @param version - The version to set (must be a positive integer)
  */
 async function setVersion(db: SQLiteDatabase, version: number): Promise<void> {
+  // Validate version is a positive integer
+  if (!Number.isInteger(version) || version < 0) {
+    throw new Error(`Invalid version number: ${version}`);
+  }
   await db.execAsync(`PRAGMA user_version = ${version};`);
 }
 
@@ -42,7 +46,15 @@ async function setVersion(db: SQLiteDatabase, version: number): Promise<void> {
  */
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {
   const currentVersion = await getCurrentVersion(db);
-  const targetVersion = Math.max(...Object.keys(migrations).map(Number));
+  
+  // Handle empty migrations object
+  const migrationVersions = Object.keys(migrations).map(Number);
+  if (migrationVersions.length === 0) {
+    console.log('[DB Migration] No migrations defined');
+    return;
+  }
+  
+  const targetVersion = Math.max(...migrationVersions);
 
   console.log(`[DB Migration] Current version: ${currentVersion}, Target version: ${targetVersion}`);
 
@@ -64,7 +76,7 @@ export async function runMigrations(db: SQLiteDatabase): Promise<void> {
       // Execute the migration SQL (which includes BEGIN/COMMIT)
       await runInTransaction(db, migration);
       
-      // Set the new version
+      // Set the new version (atomic operation after successful migration)
       await setVersion(db, version);
       
       console.log(`[DB Migration] Migration ${version} completed successfully`);
