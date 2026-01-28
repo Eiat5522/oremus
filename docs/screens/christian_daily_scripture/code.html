@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Christian Daily Scripture</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1152d4",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Newsreader", "serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Newsreader', serif;
+        }
+        .paper-texture {
+            background-color: #fdfbf7;
+            background-image: radial-gradient(#e5e7eb 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+        .dark .paper-texture {
+            background-color: #1a1f2c;
+            background-image: radial-gradient(#2d3748 0.5px, transparent 0.5px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen text-[#111318] dark:text-gray-100">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden max-w-[480px] mx-auto shadow-2xl bg-white dark:bg-background-dark">
+<!-- TopAppBar -->
+<div class="sticky top-0 z-10 flex items-center bg-white/80 dark:bg-background-dark/80 backdrop-blur-md p-4 pb-2 justify-between border-b border-gray-100 dark:border-gray-800">
+<div class="text-[#111318] dark:text-white flex size-12 shrink-0 items-center justify-start">
+<span class="material-symbols-outlined">menu_book</span>
+</div>
+<h2 class="text-[#111318] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center font-display">Daily Scripture</h2>
+<div class="flex w-12 items-center justify-end">
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 bg-transparent text-[#111318] dark:text-white gap-2 text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0">
+<span class="material-symbols-outlined">search</span>
+</button>
+</div>
+</div>
+<!-- Hero Verse Card -->
+<div class="p-4">
+<div class="paper-texture relative flex flex-col items-stretch justify-end rounded-xl p-8 shadow-sm border border-orange-100/50 dark:border-gray-700 overflow-hidden min-h-[320px]">
+<!-- Subtle background decorative element -->
+<div class="absolute -top-10 -right-10 opacity-5 dark:opacity-10 pointer-events-none">
+<span class="material-symbols-outlined text-[200px]">auto_stories</span>
+</div>
+<div class="flex w-full items-start flex-col gap-6 relative z-10">
+<div class="flex flex-col gap-1">
+<span class="text-primary dark:text-blue-400 text-xs font-bold tracking-widest uppercase mb-2">Verse of the Day</span>
+<p class="text-[#111318] dark:text-gray-100 italic tracking-tight text-2xl font-medium leading-relaxed font-display">
+                            "For unto us a child is born, unto us a son is given: and the government shall be upon his shoulder: and his name shall be called Wonderful, Counsellor, The mighty God, The everlasting Father, The Prince of Peace."
+                        </p>
+</div>
+<div class="flex items-center gap-2 border-t border-gray-200 dark:border-gray-700 pt-4 w-full">
+<span class="material-symbols-outlined text-sm text-gray-400">bookmark</span>
+<p class="text-gray-600 dark:text-gray-400 text-base font-medium leading-normal italic">Isaiah 9:6</p>
+</div>
+</div>
+</div>
+</div>
+<!-- SectionHeader -->
+<div class="px-4 pt-6 pb-2">
+<h3 class="text-[#111318] dark:text-white text-xl font-bold leading-tight tracking-[-0.015em] font-display">Scripture Library</h3>
+<p class="text-gray-500 text-sm mt-1">Guided readings for your daily walk</p>
+</div>
+<!-- Scripture List -->
+<div class="flex flex-col gap-1 px-2">
+<!-- ListItem: Advent -->
+<div class="flex items-center gap-4 bg-white dark:bg-background-dark px-4 min-h-[80px] py-2 justify-between rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="text-primary flex items-center justify-center rounded-xl bg-primary/10 shrink-0 size-12" data-icon="Sparkle">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-[#111318] dark:text-white text-base font-bold leading-normal line-clamp-1 font-display">Advent &amp; Christmas</p>
+<p class="text-[#616f89] dark:text-gray-400 text-sm font-normal leading-normal line-clamp-2">Preparing for the coming of Christ the King</p>
+</div>
+</div>
+<div class="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+<div class="text-primary flex size-7 items-center justify-center">
+<span class="material-symbols-outlined">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- ListItem: Dinner -->
+<div class="flex items-center gap-4 bg-white dark:bg-background-dark px-4 min-h-[80px] py-2 justify-between rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="text-[#111318] dark:text-white flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 shrink-0 size-12" data-icon="BowlFood">
+<span class="material-symbols-outlined">restaurant</span>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-[#111318] dark:text-white text-base font-bold leading-normal line-clamp-1 font-display">Table Blessings</p>
+<p class="text-[#616f89] dark:text-gray-400 text-sm font-normal leading-normal line-clamp-2">Prayers and gratitude for the nourishment of body and soul</p>
+</div>
+</div>
+<div class="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+<div class="text-primary flex size-7 items-center justify-center">
+<span class="material-symbols-outlined">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- ListItem: Strength -->
+<div class="flex items-center gap-4 bg-white dark:bg-background-dark px-4 min-h-[80px] py-2 justify-between rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="text-[#111318] dark:text-white flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 shrink-0 size-12">
+<span class="material-symbols-outlined">fort</span>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-[#111318] dark:text-white text-base font-bold leading-normal line-clamp-1 font-display">Strength &amp; Courage</p>
+<p class="text-[#616f89] dark:text-gray-400 text-sm font-normal leading-normal line-clamp-2">Fortifying the spirit through trials and uncertainty</p>
+</div>
+</div>
+<div class="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+<div class="text-primary flex size-7 items-center justify-center">
+<span class="material-symbols-outlined">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- ListItem: Peace -->
+<div class="flex items-center gap-4 bg-white dark:bg-background-dark px-4 min-h-[80px] py-2 justify-between rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="text-[#111318] dark:text-white flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 shrink-0 size-12">
+<span class="material-symbols-outlined">potted_plant</span>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-[#111318] dark:text-white text-base font-bold leading-normal line-clamp-1 font-display">Inner Peace</p>
+<p class="text-[#616f89] dark:text-gray-400 text-sm font-normal leading-normal line-clamp-2">Finding rest for your soul in the presence of God</p>
+</div>
+</div>
+<div class="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+<div class="text-primary flex size-7 items-center justify-center">
+<span class="material-symbols-outlined">chevron_right</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer / Security Note -->
+<div class="mt-auto p-8 text-center border-t border-gray-100 dark:border-gray-800">
+<div class="flex items-center justify-center gap-2 text-gray-400 text-xs font-medium uppercase tracking-widest">
+<span class="material-symbols-outlined text-sm">shield_person</span>
+<span>Local Data Only • Privacy First</span>
+</div>
+<p class="mt-2 text-gray-400 text-[10px] italic">Your spiritual journey stays on your device.</p>
+</div>
+<!-- Navigation Bar (iOS Style) -->
+<div class="flex items-center justify-around bg-white/90 dark:bg-background-dark/90 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 pb-8 pt-3 px-6">
+<div class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[28px] fill-[1]">home</span>
+<span class="text-[10px] font-bold">Home</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-gray-400">
+<span class="material-symbols-outlined text-[28px]">import_contacts</span>
+<span class="text-[10px] font-bold">Read</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-gray-400">
+<span class="material-symbols-outlined text-[28px]">history_edu</span>
+<span class="text-[10px] font-bold">Journal</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-gray-400">
+<span class="material-symbols-outlined text-[28px]">settings</span>
+<span class="text-[10px] font-bold">Settings</span>
+</div>
+</div>
+</div>
+</body></html>

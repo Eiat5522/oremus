@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Active Prayer Session</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1152d4",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display h-screen w-full overflow-hidden flex flex-col items-center justify-between transition-colors duration-300">
+<!-- Top Status Bar Area (Visual Placeholder for immersive feel) -->
+<div class="w-full flex justify-between px-6 pt-4 opacity-50 text-xs font-medium z-10">
+<!-- Empty or minimal status info could go here, keeping it clean as requested -->
+</div>
+<!-- Main Content Area: Centered Timer -->
+<div class="flex-grow flex flex-col items-center justify-center relative w-full px-6">
+<!-- Prayer Intention (Subtle) -->
+<div class="mb-8 opacity-60 text-sm font-medium tracking-wide uppercase text-slate-500 dark:text-slate-400">
+            Morning Silence
+        </div>
+<!-- Timer Container with Subtle Glow/Progress Ring Simulation -->
+<div class="relative flex items-center justify-center">
+<!-- Ambient Glow Background -->
+<div class="absolute inset-0 bg-primary/10 dark:bg-primary/5 rounded-full blur-[60px] w-[300px] h-[300px] z-0 pointer-events-none"></div>
+<!-- Decorative Progress Ring (SVG) -->
+<div class="absolute w-[320px] h-[320px] z-0 opacity-20">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 100 100">
+<circle class="text-slate-300 dark:text-slate-700" cx="50" cy="50" fill="none" r="48" stroke="currentColor" stroke-width="0.5"></circle>
+<circle class="text-primary transition-all duration-1000 ease-linear" cx="50" cy="50" fill="none" r="48" stroke="currentColor" stroke-dasharray="301.59" stroke-dashoffset="75" stroke-width="0.5"></circle>
+</svg>
+</div>
+<!-- Main Timer Display -->
+<div class="relative z-10 flex flex-col items-center">
+<h1 class="text-[5.5rem] leading-none font-thin tabular-nums tracking-tighter text-slate-800 dark:text-white select-none">
+                    14:59
+                </h1>
+</div>
+</div>
+</div>
+<!-- Bottom Controls Area -->
+<div class="w-full flex flex-col items-center gap-10 pb-12 z-10">
+<!-- Distraction Button -->
+<button class="group relative flex items-center justify-center gap-2 h-12 px-8 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm transition-all active:scale-95 hover:border-primary/50 dark:hover:border-primary/50">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary text-[20px]">
+                waves
+            </span>
+<span class="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white">
+                I'm distracted
+            </span>
+</button>
+<!-- Playback Controls -->
+<div class="flex items-center gap-8">
+<!-- End Session Button -->
+<button aria-label="End Session" class="flex items-center justify-center w-14 h-14 rounded-full bg-slate-200/50 dark:bg-slate-800/50 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 transition-colors backdrop-blur-sm">
+<span class="material-symbols-outlined text-[24px]">close</span>
+</button>
+<!-- Play/Pause Button (Primary Action) -->
+<button aria-label="Pause Session" class="flex items-center justify-center w-20 h-20 rounded-full bg-primary text-white shadow-lg shadow-primary/30 hover:bg-primary/90 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-[32px] fill-1">pause</span>
+</button>
+<!-- Settings/Sound (Optional balance) -->
+<button aria-label="Sound Settings" class="flex items-center justify-center w-14 h-14 rounded-full bg-slate-200/50 dark:bg-slate-800/50 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 transition-colors backdrop-blur-sm">
+<span class="material-symbols-outlined text-[24px]">volume_up</span>
+</button>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Profile &amp; Data Privacy</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white min-h-screen">
+<!-- Top Navigation Bar -->
+<nav class="sticky top-0 z-10 flex items-center bg-background-light dark:bg-background-dark p-4 justify-between border-b border-slate-200 dark:border-slate-800">
+<div class="text-slate-900 dark:text-white flex size-10 items-center justify-center cursor-pointer">
+<span class="material-symbols-outlined">arrow_back_ios</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight flex-1 text-center">Profile</h2>
+<div class="flex size-10 items-center justify-end">
+<button class="flex cursor-pointer items-center justify-center rounded-lg bg-transparent text-slate-900 dark:text-white">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</nav>
+<main class="max-w-md mx-auto pb-12">
+<!-- Profile Header -->
+<header class="flex p-8 flex-col items-center gap-4">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-28 w-28 border-4 border-primary/20" data-alt="Abstract soft blue gradient profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDlRsitAUHhAJL2HPTIZDpJmf_oWjwXfZfh2vD0kAe0RxWS-ZV9wTm_yMifwO_Lv7NbiPi2kzLhLqZZkke7kJVBa24kqT6l_guj1nbe3K8Afqg3w2RgEhsv3tlQT_o2Y1GlxIzPMdvJOEBEC8AQcjzVDb-n1kFJZwrFxuxKqdPzem3h-AgK93WGSuWNahyeuRXkjOvOnXr7lyqOtKHVrP_ywczBWc2DmNa2NMWeG9jTyBtkdfjdvk-db3hpONSWlQf4AAxKT_L88zA");'>
+</div>
+<div class="absolute bottom-0 right-0 bg-primary text-white p-1 rounded-full border-2 border-background-dark flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">edit</span>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<p class="text-slate-900 dark:text-white text-2xl font-bold tracking-tight">Gabriel Vance</p>
+<div class="mt-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-base">auto_awesome</span>
+                    General Tradition
+                </div>
+</div>
+</header>
+<!-- General Settings Section -->
+<section class="mt-4 px-4">
+<h3 class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest px-2 pb-3">Preferences</h3>
+<div class="bg-white dark:bg-slate-800/40 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
+<!-- List Item 1 -->
+<div class="flex items-center gap-4 px-4 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors border-b border-slate-100 dark:border-slate-800">
+<div class="text-primary flex items-center justify-center rounded-xl bg-primary/10 shrink-0 size-10">
+<span class="material-symbols-outlined">tune</span>
+</div>
+<p class="text-slate-900 dark:text-white text-base font-medium flex-1">Edit Preferences</p>
+<span class="material-symbols-outlined text-slate-400">chevron_right</span>
+</div>
+<!-- List Item 2 -->
+<div class="flex items-center gap-4 px-4 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors border-b border-slate-100 dark:border-slate-800">
+<div class="text-emerald-500 flex items-center justify-center rounded-xl bg-emerald-500/10 shrink-0 size-10">
+<span class="material-symbols-outlined">description</span>
+</div>
+<p class="text-slate-900 dark:text-white text-base font-medium flex-1">Manage Templates</p>
+<span class="material-symbols-outlined text-slate-400">chevron_right</span>
+</div>
+<!-- List Item 3 -->
+<div class="flex items-center gap-4 px-4 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors">
+<div class="text-amber-500 flex items-center justify-center rounded-xl bg-amber-500/10 shrink-0 size-10">
+<span class="material-symbols-outlined">notifications_active</span>
+</div>
+<p class="text-slate-900 dark:text-white text-base font-medium flex-1">Notifications</p>
+<span class="material-symbols-outlined text-slate-400">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Data & Privacy Card -->
+<section class="mt-8 px-4">
+<div class="bg-slate-50 dark:bg-slate-900/60 rounded-3xl p-6 border-2 border-dashed border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3 mb-4">
+<div class="bg-primary/20 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary">shield_lock</span>
+</div>
+<h3 class="text-slate-900 dark:text-white text-lg font-bold">Data &amp; Privacy</h3>
+</div>
+<p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6">
+                    Your data is private. Sessions, notes, and templates are stored on this device only and <span class="text-primary font-medium">not synced to the cloud</span>.
+                </p>
+<div class="flex flex-col gap-3">
+<button class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-bold py-3 px-4 rounded-xl transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-xl">file_export</span>
+                        Export Data (JSON)
+                    </button>
+<button class="w-full flex items-center justify-center gap-2 bg-transparent hover:bg-red-500/5 text-red-500 font-semibold py-2 px-4 rounded-xl transition-all">
+<span class="material-symbols-outlined text-xl">delete_forever</span>
+                        Clear All Local Data
+                    </button>
+</div>
+</div>
+<p class="text-center text-slate-500 dark:text-slate-500 text-xs mt-6 px-8">
+                App Version 1.2.0 (Build 45) <br/>
+                Made for distraction-free practice.
+            </p>
+</section>
+</main>
+<!-- Bottom Spacer for iOS Home Indicator -->
+<div class="h-8"></div>
+</body></html>
