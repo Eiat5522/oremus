@@ -6,7 +6,7 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  initialRouteName: 'onboarding',
 };
 
 export default function RootLayout() {
@@ -14,8 +14,14 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="onboarding" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="active-session" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="tradition/qibla" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="tradition/buddhist" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="tradition/christian" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="tradition/general" options={{ presentation: 'modal' }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
       <StatusBar style="auto" />
