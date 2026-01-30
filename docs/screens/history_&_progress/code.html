@@ -1,240 +1,378 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="dark" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>History &amp; Progress - Prayer Focus App</title>
-<!-- Material Symbols -->
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- Tailwind Config -->
-<script>
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>History &amp; Progress - Prayer Focus App</title>
+    <!-- Material Symbols -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Tailwind Config -->
+    <script>
       tailwind.config = {
-        darkMode: "class",
+        darkMode: 'class',
         theme: {
           extend: {
             colors: {
-              "primary": "#1152d4",
-              "background-light": "#f6f6f8",
-              "background-dark": "#101622",
-              "surface-dark": "#1a2230", // Slightly lighter than background-dark for cards
-              "surface-light": "#ffffff", // White for light mode cards
+              primary: '#1152d4',
+              'background-light': '#f6f6f8',
+              'background-dark': '#101622',
+              'surface-dark': '#1a2230', // Slightly lighter than background-dark for cards
+              'surface-light': '#ffffff', // White for light mode cards
             },
             fontFamily: {
-              "display": ["Inter", "sans-serif"]
+              display: ['Inter', 'sans-serif'],
             },
-            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+            borderRadius: { DEFAULT: '1rem', lg: '2rem', xl: '3rem', full: '9999px' },
           },
         },
-      }
+      };
     </script>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
   </head>
-<body class="bg-background-light dark:bg-background-dark font-display antialiased transition-colors duration-200">
-<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto border-x border-gray-200 dark:border-gray-800">
-<!-- Header -->
-<header class="sticky top-0 z-50 flex items-center bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md p-4 pb-2 justify-between border-b border-gray-200 dark:border-gray-800">
-<div class="flex items-center gap-3">
-<button class="text-gray-900 dark:text-white p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
-<span class="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
-</button>
-<h2 class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">History &amp; Progress</h2>
-</div>
-<button class="text-primary font-medium text-sm hover:text-primary/80 transition-colors">Export</button>
-</header>
-<!-- Main Content -->
-<main class="flex-1 px-4 py-6">
-<!-- Weekly Progress Title -->
-<div class="mb-5 flex items-end justify-between">
-<h3 class="text-gray-900 dark:text-white tracking-tight text-xl font-bold leading-tight">Weekly Progress</h3>
-<span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Oct 24 - Oct 30</span>
-</div>
-<!-- Stats Grid -->
-<div class="grid grid-cols-2 gap-3 mb-8">
-<!-- Total Sessions Card -->
-<div class="flex flex-col gap-3 rounded-lg p-5 bg-surface-light dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-gray-800 relative overflow-hidden group">
-<div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-<span class="material-symbols-outlined text-4xl text-primary">spa</span>
-</div>
-<div class="flex items-center gap-2">
-<div class="flex items-center justify-center rounded-full bg-primary/10 w-8 h-8 text-primary">
-<span class="material-symbols-outlined text-lg">calendar_month</span>
-</div>
-<p class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">Sessions</p>
-</div>
-<div class="flex items-end gap-2 mt-1">
-<p class="text-gray-900 dark:text-white tracking-tight text-3xl font-bold leading-none">12</p>
-<p class="text-emerald-500 text-xs font-medium mb-1 flex items-center">
-<span class="material-symbols-outlined text-sm">arrow_upward</span> 20%
-                        </p>
-</div>
-</div>
-<!-- Total Minutes Card -->
-<div class="flex flex-col gap-3 rounded-lg p-5 bg-surface-light dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-gray-800 relative overflow-hidden group">
-<div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-<span class="material-symbols-outlined text-4xl text-primary">schedule</span>
-</div>
-<div class="flex items-center gap-2">
-<div class="flex items-center justify-center rounded-full bg-primary/10 w-8 h-8 text-primary">
-<span class="material-symbols-outlined text-lg">timer</span>
-</div>
-<p class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">Minutes</p>
-</div>
-<div class="flex items-end gap-2 mt-1">
-<p class="text-gray-900 dark:text-white tracking-tight text-3xl font-bold leading-none">340</p>
-<span class="text-gray-400 text-sm font-medium mb-1">m</span>
-<p class="text-emerald-500 text-xs font-medium mb-1 flex items-center ml-auto">
-<span class="material-symbols-outlined text-sm">arrow_upward</span> 15%
-                        </p>
-</div>
-</div>
-<!-- Avg Focus Card (Full Width) -->
-<div class="col-span-2 flex items-center justify-between gap-4 rounded-lg p-5 bg-surface-light dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-gray-800">
-<div class="flex flex-col gap-1">
-<div class="flex items-center gap-2 mb-1">
-<p class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">Avg. Focus</p>
-<span class="text-emerald-500 text-xs font-medium bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">+0.5%</span>
-</div>
-<div class="flex items-center gap-2">
-<p class="text-gray-900 dark:text-white tracking-tight text-3xl font-bold leading-none">4.5</p>
-<div class="flex text-yellow-400 text-lg">
-<span class="material-symbols-outlined fill-1">star</span>
-<span class="material-symbols-outlined fill-1">star</span>
-<span class="material-symbols-outlined fill-1">star</span>
-<span class="material-symbols-outlined fill-1">star</span>
-<span class="material-symbols-outlined fill-1" style="font-variation-settings: 'FILL' 0.5;">star_half</span>
-</div>
-</div>
-</div>
-<!-- Mini Chart Visualization (Abstract) -->
-<div class="h-10 w-24 flex items-end justify-between gap-1 opacity-80">
-<div class="w-full bg-primary/20 rounded-t-sm h-[40%]"></div>
-<div class="w-full bg-primary/30 rounded-t-sm h-[60%]"></div>
-<div class="w-full bg-primary/50 rounded-t-sm h-[50%]"></div>
-<div class="w-full bg-primary/70 rounded-t-sm h-[80%]"></div>
-<div class="w-full bg-primary rounded-t-sm h-[70%]"></div>
-</div>
-</div>
-</div>
-<!-- Recent Sessions Header -->
-<div class="sticky top-[60px] z-40 bg-background-light dark:bg-background-dark py-3">
-<h3 class="text-gray-900 dark:text-white text-base font-bold leading-tight tracking-[-0.015em]">Recent Sessions</h3>
-</div>
-<!-- Sessions List -->
-<div class="flex flex-col gap-3 pb-8">
-<!-- List Item 1 -->
-<button class="flex items-center gap-4 bg-surface-light dark:bg-surface-dark p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors w-full text-left group">
-<!-- Icon Box -->
-<div class="text-white flex items-center justify-center rounded-full bg-gradient-to-br from-primary to-blue-700 shadow-md shadow-blue-900/20 shrink-0 h-12 w-12 group-hover:scale-105 transition-transform">
-<span class="material-symbols-outlined text-2xl">wb_twilight</span>
-</div>
-<!-- Content -->
-<div class="flex flex-1 flex-col justify-center gap-1">
-<div class="flex justify-between items-center w-full">
-<p class="text-gray-900 dark:text-white text-base font-semibold leading-normal">Today, 6:00 AM</p>
-<div class="flex text-yellow-400 text-sm">
-<span class="material-symbols-outlined fill-1 text-[16px]">star</span>
-<span class="material-symbols-outlined fill-1 text-[16px]">star</span>
-<span class="material-symbols-outlined fill-1 text-[16px]">star</span>
-<span class="material-symbols-outlined fill-1 text-[16px]">star</span>
-<span class="material-symbols-outlined fill-1 text-[16px]">star</span>
-</div>
-</div>
-<div class="flex items-center gap-2">
-<span class="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[11px] font-bold uppercase tracking-wide">Hesychasm</span>
-<span class="text-gray-400 dark:text-gray-500 text-[10px] text-xs">•</span>
-<p class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">20 min</p>
-</div>
-</div>
-<!-- Chevron -->
-<span class="material-symbols-outlined text-gray-400 dark:text-gray-600">chevron_right</span>
-</button>
-<!-- List Item 2 -->
-<button class="flex items-center gap-4 bg-surface-light dark:bg-surface-dark p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors w-full text-left group">
-<div class="text-white flex items-center justify-center rounded-full bg-gradient-to-br from-slate-600 to-slate-800 shadow-md shadow-slate-900/20 shrink-0 h-12 w-12 group-hover:scale-105 transition-transform">
-<span class="material-symbols-outlined text-2xl">nights_stay</span>
-</div>
-<div class="flex flex-1 flex-col justify-center gap-1">
-<div class="flex justify-between items-center w-full">
-<p class="text-gray-900 dark:text-white text-base font-semibold leading-normal">Yesterday, 8:30 PM</p>
-<div class="flex text-yellow-400 text-sm">
-<span class="material-symbols-outlined fill-1 text-[16px]">star</span>
-<span class="material-symbols-outlined fill-1 text-[16px]">star</span>
-<span class="material-symbols-outlined fill-1 text-[16px]">star</span>
-<span class="material-symbols-outlined fill-1 text-[16px]">star</span>
-<span class="material-symbols-outlined text-gray-300 dark:text-gray-600 text-[16px]">star</span>
-</div>
-</div>
-<div class="flex items-center gap-2">
-<span class="px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-[11px] font-bold uppercase tracking-wide">Rosary</span>
-<span class="text-gray-400 dark:text-gray-500 text-[10px] text-xs">•</span>
-<p class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">15 min</p>
-</div>
-</div>
-<span class="material-symbols-outlined text-gray-400 dark:text-gray-600">chevron_right</span>
-</button>
-<!-- List Item 3 -->
-<button class="flex items-center gap-4 bg-surface-light dark:bg-surface-dark p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors w-full text-left group">
-<div class="text-white flex items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-indigo-700 shadow-md shadow-indigo-900/20 shrink-0 h-12 w-12 group-hover:scale-105 transition-transform">
-<span class="material-symbols-outlined text-2xl">self_improvement</span>
-</div>
-<div class="flex flex-1 flex-col justify-center gap-1">
-<div class="flex justify-between items-center w-full">
-<p class="text-gray-900 dark:text-white text-base font-semibold leading-normal">Mon, Oct 24</p>
-<div class="flex text-yellow-400 text-sm">
-<span class="material-symbols-outlined fill-1 text-[16px]">star</span>
-<span class="material-symbols-outlined fill-1 text-[16px]">star</span>
-<span class="material-symbols-outlined fill-1 text-[16px]">star</span>
-<span class="material-symbols-outlined text-gray-300 dark:text-gray-600 text-[16px]">star</span>
-<span class="material-symbols-outlined text-gray-300 dark:text-gray-600 text-[16px]">star</span>
-</div>
-</div>
-<div class="flex items-center gap-2">
-<span class="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold uppercase tracking-wide">Centering Prayer</span>
-<span class="text-gray-400 dark:text-gray-500 text-[10px] text-xs">•</span>
-<p class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">10 min</p>
-</div>
-</div>
-<span class="material-symbols-outlined text-gray-400 dark:text-gray-600">chevron_right</span>
-</button>
-<!-- List Item 4 (Older) -->
-<button class="flex items-center gap-4 bg-surface-light dark:bg-surface-dark p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors w-full text-left group opacity-75 hover:opacity-100">
-<div class="text-white flex items-center justify-center rounded-full bg-gradient-to-br from-slate-600 to-slate-800 shadow-md shadow-slate-900/20 shrink-0 h-12 w-12 group-hover:scale-105 transition-transform">
-<span class="material-symbols-outlined text-2xl">wb_twilight</span>
-</div>
-<div class="flex flex-1 flex-col justify-center gap-1">
-<div class="flex justify-between items-center w-full">
-<p class="text-gray-900 dark:text-white text-base font-semibold leading-normal">Sun, Oct 23</p>
-<div class="flex text-yellow-400 text-sm">
-<span class="material-symbols-outlined fill-1 text-[16px]">star</span>
-<span class="material-symbols-outlined fill-1 text-[16px]">star</span>
-<span class="material-symbols-outlined fill-1 text-[16px]">star</span>
-<span class="material-symbols-outlined fill-1 text-[16px]">star</span>
-<span class="material-symbols-outlined fill-1 text-[16px]">star</span>
-</div>
-</div>
-<div class="flex items-center gap-2">
-<span class="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[11px] font-bold uppercase tracking-wide">Hesychasm</span>
-<span class="text-gray-400 dark:text-gray-500 text-[10px] text-xs">•</span>
-<p class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">25 min</p>
-</div>
-</div>
-<span class="material-symbols-outlined text-gray-400 dark:text-gray-600">chevron_right</span>
-</button>
-</div>
-<!-- Privacy Footer -->
-<div class="flex items-center justify-center gap-2 pb-6 mt-4 opacity-50">
-<span class="material-symbols-outlined text-gray-500 dark:text-gray-400 text-sm">shield_lock</span>
-<p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Your data is stored securely on this device only.</p>
-</div>
-</main>
-</div>
-</body></html>
+  <body
+    class="bg-background-light dark:bg-background-dark font-display antialiased transition-colors duration-200"
+  >
+    <div
+      class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto border-x border-gray-200 dark:border-gray-800"
+    >
+      <!-- Header -->
+      <header
+        class="sticky top-0 z-50 flex items-center bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md p-4 pb-2 justify-between border-b border-gray-200 dark:border-gray-800"
+      >
+        <div class="flex items-center gap-3">
+          <button
+            class="text-gray-900 dark:text-white p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+          >
+            <span class="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
+          </button>
+          <h2
+            class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]"
+          >
+            History &amp; Progress
+          </h2>
+        </div>
+        <button class="text-primary font-medium text-sm hover:text-primary/80 transition-colors">
+          Export
+        </button>
+      </header>
+      <!-- Main Content -->
+      <main class="flex-1 px-4 py-6">
+        <!-- Weekly Progress Title -->
+        <div class="mb-5 flex items-end justify-between">
+          <h3 class="text-gray-900 dark:text-white tracking-tight text-xl font-bold leading-tight">
+            Weekly Progress
+          </h3>
+          <span
+            class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+            >Oct 24 - Oct 30</span
+          >
+        </div>
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-2 gap-3 mb-8">
+          <!-- Total Sessions Card -->
+          <div
+            class="flex flex-col gap-3 rounded-lg p-5 bg-surface-light dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-gray-800 relative overflow-hidden group"
+          >
+            <div
+              class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity"
+            >
+              <span class="material-symbols-outlined text-4xl text-primary">spa</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div
+                class="flex items-center justify-center rounded-full bg-primary/10 w-8 h-8 text-primary"
+              >
+                <span class="material-symbols-outlined text-lg">calendar_month</span>
+              </div>
+              <p class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">
+                Sessions
+              </p>
+            </div>
+            <div class="flex items-end gap-2 mt-1">
+              <p
+                class="text-gray-900 dark:text-white tracking-tight text-3xl font-bold leading-none"
+              >
+                12
+              </p>
+              <p class="text-emerald-500 text-xs font-medium mb-1 flex items-center">
+                <span class="material-symbols-outlined text-sm">arrow_upward</span> 20%
+              </p>
+            </div>
+          </div>
+          <!-- Total Minutes Card -->
+          <div
+            class="flex flex-col gap-3 rounded-lg p-5 bg-surface-light dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-gray-800 relative overflow-hidden group"
+          >
+            <div
+              class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity"
+            >
+              <span class="material-symbols-outlined text-4xl text-primary">schedule</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div
+                class="flex items-center justify-center rounded-full bg-primary/10 w-8 h-8 text-primary"
+              >
+                <span class="material-symbols-outlined text-lg">timer</span>
+              </div>
+              <p class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">
+                Minutes
+              </p>
+            </div>
+            <div class="flex items-end gap-2 mt-1">
+              <p
+                class="text-gray-900 dark:text-white tracking-tight text-3xl font-bold leading-none"
+              >
+                340
+              </p>
+              <span class="text-gray-400 text-sm font-medium mb-1">m</span>
+              <p class="text-emerald-500 text-xs font-medium mb-1 flex items-center ml-auto">
+                <span class="material-symbols-outlined text-sm">arrow_upward</span> 15%
+              </p>
+            </div>
+          </div>
+          <!-- Avg Focus Card (Full Width) -->
+          <div
+            class="col-span-2 flex items-center justify-between gap-4 rounded-lg p-5 bg-surface-light dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-gray-800"
+          >
+            <div class="flex flex-col gap-1">
+              <div class="flex items-center gap-2 mb-1">
+                <p class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">
+                  Avg. Focus
+                </p>
+                <span
+                  class="text-emerald-500 text-xs font-medium bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1"
+                  >+0.5%</span
+                >
+              </div>
+              <div class="flex items-center gap-2">
+                <p
+                  class="text-gray-900 dark:text-white tracking-tight text-3xl font-bold leading-none"
+                >
+                  4.5
+                </p>
+                <div class="flex text-yellow-400 text-lg">
+                  <span class="material-symbols-outlined fill-1">star</span>
+                  <span class="material-symbols-outlined fill-1">star</span>
+                  <span class="material-symbols-outlined fill-1">star</span>
+                  <span class="material-symbols-outlined fill-1">star</span>
+                  <span
+                    class="material-symbols-outlined fill-1"
+                    style="font-variation-settings: 'FILL' 0.5"
+                    >star_half</span
+                  >
+                </div>
+              </div>
+            </div>
+            <!-- Mini Chart Visualization (Abstract) -->
+            <div class="h-10 w-24 flex items-end justify-between gap-1 opacity-80">
+              <div class="w-full bg-primary/20 rounded-t-sm h-[40%]"></div>
+              <div class="w-full bg-primary/30 rounded-t-sm h-[60%]"></div>
+              <div class="w-full bg-primary/50 rounded-t-sm h-[50%]"></div>
+              <div class="w-full bg-primary/70 rounded-t-sm h-[80%]"></div>
+              <div class="w-full bg-primary rounded-t-sm h-[70%]"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Recent Sessions Header -->
+        <div class="sticky top-[60px] z-40 bg-background-light dark:bg-background-dark py-3">
+          <h3
+            class="text-gray-900 dark:text-white text-base font-bold leading-tight tracking-[-0.015em]"
+          >
+            Recent Sessions
+          </h3>
+        </div>
+        <!-- Sessions List -->
+        <div class="flex flex-col gap-3 pb-8">
+          <!-- List Item 1 -->
+          <button
+            class="flex items-center gap-4 bg-surface-light dark:bg-surface-dark p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors w-full text-left group"
+          >
+            <!-- Icon Box -->
+            <div
+              class="text-white flex items-center justify-center rounded-full bg-gradient-to-br from-primary to-blue-700 shadow-md shadow-blue-900/20 shrink-0 h-12 w-12 group-hover:scale-105 transition-transform"
+            >
+              <span class="material-symbols-outlined text-2xl">wb_twilight</span>
+            </div>
+            <!-- Content -->
+            <div class="flex flex-1 flex-col justify-center gap-1">
+              <div class="flex justify-between items-center w-full">
+                <p class="text-gray-900 dark:text-white text-base font-semibold leading-normal">
+                  Today, 6:00 AM
+                </p>
+                <div class="flex text-yellow-400 text-sm">
+                  <span class="material-symbols-outlined fill-1 text-[16px]">star</span>
+                  <span class="material-symbols-outlined fill-1 text-[16px]">star</span>
+                  <span class="material-symbols-outlined fill-1 text-[16px]">star</span>
+                  <span class="material-symbols-outlined fill-1 text-[16px]">star</span>
+                  <span class="material-symbols-outlined fill-1 text-[16px]">star</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span
+                  class="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[11px] font-bold uppercase tracking-wide"
+                  >Hesychasm</span
+                >
+                <span class="text-gray-400 dark:text-gray-500 text-[10px] text-xs">•</span>
+                <p class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">
+                  20 min
+                </p>
+              </div>
+            </div>
+            <!-- Chevron -->
+            <span class="material-symbols-outlined text-gray-400 dark:text-gray-600"
+              >chevron_right</span
+            >
+          </button>
+          <!-- List Item 2 -->
+          <button
+            class="flex items-center gap-4 bg-surface-light dark:bg-surface-dark p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors w-full text-left group"
+          >
+            <div
+              class="text-white flex items-center justify-center rounded-full bg-gradient-to-br from-slate-600 to-slate-800 shadow-md shadow-slate-900/20 shrink-0 h-12 w-12 group-hover:scale-105 transition-transform"
+            >
+              <span class="material-symbols-outlined text-2xl">nights_stay</span>
+            </div>
+            <div class="flex flex-1 flex-col justify-center gap-1">
+              <div class="flex justify-between items-center w-full">
+                <p class="text-gray-900 dark:text-white text-base font-semibold leading-normal">
+                  Yesterday, 8:30 PM
+                </p>
+                <div class="flex text-yellow-400 text-sm">
+                  <span class="material-symbols-outlined fill-1 text-[16px]">star</span>
+                  <span class="material-symbols-outlined fill-1 text-[16px]">star</span>
+                  <span class="material-symbols-outlined fill-1 text-[16px]">star</span>
+                  <span class="material-symbols-outlined fill-1 text-[16px]">star</span>
+                  <span
+                    class="material-symbols-outlined text-gray-300 dark:text-gray-600 text-[16px]"
+                    >star</span
+                  >
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span
+                  class="px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-[11px] font-bold uppercase tracking-wide"
+                  >Rosary</span
+                >
+                <span class="text-gray-400 dark:text-gray-500 text-[10px] text-xs">•</span>
+                <p class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">
+                  15 min
+                </p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-gray-400 dark:text-gray-600"
+              >chevron_right</span
+            >
+          </button>
+          <!-- List Item 3 -->
+          <button
+            class="flex items-center gap-4 bg-surface-light dark:bg-surface-dark p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors w-full text-left group"
+          >
+            <div
+              class="text-white flex items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-indigo-700 shadow-md shadow-indigo-900/20 shrink-0 h-12 w-12 group-hover:scale-105 transition-transform"
+            >
+              <span class="material-symbols-outlined text-2xl">self_improvement</span>
+            </div>
+            <div class="flex flex-1 flex-col justify-center gap-1">
+              <div class="flex justify-between items-center w-full">
+                <p class="text-gray-900 dark:text-white text-base font-semibold leading-normal">
+                  Mon, Oct 24
+                </p>
+                <div class="flex text-yellow-400 text-sm">
+                  <span class="material-symbols-outlined fill-1 text-[16px]">star</span>
+                  <span class="material-symbols-outlined fill-1 text-[16px]">star</span>
+                  <span class="material-symbols-outlined fill-1 text-[16px]">star</span>
+                  <span
+                    class="material-symbols-outlined text-gray-300 dark:text-gray-600 text-[16px]"
+                    >star</span
+                  >
+                  <span
+                    class="material-symbols-outlined text-gray-300 dark:text-gray-600 text-[16px]"
+                    >star</span
+                  >
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span
+                  class="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold uppercase tracking-wide"
+                  >Centering Prayer</span
+                >
+                <span class="text-gray-400 dark:text-gray-500 text-[10px] text-xs">•</span>
+                <p class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">
+                  10 min
+                </p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-gray-400 dark:text-gray-600"
+              >chevron_right</span
+            >
+          </button>
+          <!-- List Item 4 (Older) -->
+          <button
+            class="flex items-center gap-4 bg-surface-light dark:bg-surface-dark p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors w-full text-left group opacity-75 hover:opacity-100"
+          >
+            <div
+              class="text-white flex items-center justify-center rounded-full bg-gradient-to-br from-slate-600 to-slate-800 shadow-md shadow-slate-900/20 shrink-0 h-12 w-12 group-hover:scale-105 transition-transform"
+            >
+              <span class="material-symbols-outlined text-2xl">wb_twilight</span>
+            </div>
+            <div class="flex flex-1 flex-col justify-center gap-1">
+              <div class="flex justify-between items-center w-full">
+                <p class="text-gray-900 dark:text-white text-base font-semibold leading-normal">
+                  Sun, Oct 23
+                </p>
+                <div class="flex text-yellow-400 text-sm">
+                  <span class="material-symbols-outlined fill-1 text-[16px]">star</span>
+                  <span class="material-symbols-outlined fill-1 text-[16px]">star</span>
+                  <span class="material-symbols-outlined fill-1 text-[16px]">star</span>
+                  <span class="material-symbols-outlined fill-1 text-[16px]">star</span>
+                  <span class="material-symbols-outlined fill-1 text-[16px]">star</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span
+                  class="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[11px] font-bold uppercase tracking-wide"
+                  >Hesychasm</span
+                >
+                <span class="text-gray-400 dark:text-gray-500 text-[10px] text-xs">•</span>
+                <p class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">
+                  25 min
+                </p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-gray-400 dark:text-gray-600"
+              >chevron_right</span
+            >
+          </button>
+        </div>
+        <!-- Privacy Footer -->
+        <div class="flex items-center justify-center gap-2 pb-6 mt-4 opacity-50">
+          <span class="material-symbols-outlined text-gray-500 dark:text-gray-400 text-sm"
+            >shield_lock</span
+          >
+          <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">
+            Your data is stored securely on this device only.
+          </p>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

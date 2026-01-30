@@ -10,10 +10,13 @@
 ## 1) Product summary
 
 ### Problem
+
 People often lose focus while praying due to phone distractions, wandering thoughts, and inconsistent routines. Many focus/meditation apps are not designed for prayer-specific needs, and they often lack respectful tradition-aware support.
 
 ### Solution (Enhanced MVP)
+
 A respectful, low-friction app that:
+
 - Creates a **distraction-free prayer session** (timer + minimal UI)
 - Provides an optional **pre-prayer preparation ritual** (intention + settling)
 - Offers **gentle refocus cues** (haptic/text; sound optional)
@@ -27,12 +30,14 @@ A respectful, low-friction app that:
 ## 2) Goals, non-goals
 
 ### Goals
+
 - Help users concentrate during prayer with minimal friction.
 - Provide respectful personalization across traditions, plus a neutral **General** mode.
 - Keep user content private and local: sessions, notes, templates, prayer lists stored on-device.
 - Deliver a stable timer experience with clean UX.
 
 ### Non-goals (not in Enhanced MVP)
+
 - Cloud sync of sessions/templates/notes.
 - Social/community features.
 - Wearable support.
@@ -42,6 +47,7 @@ A respectful, low-friction app that:
 ---
 
 ## 3) Success metrics
+
 - **Activation:** % users who complete onboarding and start a session within 10 minutes.
 - **Retention:** D7 and D30 retention.
 - **Core usage:** sessions per user per week; average session duration.
@@ -51,6 +57,7 @@ A respectful, low-friction app that:
 ---
 
 ## 4) Target users & personas
+
 1. **Busy believer:** prays daily but gets interrupted; wants quick “focus mode.”
 2. **Structured practitioner:** has set prayer routines; wants templates and reminders.
 3. **New/returning practitioner:** wants gentle guidance; no pressure or guilt.
@@ -60,6 +67,7 @@ A respectful, low-friction app that:
 ## 5) Scope
 
 ### In scope (Enhanced MVP + base screens)
+
 - Authentication:
   - Email/password sign up + login + forgot password
   - Optional: anonymous sign-in (recommended for frictionless onboarding)
@@ -97,6 +105,7 @@ A respectful, low-friction app that:
   - General: neutral daily intention prompt
 
 ### Out of scope (later)
+
 - Cloud sync / multi-device transfer.
 - Group prayer/community.
 - Paid subscriptions.
@@ -106,6 +115,7 @@ A respectful, low-friction app that:
 ---
 
 ## 6) Key principles & UX rules
+
 - **Respect first:** tone should be calm, non-judgmental, and inclusive.
 - **General mode always:** never force a religious identity.
 - **No streak pressure:** emphasize consistency gently; avoid guilt.
@@ -117,6 +127,7 @@ A respectful, low-friction app that:
 ## 7) User journeys
 
 ### Journey A — New user (first 3 minutes)
+
 1. Install → Open → Welcome
 2. Sign up / Log in (or Continue as guest)
 3. Select tradition (includes **General**)
@@ -125,12 +136,14 @@ A respectful, low-friction app that:
 6. Rate focus + finish → Home
 
 ### Journey B — Returning user (daily)
+
 1. Open Home
 2. Tap “Start session” or choose a favorite template
 3. Prep step (optional)
 4. Session ends → reflection rating → history updated
 
 ### Journey C — Template setup
+
 1. Templates → Create new
 2. Configure duration, prep, refocus cues, add-ons
 3. Save → start from template anytime
@@ -140,7 +153,9 @@ A respectful, low-friction app that:
 ## 8) Functional requirements
 
 ### 8.1 Authentication (Firebase)
+
 **Features**
+
 - Email/password sign up
 - Email/password login
 - Forgot password
@@ -148,6 +163,7 @@ A respectful, low-friction app that:
 - Optional: anonymous sign-in
 
 **Acceptance criteria**
+
 - Users can create an account, log in, reset password, log out.
 - Auth state persists across app restarts.
 - If anonymous sign-in is enabled, user can access the app without signup and later upgrade to email/password.
@@ -155,10 +171,13 @@ A respectful, low-friction app that:
 ---
 
 ### 8.2 Onboarding
+
 **Screens**
+
 - Welcome → Tradition → Preferences → Quick Try → Done
 
 **Preferences captured**
+
 - Default session duration
 - Prep enabled
 - Refocus prompt frequency (none/low/medium)
@@ -167,13 +186,16 @@ A respectful, low-friction app that:
 - Neutral language toggle (recommended)
 
 **Acceptance criteria**
+
 - Preferences stored locally and applied to future sessions.
 - User can complete onboarding without Quick Try (skip allowed).
 
 ---
 
 ### 8.3 Home
+
 **Content**
+
 - Primary CTA: Start session
 - Favorite templates list
 - Today Prompt (verse/chant/intention)
@@ -181,56 +203,70 @@ A respectful, low-friction app that:
 - Mini progress snippet (calendar dots last 14–30 days)
 
 **Acceptance criteria**
+
 - If no templates exist: show “Create your first template.”
 - Home loads fast and remains stable offline.
 
 ---
 
 ### 8.4 Prayer Focus Session (core)
+
 **Session types**
+
 - Countdown (default)
 - (Optional) Count-up
 
 **Session UI**
+
 - Timer display
 - Pause/Resume/End
 - Optional “Screen dim/black mode”
 - “I’m distracted” button → brief refocus prompt
 
 **Acceptance criteria**
+
 - Timer is accurate; session records saved reliably.
 - Session completion always leads to Reflection screen.
 
 ---
 
 ### 8.5 Guided preparation ritual (Enhanced)
+
 **Flow (30–60s)**
+
 - Set intention (preset + custom)
 - Settle/breath step
 - Optional checklist
 
 **Acceptance criteria**
+
 - Prep is skippable and can be disabled globally or per template.
 
 ---
 
 ### 8.6 Refocus prompts (Enhanced)
+
 **Prompt types**
+
 - Text overlay (1–2 lines)
 - Haptic taps (gentle)
 - Sound (optional; off by default)
 
 **Prompt frequency**
+
 - none / low / medium (per preference or template override)
 
 **Acceptance criteria**
+
 - Prompts never feel alarming; no loud default audio.
 - If haptics unavailable/disabled, fallback to text or no cue based on user setting.
 
 ---
 
 ### 8.7 Templates (Enhanced)
+
 **Template fields**
+
 - Name
 - Duration
 - Prep (inherit or override)
@@ -242,28 +278,35 @@ A respectful, low-friction app that:
 - Favorite & order
 
 **Acceptance criteria**
+
 - CRUD works; favorite templates show on Home.
 - Starting from a template launches a session with correct settings.
 
 ---
 
 ### 8.8 Reflection & history (Enhanced)
+
 **Reflection**
+
 - Focus rating (1–5)
 - Optional note
 - Optional: “Save as template”
 
 **History**
+
 - List of sessions; tap to detail
 
 **Acceptance criteria**
+
 - Sessions stored locally and visible offline.
 - History is accurate even if preferences change later (session stores resolved settings snapshot).
 
 ---
 
 ### 8.9 Habit tracker (Enhanced)
+
 **Views**
+
 - Calendar dots (30 days)
 - Stats:
   - Sessions this week
@@ -271,13 +314,16 @@ A respectful, low-friction app that:
   - Avg rating last 7
 
 **Acceptance criteria**
+
 - Updates after each completed session.
 - Works offline.
 
 ---
 
 ### 8.10 Profile (Base)
+
 **Fields**
+
 - Display name
 - Tradition (can change)
 - Preferences summary + edit
@@ -287,6 +333,7 @@ A respectful, low-friction app that:
   - Clear local data
 
 **Acceptance criteria**
+
 - Profile updates reflect across Home and session settings.
 - Data notice is visible and understandable.
 
@@ -295,23 +342,27 @@ A respectful, low-friction app that:
 ## 9) Tradition add-ons (Enhanced MVP)
 
 ### General mode (always available)
+
 - Neutral daily intention prompt
 - Neutral refocus prompts by default
 - No religious assumptions
 
 ### Christianity
+
 - Daily verse prompt (curated list packaged in-app; avoid licensing issues)
 - Prayer list:
   - Add/edit/archive items
   - Optional “prayed today” timestamp
 
 ### Islam
+
 - Qibla compass:
   - Uses location + device heading
   - Calibration guidance
   - Clear disclaimer about sensor variability
 
 ### Buddhism
+
 - Randomized chant/mantra prompt:
   - Curated list packaged in-app
   - Optional favorites
@@ -321,19 +372,23 @@ A respectful, low-friction app that:
 ## 10) Data storage & privacy
 
 ### Storage approach
+
 - **SQLite (expo-sqlite)** is the source of truth for:
   - Preferences, templates, sessions, notes, prayer list, prompt state
 - Firebase is used only for **Auth** (identity)
 - No Firestore/Realtime DB for user content
 
 ### User messaging
+
 - On Welcome and in Profile:
   - “Your sessions and notes are stored on this device only.”
 
 ---
 
 ## 11) Analytics & telemetry (optional, privacy-respecting)
+
 If implemented later:
+
 - Track only non-sensitive events:
   - onboarding_completed, session_started, session_completed, rating_submitted, template_created, qibla_opened
 - Do **not** log notes/intention text.
@@ -341,6 +396,7 @@ If implemented later:
 ---
 
 ## 12) Tech approach (high level)
+
 - Expo + TypeScript + Expo Router
 - Firebase Auth (JS SDK)
 - SQLite (expo-sqlite) + migrations (PRAGMA user_version)
@@ -353,22 +409,26 @@ If implemented later:
 ## 13) Release plan (milestones)
 
 ### Milestone 1 — Foundations
+
 - Navigation stacks + base UI components
 - Firebase Auth
 - Local DB init + migrations
 - Onboarding screens (without Quick Try)
 
 ### Milestone 2 — Core sessions
+
 - Session engine + focus screen + reflection
 - Local session persistence + history list
 
 ### Milestone 3 — Enhanced MVP
+
 - Prep ritual
 - Refocus prompts (haptic/text)
 - Templates CRUD + favorites
 - Habit tracker (calendar + stats)
 
 ### Milestone 4 — Tradition add-ons & polish
+
 - Qibla compass
 - Daily prompts (General + Christian + Buddhist)
 - Christian prayer list
@@ -377,6 +437,7 @@ If implemented later:
 ---
 
 ## 14) Acceptance checklist (Enhanced MVP ship)
+
 - [ ] User can sign up/log in and complete onboarding (including General mode)
 - [ ] Local DB stores preferences, templates, sessions, notes reliably
 - [ ] Session timer is stable; reflection saves correctly

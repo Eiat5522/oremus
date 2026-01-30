@@ -1,219 +1,298 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Buddhist Chants &amp; Mantras</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#f4a825",
-                        "background-light": "#f8f7f5",
-                        "background-dark": "#221b10",
-                    },
-                    fontFamily: {
-                        "display": ["Work Sans", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                },
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Buddhist Chants &amp; Mantras</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: '#f4a825',
+              'background-light': '#f8f7f5',
+              'background-dark': '#221b10',
             },
-        }
+            fontFamily: {
+              display: ['Work Sans', 'sans-serif'],
+            },
+            borderRadius: {
+              DEFAULT: '0.25rem',
+              lg: '0.5rem',
+              xl: '0.75rem',
+              full: '9999px',
+            },
+          },
+        },
+      };
     </script>
-<style>
-        body {
-            font-family: 'Work Sans', sans-serif;
-        }
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .active-glow {
-            box-shadow: 0 0 15px rgba(244, 168, 37, 0.2);
-        }
+    <style>
+      body {
+        font-family: 'Work Sans', sans-serif;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24;
+      }
+      .active-glow {
+        box-shadow: 0 0 15px rgba(244, 168, 37, 0.2);
+      }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
   </head>
-<body class="bg-background-light dark:bg-background-dark min-h-screen text-[#181511] dark:text-[#f8f7f5]">
-<!-- Top Navigation Bar -->
-<nav class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-[#e6e2db] dark:border-[#3d3221]">
-<div class="flex items-center justify-between p-4 max-w-md mx-auto">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-primary">spa</span>
-<h2 class="text-lg font-bold tracking-tight">Buddhist Traditions</h2>
-</div>
-<div class="flex items-center gap-4">
-<div class="flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded-full">
-<span class="material-symbols-outlined text-[16px] text-green-600 dark:text-green-400">shield_lock</span>
-<span class="text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-widest">Local</span>
-</div>
-<button class="text-[#181511] dark:text-[#f8f7f5]">
-<span class="material-symbols-outlined">settings</span>
-</button>
-</div>
-</div>
-</nav>
-<main class="max-w-md mx-auto pb-32">
-<!-- Tradition Selection Tabs -->
-<div class="pt-4">
-<div class="flex border-b border-[#e6e2db] dark:border-[#3d3221] px-4 gap-8 overflow-x-auto no-scrollbar">
-<a class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-primary pb-[13px] pt-4 shrink-0" href="#">
-<p class="text-sm font-bold tracking-wide">Tibetan</p>
-</a>
-<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#8a7b60] dark:text-[#a8997f] pb-[13px] pt-4 shrink-0" href="#">
-<p class="text-sm font-bold tracking-wide">Zen</p>
-</a>
-<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#8a7b60] dark:text-[#a8997f] pb-[13px] pt-4 shrink-0" href="#">
-<p class="text-sm font-bold tracking-wide">Theravada</p>
-</a>
-<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#8a7b60] dark:text-[#a8997f] pb-[13px] pt-4 shrink-0" href="#">
-<p class="text-sm font-bold tracking-wide">Pure Land</p>
-</a>
-</div>
-</div>
-<!-- Section: Featured Mantra -->
-<div class="px-4 pt-6">
-<h3 class="text-lg font-bold tracking-tight mb-4">Selected Tradition</h3>
-<div class="relative overflow-hidden rounded-xl bg-[#f5f3f0] dark:bg-[#2d2417] p-6 border-l-4 border-primary active-glow">
-<div class="flex justify-between items-start">
-<div>
-<span class="text-[10px] font-bold text-primary uppercase tracking-widest bg-primary/10 px-2 py-0.5 rounded">Tibetan Buddhism</span>
-<h4 class="text-2xl font-bold mt-2">Om Mani Padme Hum</h4>
-<p class="text-[#8a7b60] dark:text-[#a8997f] text-sm mt-1 italic">"The Jewel is in the Lotus"</p>
-<p class="text-sm mt-4 leading-relaxed max-w-[240px]">The most common mantra in Tibet, recited to invoke the embodiment of compassion.</p>
-</div>
-<div class="bg-white/50 dark:bg-white/5 p-3 rounded-full">
-<span class="material-symbols-outlined text-4xl text-primary">filter_vintage</span>
-</div>
-</div>
-</div>
-</div>
-<!-- Section: Mantra List -->
-<div class="px-4 pt-8">
-<div class="flex items-center justify-between mb-2">
-<h3 class="text-lg font-bold tracking-tight">Chants &amp; Mantras</h3>
-<span class="text-xs text-[#8a7b60] dark:text-[#a8997f]">4 Found</span>
-</div>
-<div class="space-y-1">
-<!-- List Item 1 (Selected) -->
-<div class="flex items-center gap-4 bg-primary/10 dark:bg-primary/5 px-4 min-h-[72px] py-3 rounded-lg border border-primary/20">
-<div class="text-primary flex items-center justify-center rounded-lg bg-primary/20 shrink-0 size-12">
-<span class="material-symbols-outlined">auto_awesome</span>
-</div>
-<div class="flex flex-col justify-center flex-1">
-<p class="text-base font-bold leading-normal">Om Mani Padme Hum</p>
-<p class="text-[#8a7b60] dark:text-[#a8997f] text-xs font-normal line-clamp-1">Mantra of Compassion (Avalokiteshvara)</p>
-</div>
-<div class="shrink-0 flex items-center gap-2">
-<span class="text-[10px] font-medium text-primary">60 BPM</span>
-<span class="material-symbols-outlined text-primary">check_circle</span>
-</div>
-</div>
-<!-- List Item 2 -->
-<div class="flex items-center gap-4 bg-transparent px-4 min-h-[72px] py-3 rounded-lg">
-<div class="text-[#181511] dark:text-[#f8f7f5] flex items-center justify-center rounded-lg bg-[#f5f3f0] dark:bg-[#3d3221] shrink-0 size-12">
-<span class="material-symbols-outlined">health_and_safety</span>
-</div>
-<div class="flex flex-col justify-center flex-1">
-<p class="text-base font-medium leading-normal">Tayata Om Bekanze</p>
-<p class="text-[#8a7b60] dark:text-[#a8997f] text-xs font-normal line-clamp-1">Medicine Buddha Healing Mantra</p>
-</div>
-<div class="shrink-0">
-<span class="material-symbols-outlined text-[#8a7b60]/50">play_circle</span>
-</div>
-</div>
-<!-- List Item 3 -->
-<div class="flex items-center gap-4 bg-transparent px-4 min-h-[72px] py-3 rounded-lg">
-<div class="text-[#181511] dark:text-[#f8f7f5] flex items-center justify-center rounded-lg bg-[#f5f3f0] dark:bg-[#3d3221] shrink-0 size-12">
-<span class="material-symbols-outlined">eco</span>
-</div>
-<div class="flex flex-col justify-center flex-1">
-<p class="text-base font-medium leading-normal">Om Tare Tuttare</p>
-<p class="text-[#8a7b60] dark:text-[#a8997f] text-xs font-normal line-clamp-1">Green Tara Mantra for Protection</p>
-</div>
-<div class="shrink-0">
-<span class="material-symbols-outlined text-[#8a7b60]/50">play_circle</span>
-</div>
-</div>
-<!-- List Item 4 -->
-<div class="flex items-center gap-4 bg-transparent px-4 min-h-[72px] py-3 rounded-lg">
-<div class="text-[#181511] dark:text-[#f8f7f5] flex items-center justify-center rounded-lg bg-[#f5f3f0] dark:bg-[#3d3221] shrink-0 size-12">
-<span class="material-symbols-outlined">water_drop</span>
-</div>
-<div class="flex flex-col justify-center flex-1">
-<p class="text-base font-medium leading-normal">Vajrasattva Mantra</p>
-<p class="text-[#8a7b60] dark:text-[#a8997f] text-xs font-normal line-clamp-1">The 100-Syllable Purification Chant</p>
-</div>
-<div class="shrink-0">
-<span class="material-symbols-outlined text-[#8a7b60]/50">play_circle</span>
-</div>
-</div>
-</div>
-</div>
-<!-- Pacing Preferences -->
-<div class="px-4 pt-8">
-<h3 class="text-lg font-bold tracking-tight mb-4">Practice Settings</h3>
-<div class="bg-[#f5f3f0] dark:bg-[#2d2417] rounded-xl p-4">
-<div class="flex items-center justify-between mb-4">
-<span class="text-sm font-medium">Auto-scroll Pace</span>
-<span class="text-sm font-bold text-primary">60 BPM</span>
-</div>
-<div class="relative w-full h-2 bg-[#e6e2db] dark:bg-[#3d3221] rounded-full">
-<div class="absolute top-0 left-0 h-full w-[40%] bg-primary rounded-full"></div>
-<div class="absolute top-1/2 left-[40%] -translate-y-1/2 size-5 bg-white border-2 border-primary rounded-full shadow-md"></div>
-</div>
-<div class="flex justify-between mt-2 text-[10px] text-[#8a7b60] dark:text-[#a8997f] uppercase font-bold tracking-tighter">
-<span>Meditative</span>
-<span>Steady</span>
-<span>Rhythmic</span>
-</div>
-</div>
-</div>
-<div class="p-6 text-center text-[#8a7b60] dark:text-[#a8997f]">
-<p class="text-xs">Focused Spiritual Practice • All data stored locally</p>
-</div>
-</main>
-<!-- Floating Action Button Area -->
-<div class="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background-light dark:from-background-dark via-background-light/90 dark:via-background-dark/90 to-transparent">
-<button class="flex w-full max-w-md mx-auto items-center justify-center h-16 bg-primary text-white rounded-xl shadow-xl shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95">
-<span class="material-symbols-outlined mr-2">keyboard_double_arrow_up</span>
-<span class="text-lg font-bold tracking-wide">Start Chanting</span>
-</button>
-</div>
-<!-- Hidden Simulation of Scrolling Overlay (Conceptual) -->
-<!-- This would normally appear after clicking the button -->
-<div class="fixed inset-0 bg-[#fefdfb] dark:bg-[#1a140b] z-[60] hidden flex-col items-center justify-center p-8">
-<div class="absolute top-8 right-8">
-<button class="size-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-<span class="material-symbols-outlined">close</span>
-</button>
-</div>
-<div class="text-center space-y-24 opacity-40">
-<h1 class="text-4xl font-light text-[#8a7b60]">Om Mani Padme Hum</h1>
-<h1 class="text-6xl font-bold text-[#181511] dark:text-white">Om Mani Padme Hum</h1>
-<h1 class="text-4xl font-light text-[#8a7b60]">Om Mani Padme Hum</h1>
-</div>
-<div class="absolute bottom-12 w-full px-12 text-center">
-<div class="flex items-center justify-center gap-8 mb-4">
-<span class="material-symbols-outlined text-primary">remove_circle_outline</span>
-<span class="text-primary font-bold">60 BPM</span>
-<span class="material-symbols-outlined text-primary">add_circle_outline</span>
-</div>
-<p class="text-xs uppercase tracking-[0.2em] text-[#8a7b60]">Rhythmic Scroll Active</p>
-</div>
-</div>
-</body></html>
+  <body
+    class="bg-background-light dark:bg-background-dark min-h-screen text-[#181511] dark:text-[#f8f7f5]"
+  >
+    <!-- Top Navigation Bar -->
+    <nav
+      class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-[#e6e2db] dark:border-[#3d3221]"
+    >
+      <div class="flex items-center justify-between p-4 max-w-md mx-auto">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">spa</span>
+          <h2 class="text-lg font-bold tracking-tight">Buddhist Traditions</h2>
+        </div>
+        <div class="flex items-center gap-4">
+          <div
+            class="flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded-full"
+          >
+            <span class="material-symbols-outlined text-[16px] text-green-600 dark:text-green-400"
+              >shield_lock</span
+            >
+            <span
+              class="text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-widest"
+              >Local</span
+            >
+          </div>
+          <button class="text-[#181511] dark:text-[#f8f7f5]">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+        </div>
+      </div>
+    </nav>
+    <main class="max-w-md mx-auto pb-32">
+      <!-- Tradition Selection Tabs -->
+      <div class="pt-4">
+        <div
+          class="flex border-b border-[#e6e2db] dark:border-[#3d3221] px-4 gap-8 overflow-x-auto no-scrollbar"
+        >
+          <a
+            class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-primary pb-[13px] pt-4 shrink-0"
+            href="#"
+          >
+            <p class="text-sm font-bold tracking-wide">Tibetan</p>
+          </a>
+          <a
+            class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#8a7b60] dark:text-[#a8997f] pb-[13px] pt-4 shrink-0"
+            href="#"
+          >
+            <p class="text-sm font-bold tracking-wide">Zen</p>
+          </a>
+          <a
+            class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#8a7b60] dark:text-[#a8997f] pb-[13px] pt-4 shrink-0"
+            href="#"
+          >
+            <p class="text-sm font-bold tracking-wide">Theravada</p>
+          </a>
+          <a
+            class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#8a7b60] dark:text-[#a8997f] pb-[13px] pt-4 shrink-0"
+            href="#"
+          >
+            <p class="text-sm font-bold tracking-wide">Pure Land</p>
+          </a>
+        </div>
+      </div>
+      <!-- Section: Featured Mantra -->
+      <div class="px-4 pt-6">
+        <h3 class="text-lg font-bold tracking-tight mb-4">Selected Tradition</h3>
+        <div
+          class="relative overflow-hidden rounded-xl bg-[#f5f3f0] dark:bg-[#2d2417] p-6 border-l-4 border-primary active-glow"
+        >
+          <div class="flex justify-between items-start">
+            <div>
+              <span
+                class="text-[10px] font-bold text-primary uppercase tracking-widest bg-primary/10 px-2 py-0.5 rounded"
+                >Tibetan Buddhism</span
+              >
+              <h4 class="text-2xl font-bold mt-2">Om Mani Padme Hum</h4>
+              <p class="text-[#8a7b60] dark:text-[#a8997f] text-sm mt-1 italic">
+                "The Jewel is in the Lotus"
+              </p>
+              <p class="text-sm mt-4 leading-relaxed max-w-[240px]">
+                The most common mantra in Tibet, recited to invoke the embodiment of compassion.
+              </p>
+            </div>
+            <div class="bg-white/50 dark:bg-white/5 p-3 rounded-full">
+              <span class="material-symbols-outlined text-4xl text-primary">filter_vintage</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Section: Mantra List -->
+      <div class="px-4 pt-8">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-lg font-bold tracking-tight">Chants &amp; Mantras</h3>
+          <span class="text-xs text-[#8a7b60] dark:text-[#a8997f]">4 Found</span>
+        </div>
+        <div class="space-y-1">
+          <!-- List Item 1 (Selected) -->
+          <div
+            class="flex items-center gap-4 bg-primary/10 dark:bg-primary/5 px-4 min-h-[72px] py-3 rounded-lg border border-primary/20"
+          >
+            <div
+              class="text-primary flex items-center justify-center rounded-lg bg-primary/20 shrink-0 size-12"
+            >
+              <span class="material-symbols-outlined">auto_awesome</span>
+            </div>
+            <div class="flex flex-col justify-center flex-1">
+              <p class="text-base font-bold leading-normal">Om Mani Padme Hum</p>
+              <p class="text-[#8a7b60] dark:text-[#a8997f] text-xs font-normal line-clamp-1">
+                Mantra of Compassion (Avalokiteshvara)
+              </p>
+            </div>
+            <div class="shrink-0 flex items-center gap-2">
+              <span class="text-[10px] font-medium text-primary">60 BPM</span>
+              <span class="material-symbols-outlined text-primary">check_circle</span>
+            </div>
+          </div>
+          <!-- List Item 2 -->
+          <div class="flex items-center gap-4 bg-transparent px-4 min-h-[72px] py-3 rounded-lg">
+            <div
+              class="text-[#181511] dark:text-[#f8f7f5] flex items-center justify-center rounded-lg bg-[#f5f3f0] dark:bg-[#3d3221] shrink-0 size-12"
+            >
+              <span class="material-symbols-outlined">health_and_safety</span>
+            </div>
+            <div class="flex flex-col justify-center flex-1">
+              <p class="text-base font-medium leading-normal">Tayata Om Bekanze</p>
+              <p class="text-[#8a7b60] dark:text-[#a8997f] text-xs font-normal line-clamp-1">
+                Medicine Buddha Healing Mantra
+              </p>
+            </div>
+            <div class="shrink-0">
+              <span class="material-symbols-outlined text-[#8a7b60]/50">play_circle</span>
+            </div>
+          </div>
+          <!-- List Item 3 -->
+          <div class="flex items-center gap-4 bg-transparent px-4 min-h-[72px] py-3 rounded-lg">
+            <div
+              class="text-[#181511] dark:text-[#f8f7f5] flex items-center justify-center rounded-lg bg-[#f5f3f0] dark:bg-[#3d3221] shrink-0 size-12"
+            >
+              <span class="material-symbols-outlined">eco</span>
+            </div>
+            <div class="flex flex-col justify-center flex-1">
+              <p class="text-base font-medium leading-normal">Om Tare Tuttare</p>
+              <p class="text-[#8a7b60] dark:text-[#a8997f] text-xs font-normal line-clamp-1">
+                Green Tara Mantra for Protection
+              </p>
+            </div>
+            <div class="shrink-0">
+              <span class="material-symbols-outlined text-[#8a7b60]/50">play_circle</span>
+            </div>
+          </div>
+          <!-- List Item 4 -->
+          <div class="flex items-center gap-4 bg-transparent px-4 min-h-[72px] py-3 rounded-lg">
+            <div
+              class="text-[#181511] dark:text-[#f8f7f5] flex items-center justify-center rounded-lg bg-[#f5f3f0] dark:bg-[#3d3221] shrink-0 size-12"
+            >
+              <span class="material-symbols-outlined">water_drop</span>
+            </div>
+            <div class="flex flex-col justify-center flex-1">
+              <p class="text-base font-medium leading-normal">Vajrasattva Mantra</p>
+              <p class="text-[#8a7b60] dark:text-[#a8997f] text-xs font-normal line-clamp-1">
+                The 100-Syllable Purification Chant
+              </p>
+            </div>
+            <div class="shrink-0">
+              <span class="material-symbols-outlined text-[#8a7b60]/50">play_circle</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Pacing Preferences -->
+      <div class="px-4 pt-8">
+        <h3 class="text-lg font-bold tracking-tight mb-4">Practice Settings</h3>
+        <div class="bg-[#f5f3f0] dark:bg-[#2d2417] rounded-xl p-4">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-sm font-medium">Auto-scroll Pace</span>
+            <span class="text-sm font-bold text-primary">60 BPM</span>
+          </div>
+          <div class="relative w-full h-2 bg-[#e6e2db] dark:bg-[#3d3221] rounded-full">
+            <div class="absolute top-0 left-0 h-full w-[40%] bg-primary rounded-full"></div>
+            <div
+              class="absolute top-1/2 left-[40%] -translate-y-1/2 size-5 bg-white border-2 border-primary rounded-full shadow-md"
+            ></div>
+          </div>
+          <div
+            class="flex justify-between mt-2 text-[10px] text-[#8a7b60] dark:text-[#a8997f] uppercase font-bold tracking-tighter"
+          >
+            <span>Meditative</span>
+            <span>Steady</span>
+            <span>Rhythmic</span>
+          </div>
+        </div>
+      </div>
+      <div class="p-6 text-center text-[#8a7b60] dark:text-[#a8997f]">
+        <p class="text-xs">Focused Spiritual Practice • All data stored locally</p>
+      </div>
+    </main>
+    <!-- Floating Action Button Area -->
+    <div
+      class="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background-light dark:from-background-dark via-background-light/90 dark:via-background-dark/90 to-transparent"
+    >
+      <button
+        class="flex w-full max-w-md mx-auto items-center justify-center h-16 bg-primary text-white rounded-xl shadow-xl shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95"
+      >
+        <span class="material-symbols-outlined mr-2">keyboard_double_arrow_up</span>
+        <span class="text-lg font-bold tracking-wide">Start Chanting</span>
+      </button>
+    </div>
+    <!-- Hidden Simulation of Scrolling Overlay (Conceptual) -->
+    <!-- This would normally appear after clicking the button -->
+    <div
+      class="fixed inset-0 bg-[#fefdfb] dark:bg-[#1a140b] z-[60] hidden flex-col items-center justify-center p-8"
+    >
+      <div class="absolute top-8 right-8">
+        <button
+          class="size-12 rounded-full bg-primary/10 text-primary flex items-center justify-center"
+        >
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="text-center space-y-24 opacity-40">
+        <h1 class="text-4xl font-light text-[#8a7b60]">Om Mani Padme Hum</h1>
+        <h1 class="text-6xl font-bold text-[#181511] dark:text-white">Om Mani Padme Hum</h1>
+        <h1 class="text-4xl font-light text-[#8a7b60]">Om Mani Padme Hum</h1>
+      </div>
+      <div class="absolute bottom-12 w-full px-12 text-center">
+        <div class="flex items-center justify-center gap-8 mb-4">
+          <span class="material-symbols-outlined text-primary">remove_circle_outline</span>
+          <span class="text-primary font-bold">60 BPM</span>
+          <span class="material-symbols-outlined text-primary">add_circle_outline</span>
+        </div>
+        <p class="text-xs uppercase tracking-[0.2em] text-[#8a7b60]">Rhythmic Scroll Active</p>
+      </div>
+    </div>
+  </body>
+</html>

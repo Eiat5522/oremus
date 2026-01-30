@@ -58,9 +58,11 @@ my-plugin/
 ```
 
 Required fields:
+
 - `name`: Unique identifier in kebab-case
 
 Optional fields:
+
 - `version`: Semantic versioning (e.g., `"1.0.0"`)
 - `description`: Brief explanation shown in plugin manager
 - `author`: Object with `name` and optionally `email`
@@ -82,15 +84,16 @@ Skill content goes here...
 
 **Frontmatter fields:**
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `name` | Yes | Skill identifier (lowercase, hyphens, max 64 chars) |
-| `description` | Yes | When to use this skill (max 1024 chars) - crucial for auto-discovery |
-| `allowed-tools` | No | Tools Claude can use without permission (e.g., `"Read, Grep, Bash(node:*)"`) |
-| `version` | No | Skill version |
-| `license` | No | License identifier |
+| Field           | Required | Description                                                                  |
+| --------------- | -------- | ---------------------------------------------------------------------------- |
+| `name`          | Yes      | Skill identifier (lowercase, hyphens, max 64 chars)                          |
+| `description`   | Yes      | When to use this skill (max 1024 chars) - crucial for auto-discovery         |
+| `allowed-tools` | No       | Tools Claude can use without permission (e.g., `"Read, Grep, Bash(node:*)"`) |
+| `version`       | No       | Skill version                                                                |
+| `license`       | No       | License identifier                                                           |
 
 **Best practices:**
+
 - Keep `SKILL.md` under 500 lines
 - Use `references/` subdirectory for detailed documentation
 - Write descriptions that match what users naturally say
@@ -112,10 +115,12 @@ skills/my-skill/
 ```
 
 Reference these in your SKILL.md:
+
 ```markdown
 ## References
 
 Consult these resources as needed:
+
 - ./references/setup.md -- Setup and configuration guide
 - ./references/examples.md -- Usage examples
 ```
@@ -145,6 +150,7 @@ The `.claude-plugin/marketplace.json` file catalogs all plugins:
 ```
 
 **Plugin entry fields:**
+
 - `name` (required): Plugin identifier in kebab-case
 - `source` (required): Relative path to plugin directory
 - `description`: Brief description for the plugin list
@@ -152,12 +158,14 @@ The `.claude-plugin/marketplace.json` file catalogs all plugins:
 ## Adding a New Plugin
 
 1. Create the plugin directory structure:
+
    ```bash
    mkdir -p plugins/my-plugin/.claude-plugin
    mkdir -p plugins/my-plugin/skills/my-skill
    ```
 
 2. Create `plugins/my-plugin/.claude-plugin/plugin.json`:
+
    ```json
    {
      "name": "my-plugin",
@@ -171,6 +179,7 @@ The `.claude-plugin/marketplace.json` file catalogs all plugins:
    ```
 
 3. Create `plugins/my-plugin/skills/my-skill/SKILL.md`:
+
    ```markdown
    ---
    name: my-skill
@@ -183,6 +192,7 @@ The `.claude-plugin/marketplace.json` file catalogs all plugins:
    ```
 
 4. Create `plugins/my-plugin/README.md`:
+
    ```markdown
    # My Plugin
 
@@ -194,6 +204,7 @@ The `.claude-plugin/marketplace.json` file catalogs all plugins:
    ```
 
 5. Add to `.claude-plugin/marketplace.json`:
+
    ```json
    {
      "name": "my-plugin",

@@ -1,107 +1,141 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="dark" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>General Reflection Mode</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#1152d4",
-                        "background-light": "#f6f6f8",
-                        "background-dark": "#101622",
-                    },
-                    fontFamily: {
-                        "display": ["Inter"]
-                    },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-                },
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>General Reflection Mode</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: '#1152d4',
+              'background-light': '#f6f6f8',
+              'background-dark': '#101622',
             },
-        }
+            fontFamily: {
+              display: ['Inter'],
+            },
+            borderRadius: { DEFAULT: '0.25rem', lg: '0.5rem', xl: '0.75rem', full: '9999px' },
+          },
+        },
+      };
     </script>
-<style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .zen-gradient {
-            background: radial-gradient(circle at 50% 50%, rgba(17, 82, 212, 0.15) 0%, rgba(16, 22, 34, 1) 100%);
-        }
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+      .zen-gradient {
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(17, 82, 212, 0.15) 0%,
+          rgba(16, 22, 34, 1) 100%
+        );
+      }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
   </head>
-<body class="bg-background-light dark:bg-background-dark font-display">
-<!-- App Container -->
-<div class="relative flex h-screen w-full flex-col overflow-hidden zen-gradient">
-<!-- Top Navigation -->
-<header class="flex items-center justify-between p-4 pt-12">
-<button class="text-white/70 hover:text-white transition-colors flex items-center justify-center p-2">
-<span class="material-symbols-outlined">arrow_back_ios</span>
-</button>
-<h2 class="text-white/60 text-sm font-medium tracking-widest uppercase">General Reflection</h2>
-<div class="w-12 flex justify-end">
-<button class="text-white/70 hover:text-white transition-colors">
-<span class="material-symbols-outlined">settings</span>
-</button>
-</div>
-</header>
-<!-- Main Content (Center) -->
-<main class="flex flex-1 flex-col items-center justify-center px-8 text-center">
-<div class="mb-8 opacity-40">
-<span class="material-symbols-outlined text-white text-5xl">spa</span>
-</div>
-<h1 class="text-white text-[32px] md:text-4xl font-light leading-snug tracking-tight mb-12">
-                What are you grateful for in this moment?
-            </h1>
-<div class="w-full max-w-xs">
-<!-- Action Button -->
-<button class="w-full flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-14 bg-primary text-white text-base font-semibold transition-all hover:bg-primary/90 active:scale-95 shadow-lg shadow-primary/20">
-<span class="truncate">Start Quiet Reflection</span>
-</button>
-</div>
-</main>
-<!-- Bottom Controls -->
-<footer class="p-6 pb-12 flex flex-col items-center gap-6">
-<!-- Sound Toggle Panel -->
-<div class="w-full max-w-sm">
-<div class="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-4">
-<div class="flex items-center gap-3">
-<div class="flex size-10 items-center justify-center rounded-lg bg-white/10 text-white">
-<span class="material-symbols-outlined">waves</span>
-</div>
-<div class="flex flex-col">
-<p class="text-white text-sm font-semibold leading-tight">Ambient Sounds</p>
-<p class="text-white/50 text-xs font-normal">Nature &amp; White Noise</p>
-</div>
-</div>
-<label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-white/10 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary transition-all">
-<div class="h-full w-[27px] rounded-full bg-white shadow-md"></div>
-<input checked="" class="invisible absolute" type="checkbox"/>
-</label>
-</div>
-</div>
-<!-- Meta Information -->
-<div class="flex flex-col items-center gap-1">
-<div class="flex items-center gap-2 text-white/40 text-xs font-medium uppercase tracking-[0.1em]">
-<span class="material-symbols-outlined text-sm">lock</span>
-<span>Local Storage Only</span>
-</div>
-<p class="text-white/30 text-[10px] italic">Your reflections never leave this device</p>
-</div>
-</footer>
-<!-- Decorative UI Element (Abstract Background Image) -->
-<div class="fixed inset-0 -z-10 pointer-events-none opacity-20">
-<img alt="" class="w-full h-full object-cover mix-blend-overlay" data-alt="Soft dark smoke-like abstract background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqretucboMLx2uISqQOGl9xVyP3nwGA5jaQyAa9b8kZNLZLiwqhQ8ItaiMTxemRBs4eU-4nQTWPInTWl06KWhyiDsHwhZzlRVDVApfnCUiM_o71r7mt6-Xndc7FuGnTDt4l8NEdulOeAy4OgO0UQ5cDd0tIrtO6Ko4dZHtBo4YWYAf2eHAtRReMiLmMnfunKWYkBwbXpHODlqyd5EV6j9b-q-m8t4oXMm1w2P8Q2zGYCbCbHHtjBBlaU4ZahdZY9M-d2MROLNt8pA"/>
-</div>
-</div>
-</body></html>
+  <body class="bg-background-light dark:bg-background-dark font-display">
+    <!-- App Container -->
+    <div class="relative flex h-screen w-full flex-col overflow-hidden zen-gradient">
+      <!-- Top Navigation -->
+      <header class="flex items-center justify-between p-4 pt-12">
+        <button
+          class="text-white/70 hover:text-white transition-colors flex items-center justify-center p-2"
+        >
+          <span class="material-symbols-outlined">arrow_back_ios</span>
+        </button>
+        <h2 class="text-white/60 text-sm font-medium tracking-widest uppercase">
+          General Reflection
+        </h2>
+        <div class="w-12 flex justify-end">
+          <button class="text-white/70 hover:text-white transition-colors">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+        </div>
+      </header>
+      <!-- Main Content (Center) -->
+      <main class="flex flex-1 flex-col items-center justify-center px-8 text-center">
+        <div class="mb-8 opacity-40">
+          <span class="material-symbols-outlined text-white text-5xl">spa</span>
+        </div>
+        <h1 class="text-white text-[32px] md:text-4xl font-light leading-snug tracking-tight mb-12">
+          What are you grateful for in this moment?
+        </h1>
+        <div class="w-full max-w-xs">
+          <!-- Action Button -->
+          <button
+            class="w-full flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-14 bg-primary text-white text-base font-semibold transition-all hover:bg-primary/90 active:scale-95 shadow-lg shadow-primary/20"
+          >
+            <span class="truncate">Start Quiet Reflection</span>
+          </button>
+        </div>
+      </main>
+      <!-- Bottom Controls -->
+      <footer class="p-6 pb-12 flex flex-col items-center gap-6">
+        <!-- Sound Toggle Panel -->
+        <div class="w-full max-w-sm">
+          <div
+            class="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-4"
+          >
+            <div class="flex items-center gap-3">
+              <div
+                class="flex size-10 items-center justify-center rounded-lg bg-white/10 text-white"
+              >
+                <span class="material-symbols-outlined">waves</span>
+              </div>
+              <div class="flex flex-col">
+                <p class="text-white text-sm font-semibold leading-tight">Ambient Sounds</p>
+                <p class="text-white/50 text-xs font-normal">Nature &amp; White Noise</p>
+              </div>
+            </div>
+            <label
+              class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-white/10 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary transition-all"
+            >
+              <div class="h-full w-[27px] rounded-full bg-white shadow-md"></div>
+              <input checked="" class="invisible absolute" type="checkbox" />
+            </label>
+          </div>
+        </div>
+        <!-- Meta Information -->
+        <div class="flex flex-col items-center gap-1">
+          <div
+            class="flex items-center gap-2 text-white/40 text-xs font-medium uppercase tracking-[0.1em]"
+          >
+            <span class="material-symbols-outlined text-sm">lock</span>
+            <span>Local Storage Only</span>
+          </div>
+          <p class="text-white/30 text-[10px] italic">Your reflections never leave this device</p>
+        </div>
+      </footer>
+      <!-- Decorative UI Element (Abstract Background Image) -->
+      <div class="fixed inset-0 -z-10 pointer-events-none opacity-20">
+        <img
+          alt=""
+          class="w-full h-full object-cover mix-blend-overlay"
+          data-alt="Soft dark smoke-like abstract background"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqretucboMLx2uISqQOGl9xVyP3nwGA5jaQyAa9b8kZNLZLiwqhQ8ItaiMTxemRBs4eU-4nQTWPInTWl06KWhyiDsHwhZzlRVDVApfnCUiM_o71r7mt6-Xndc7FuGnTDt4l8NEdulOeAy4OgO0UQ5cDd0tIrtO6Ko4dZHtBo4YWYAf2eHAtRReMiLmMnfunKWYkBwbXpHODlqyd5EV6j9b-q-m8t4oXMm1w2P8Q2zGYCbCbHHtjBBlaU4ZahdZY9M-d2MROLNt8pA"
+        />
+      </div>
+    </div>
+  </body>
+</html>

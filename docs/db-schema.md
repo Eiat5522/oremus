@@ -3,6 +3,7 @@
 This schema is designed for **fully local storage** (no cloud sync). Firebase is used for **authentication only**; user-generated content is stored on-device in SQLite.
 
 ## Goals
+
 - Support multiple signed-in users on the same device (optional but safe).
 - Keep writes simple and fast (append-only sessions, small updates to templates/preferences).
 - Enable clean migrations via `PRAGMA user_version`.
@@ -12,6 +13,7 @@ This schema is designed for **fully local storage** (no cloud sync). Firebase is
 ## Initialization requirements
 
 ### 1) Enable foreign keys (recommended)
+
 SQLite foreign keys are off by default. Turn them on **after opening the DB**:
 
 ```sql
@@ -19,6 +21,7 @@ PRAGMA foreign_keys = ON;
 ```
 
 ### 2) Track schema version
+
 Use:
 
 ```sql
@@ -188,6 +191,7 @@ COMMIT;
 ## Common queries
 
 ### Get effective preferences for a template
+
 (In app logic, you typically merge `preferences` + `templates` overrides.)
 
 ```sql
@@ -210,6 +214,7 @@ WHERE p.user_id = ? AND t.id = ?;
 ```
 
 ### Stats: sessions this week (basic)
+
 ```sql
 SELECT COUNT(*) AS sessions_this_week
 FROM sessions
@@ -220,6 +225,7 @@ WHERE user_id = ?
 ---
 
 ## Notes & design choices
+
 - **Local-only**: No Firestore tables for templates/sessions/notes.
 - **Prompt text is not stored**; only a `prompt_key` that maps to an in-app catalog.
 - `resolved_*` fields in `sessions` are snapshots so history stays accurate even if preferences change later.

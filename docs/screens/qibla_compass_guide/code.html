@@ -1,135 +1,200 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="dark" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Qibla Compass Guide</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "primary": "#0bda73",
-            "gold": "#d4af37",
-            "background-light": "#f5f8f7",
-            "background-dark": "#102219",
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Qibla Compass Guide</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: '#0bda73',
+              gold: '#d4af37',
+              'background-light': '#f5f8f7',
+              'background-dark': '#102219',
+            },
+            fontFamily: {
+              display: ['Plus Jakarta Sans'],
+            },
+            borderRadius: { DEFAULT: '1rem', lg: '2rem', xl: '3rem', full: '9999px' },
           },
-          fontFamily: {
-            "display": ["Plus Jakarta Sans"]
-          },
-          borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
         },
-      },
-    }
-  </script>
-<style>
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-    .compass-glow {
-      box-shadow: 0 0 40px rgba(11, 218, 115, 0.15);
-    }
-    .gold-gradient {
-      background: linear-gradient(135deg, #d4af37 0%, #f9e29f 50%, #b8860b 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-  </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
+      };
+    </script>
+    <style>
+      body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+      }
+      .compass-glow {
+        box-shadow: 0 0 40px rgba(11, 218, 115, 0.15);
+      }
+      .gold-gradient {
+        background: linear-gradient(135deg, #d4af37 0%, #f9e29f 50%, #b8860b 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
   </head>
-<body class="bg-background-light dark:bg-background-dark min-h-screen transition-colors duration-300">
-<!-- Top Navigation Bar -->
-<div class="flex items-center p-4 pb-2 justify-between sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md">
-<div class="text-gray-700 dark:text-white flex size-12 shrink-0 items-center justify-start">
-<span class="material-symbols-outlined text-2xl">settings</span>
-</div>
-<h2 class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-tight flex-1 text-center font-display">Qibla Compass</h2>
-<div class="flex w-12 items-center justify-end">
-<button class="flex size-12 cursor-pointer items-center justify-center rounded-full bg-transparent text-gray-700 dark:text-white">
-<span class="material-symbols-outlined text-2xl">info</span>
-</button>
-</div>
-</div>
-<main class="max-w-md mx-auto px-4 pb-24">
-<!-- Calibration Status Indicator -->
-<div class="flex justify-center my-4">
-<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
-<span class="relative flex h-2 w-2">
-<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-</span>
-<p class="text-primary text-sm font-semibold uppercase tracking-wider">Compass Ready</p>
-</div>
-</div>
-<!-- Compass Section -->
-<div class="relative flex flex-col items-center justify-center py-8">
-<!-- Degree Display -->
-<h1 class="text-gray-900 dark:text-white tracking-tight text-[40px] font-bold leading-tight text-center pb-2">145° SE</h1>
-<p class="text-gray-500 dark:text-gray-400 text-sm font-medium pb-8">London, United Kingdom</p>
-<!-- Digital Compass Visual -->
-<div class="relative w-72 h-72 md:w-80 md:h-80 rounded-full border-[12px] border-primary/5 dark:border-white/5 flex items-center justify-center compass-glow">
-<!-- Outer Ring with Degree Ticks -->
-<div class="absolute inset-0 rounded-full border border-primary/20 border-dashed"></div>
-<!-- Rotating Part Concept -->
-<div class="relative w-full h-full flex items-center justify-center">
-<!-- Compass Background Image -->
-<div class="w-[90%] h-[90%] bg-center bg-no-repeat aspect-square bg-cover rounded-full opacity-20" data-alt="Intricate geometric Islamic pattern in gold" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA7KEVMGiQVwfQY_szNQPF-d5H1oym2sgWwnjLElMBcQe7jbCgW3OGwCe3_0kW46dHVO0a6uOIU2JguqSA5Uvs0f3iKXNBahGQMxilCMSZh0A3HAeV7oS2afnsCRWBQ6JB_uxsi1vup5IxFvfzvE4U_n2x0AxtRXLbEiYmu-7KiNjTmREZQDwkwjk3QMVqjfyWgTna1kq5pfUIHUgWC65nk_cmq7BUc7RHiJicmc9kEN88u7kh76Er0fDdTloQNojMYseH9WFbUTA0");'>
-</div>
-<!-- Needle / Kaaba Indicator -->
-<div class="absolute inset-0 flex flex-col items-center justify-start pt-4 rotate-[145deg]">
-<div class="flex flex-col items-center">
-<span class="material-symbols-outlined text-primary text-5xl drop-shadow-[0_0_8px_rgba(11,218,115,0.8)]" style="font-variation-settings: 'FILL' 1">temple_hindu</span>
-<div class="w-1.5 h-32 bg-gradient-to-b from-primary to-transparent rounded-full -mt-2"></div>
-</div>
-</div>
-<!-- Center Point -->
-<div class="absolute size-4 bg-primary rounded-full border-4 border-background-dark shadow-lg"></div>
-</div>
-</div>
-</div>
-<!-- Distance & Info -->
-<div class="flex flex-col gap-4 mt-4">
-<div class="bg-primary/5 dark:bg-primary/10 rounded-xl p-6 text-center border border-primary/10">
-<p class="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-[0.2em] mb-1">Distance to Makkah</p>
-<p class="text-gray-900 dark:text-white text-3xl font-bold">4,785 km</p>
-</div>
-<!-- Quick Stats / Prayer Reminder -->
-<div class="grid grid-cols-2 gap-3">
-<div class="flex flex-col gap-2 rounded-xl p-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
-<p class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase">Next Prayer</p>
-<p class="text-gray-900 dark:text-white text-lg font-bold">Asr</p>
-<p class="text-primary text-sm font-semibold">In 1h 24m</p>
-</div>
-<div class="flex flex-col gap-2 rounded-xl p-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
-<p class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase">Accuracy</p>
-<p class="text-gray-900 dark:text-white text-lg font-bold">High</p>
-<p class="text-gold text-sm font-semibold">GPS Active</p>
-</div>
-</div>
-</div>
-<!-- Privacy Note -->
-<div class="flex items-center justify-center gap-2 mt-8 opacity-50">
-<span class="material-symbols-outlined text-sm">lock</span>
-<p class="text-xs font-medium text-gray-500 dark:text-gray-400">Local-only data storage</p>
-</div>
-</main>
-<!-- Bottom Floating Button -->
-<div class="fixed bottom-8 left-0 right-0 px-6 flex justify-center pointer-events-none">
-<button class="pointer-events-auto flex items-center justify-center gap-3 bg-primary hover:bg-primary/90 text-background-dark h-14 px-8 rounded-full shadow-xl shadow-primary/20 transition-all active:scale-95 group">
-<span class="material-symbols-outlined font-bold">schedule</span>
-<span class="text-base font-bold tracking-tight">View Prayer Times</span>
-<span class="material-symbols-outlined text-xl transition-transform group-hover:translate-x-1">chevron_right</span>
-</button>
-</div>
-<!-- iOS-style Home Indicator Spacer -->
-<div class="h-8"></div>
-</body></html>
+  <body
+    class="bg-background-light dark:bg-background-dark min-h-screen transition-colors duration-300"
+  >
+    <!-- Top Navigation Bar -->
+    <div
+      class="flex items-center p-4 pb-2 justify-between sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md"
+    >
+      <div class="text-gray-700 dark:text-white flex size-12 shrink-0 items-center justify-start">
+        <span class="material-symbols-outlined text-2xl">settings</span>
+      </div>
+      <h2
+        class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-tight flex-1 text-center font-display"
+      >
+        Qibla Compass
+      </h2>
+      <div class="flex w-12 items-center justify-end">
+        <button
+          class="flex size-12 cursor-pointer items-center justify-center rounded-full bg-transparent text-gray-700 dark:text-white"
+        >
+          <span class="material-symbols-outlined text-2xl">info</span>
+        </button>
+      </div>
+    </div>
+    <main class="max-w-md mx-auto px-4 pb-24">
+      <!-- Calibration Status Indicator -->
+      <div class="flex justify-center my-4">
+        <div
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20"
+        >
+          <span class="relative flex h-2 w-2">
+            <span
+              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"
+            ></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+          </span>
+          <p class="text-primary text-sm font-semibold uppercase tracking-wider">Compass Ready</p>
+        </div>
+      </div>
+      <!-- Compass Section -->
+      <div class="relative flex flex-col items-center justify-center py-8">
+        <!-- Degree Display -->
+        <h1
+          class="text-gray-900 dark:text-white tracking-tight text-[40px] font-bold leading-tight text-center pb-2"
+        >
+          145° SE
+        </h1>
+        <p class="text-gray-500 dark:text-gray-400 text-sm font-medium pb-8">
+          London, United Kingdom
+        </p>
+        <!-- Digital Compass Visual -->
+        <div
+          class="relative w-72 h-72 md:w-80 md:h-80 rounded-full border-[12px] border-primary/5 dark:border-white/5 flex items-center justify-center compass-glow"
+        >
+          <!-- Outer Ring with Degree Ticks -->
+          <div class="absolute inset-0 rounded-full border border-primary/20 border-dashed"></div>
+          <!-- Rotating Part Concept -->
+          <div class="relative w-full h-full flex items-center justify-center">
+            <!-- Compass Background Image -->
+            <div
+              class="w-[90%] h-[90%] bg-center bg-no-repeat aspect-square bg-cover rounded-full opacity-20"
+              data-alt="Intricate geometric Islamic pattern in gold"
+              style="
+                background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA7KEVMGiQVwfQY_szNQPF-d5H1oym2sgWwnjLElMBcQe7jbCgW3OGwCe3_0kW46dHVO0a6uOIU2JguqSA5Uvs0f3iKXNBahGQMxilCMSZh0A3HAeV7oS2afnsCRWBQ6JB_uxsi1vup5IxFvfzvE4U_n2x0AxtRXLbEiYmu-7KiNjTmREZQDwkwjk3QMVqjfyWgTna1kq5pfUIHUgWC65nk_cmq7BUc7RHiJicmc9kEN88u7kh76Er0fDdTloQNojMYseH9WFbUTA0');
+              "
+            ></div>
+            <!-- Needle / Kaaba Indicator -->
+            <div
+              class="absolute inset-0 flex flex-col items-center justify-start pt-4 rotate-[145deg]"
+            >
+              <div class="flex flex-col items-center">
+                <span
+                  class="material-symbols-outlined text-primary text-5xl drop-shadow-[0_0_8px_rgba(11,218,115,0.8)]"
+                  style="font-variation-settings: 'FILL' 1"
+                  >temple_hindu</span
+                >
+                <div
+                  class="w-1.5 h-32 bg-gradient-to-b from-primary to-transparent rounded-full -mt-2"
+                ></div>
+              </div>
+            </div>
+            <!-- Center Point -->
+            <div
+              class="absolute size-4 bg-primary rounded-full border-4 border-background-dark shadow-lg"
+            ></div>
+          </div>
+        </div>
+      </div>
+      <!-- Distance & Info -->
+      <div class="flex flex-col gap-4 mt-4">
+        <div
+          class="bg-primary/5 dark:bg-primary/10 rounded-xl p-6 text-center border border-primary/10"
+        >
+          <p
+            class="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-[0.2em] mb-1"
+          >
+            Distance to Makkah
+          </p>
+          <p class="text-gray-900 dark:text-white text-3xl font-bold">4,785 km</p>
+        </div>
+        <!-- Quick Stats / Prayer Reminder -->
+        <div class="grid grid-cols-2 gap-3">
+          <div
+            class="flex flex-col gap-2 rounded-xl p-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10"
+          >
+            <p class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase">
+              Next Prayer
+            </p>
+            <p class="text-gray-900 dark:text-white text-lg font-bold">Asr</p>
+            <p class="text-primary text-sm font-semibold">In 1h 24m</p>
+          </div>
+          <div
+            class="flex flex-col gap-2 rounded-xl p-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10"
+          >
+            <p class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase">Accuracy</p>
+            <p class="text-gray-900 dark:text-white text-lg font-bold">High</p>
+            <p class="text-gold text-sm font-semibold">GPS Active</p>
+          </div>
+        </div>
+      </div>
+      <!-- Privacy Note -->
+      <div class="flex items-center justify-center gap-2 mt-8 opacity-50">
+        <span class="material-symbols-outlined text-sm">lock</span>
+        <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Local-only data storage</p>
+      </div>
+    </main>
+    <!-- Bottom Floating Button -->
+    <div class="fixed bottom-8 left-0 right-0 px-6 flex justify-center pointer-events-none">
+      <button
+        class="pointer-events-auto flex items-center justify-center gap-3 bg-primary hover:bg-primary/90 text-background-dark h-14 px-8 rounded-full shadow-xl shadow-primary/20 transition-all active:scale-95 group"
+      >
+        <span class="material-symbols-outlined font-bold">schedule</span>
+        <span class="text-base font-bold tracking-tight">View Prayer Times</span>
+        <span
+          class="material-symbols-outlined text-xl transition-transform group-hover:translate-x-1"
+          >chevron_right</span
+        >
+      </button>
+    </div>
+    <!-- iOS-style Home Indicator Spacer -->
+    <div class="h-8"></div>
+  </body>
+</html>

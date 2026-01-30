@@ -47,10 +47,10 @@ const fetchUser = async (userId: string) => {
 
 ```tsx
 const createUser = async (userData: UserData) => {
-  const response = await fetch("https://api.example.com/users", {
-    method: "POST",
+  const response = await fetch('https://api.example.com/users', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(userData),
@@ -73,7 +73,7 @@ const createUser = async (userData: UserData) => {
 
 ```tsx
 // app/_layout.tsx
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -96,11 +96,11 @@ export default function RootLayout() {
 **Fetching data**:
 
 ```tsx
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from '@tanstack/react-query';
 
 function UserProfile({ userId }: { userId: string }) {
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["user", userId],
+    queryKey: ['user', userId],
     queryFn: () => fetchUser(userId),
   });
 
@@ -114,7 +114,7 @@ function UserProfile({ userId }: { userId: string }) {
 **Mutations**:
 
 ```tsx
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 function CreateUserForm() {
   const queryClient = useQueryClient();
@@ -123,7 +123,7 @@ function CreateUserForm() {
     mutationFn: createUser,
     onSuccess: () => {
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     },
   });
 
@@ -143,9 +143,13 @@ function CreateUserForm() {
 
 ```tsx
 class ApiError extends Error {
-  constructor(message: string, public status: number, public code?: string) {
+  constructor(
+    message: string,
+    public status: number,
+    public code?: string,
+  ) {
     super(message);
-    this.name = "ApiError";
+    this.name = 'ApiError';
   }
 }
 
@@ -155,11 +159,7 @@ const fetchWithErrorHandling = async (url: string, options?: RequestInit) => {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new ApiError(
-        error.message || "Request failed",
-        response.status,
-        error.code
-      );
+      throw new ApiError(error.message || 'Request failed', response.status, error.code);
     }
 
     return response.json();
@@ -168,7 +168,7 @@ const fetchWithErrorHandling = async (url: string, options?: RequestInit) => {
       throw error;
     }
     // Network error (no internet, timeout, etc.)
-    throw new ApiError("Network error", 0, "NETWORK_ERROR");
+    throw new ApiError('Network error', 0, 'NETWORK_ERROR');
   }
 };
 ```
@@ -176,11 +176,7 @@ const fetchWithErrorHandling = async (url: string, options?: RequestInit) => {
 **Retry logic**:
 
 ```tsx
-const fetchWithRetry = async (
-  url: string,
-  options?: RequestInit,
-  retries = 3
-) => {
+const fetchWithRetry = async (url: string, options?: RequestInit, retries = 3) => {
   for (let i = 0; i < retries; i++) {
     try {
       return await fetchWithErrorHandling(url, options);
@@ -200,9 +196,9 @@ const fetchWithRetry = async (
 **Token management**:
 
 ```tsx
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from 'expo-secure-store';
 
-const TOKEN_KEY = "auth_token";
+const TOKEN_KEY = 'auth_token';
 
 export const auth = {
   getToken: () => SecureStore.getItemAsync(TOKEN_KEY),
@@ -218,7 +214,7 @@ const authFetch = async (url: string, options: RequestInit = {}) => {
     ...options,
     headers: {
       ...options.headers,
-      Authorization: token ? `Bearer ${token}` : "",
+      Authorization: token ? `Bearer ${token}` : '',
     },
   });
 };
@@ -255,7 +251,7 @@ const getValidToken = async (): Promise<string> => {
 **Check network status**:
 
 ```tsx
-import NetInfo from "@react-native-community/netinfo";
+import NetInfo from '@react-native-community/netinfo';
 
 // Hook for network status
 function useNetworkStatus() {
@@ -274,8 +270,8 @@ function useNetworkStatus() {
 **Offline-first with React Query**:
 
 ```tsx
-import { onlineManager } from "@tanstack/react-query";
-import NetInfo from "@react-native-community/netinfo";
+import { onlineManager } from '@tanstack/react-query';
+import NetInfo from '@react-native-community/netinfo';
 
 // Sync React Query with network status
 onlineManager.setEventListener((setOnline) => {
@@ -326,7 +322,7 @@ EXPO_PUBLIC_API_URL=https://api.production.com
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 if (!BASE_URL) {
-  throw new Error("EXPO_PUBLIC_API_URL is not defined");
+  throw new Error('EXPO_PUBLIC_API_URL is not defined');
 }
 
 export const apiClient = {
@@ -338,8 +334,8 @@ export const apiClient = {
 
   post: async <T,>(path: string, body: unknown): Promise<T> => {
     const response = await fetch(`${BASE_URL}${path}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -386,7 +382,7 @@ useEffect(() => {
     .then((response) => response.json())
     .then(setData)
     .catch((error) => {
-      if (error.name !== "AbortError") {
+      if (error.name !== 'AbortError') {
         setError(error);
       }
     });
@@ -458,13 +454,13 @@ const data = await response.json();
 **Wrong: Storing tokens in AsyncStorage**
 
 ```tsx
-await AsyncStorage.setItem("token", token); // Not secure!
+await AsyncStorage.setItem('token', token); // Not secure!
 ```
 
 **Right: Use SecureStore for sensitive data**
 
 ```tsx
-await SecureStore.setItemAsync("token", token);
+await SecureStore.setItemAsync('token', token);
 ```
 
 ## Example Invocations

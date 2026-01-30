@@ -35,6 +35,7 @@ Install a plugin:
 **Note:** Skills won't appear in the `/` slash command menu. The `/` menu in Cursor is for custom commands (stored in `.cursor/commands/`), not for skills. Skills work via auto-discovery - the agent uses them automatically when your questions match their descriptions.
 
 **Verify installation:** After adding the Remote Rule, try asking the agent Expo-related questions like:
+
 - "How do I build a UI with Expo Router?"
 - "How do I make API calls in my Expo app?"
 - "How do I deploy my Expo app to the App Store?"

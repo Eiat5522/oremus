@@ -1,153 +1,242 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="dark" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Select Your Tradition</title>
-<!-- Google Fonts: Inter -->
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<!-- Material Symbols -->
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- Theme Configuration -->
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#1152d4",
-                        "background-light": "#f6f6f8",
-                        "background-dark": "#101622",
-                        "surface-dark": "#1a2130",
-                        "surface-light": "#ffffff",
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"]
-                    },
-                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
-                },
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Select Your Tradition</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <!-- Material Symbols -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Theme Configuration -->
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: '#1152d4',
+              'background-light': '#f6f6f8',
+              'background-dark': '#101622',
+              'surface-dark': '#1a2130',
+              'surface-light': '#ffffff',
             },
-        }
+            fontFamily: {
+              display: ['Inter', 'sans-serif'],
+            },
+            borderRadius: { DEFAULT: '1rem', lg: '2rem', xl: '3rem', full: '9999px' },
+          },
+        },
+      };
     </script>
-<style>
-        /* Custom radio styling adjustments */
-        .tradition-radio:checked + div {
-            border-color: #1152d4;
-            background-color: rgba(17, 82, 212, 0.1);
-        }
-        .tradition-radio:checked + div .check-circle {
-            background-color: #1152d4;
-            border-color: #1152d4;
-        }
-        .tradition-radio:checked + div .check-icon {
-            opacity: 1;
-        }
+    <style>
+      /* Custom radio styling adjustments */
+      .tradition-radio:checked + div {
+        border-color: #1152d4;
+        background-color: rgba(17, 82, 212, 0.1);
+      }
+      .tradition-radio:checked + div .check-circle {
+        background-color: #1152d4;
+        border-color: #1152d4;
+      }
+      .tradition-radio:checked + div .check-icon {
+        opacity: 1;
+      }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
   </head>
-<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-white transition-colors duration-200">
-<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto shadow-2xl">
-<!-- Header Section -->
-<header class="pt-8 pb-2 px-6">
-<div class="flex items-center justify-between mb-6">
-<button class="flex items-center justify-center w-10 h-10 rounded-full bg-slate-200 dark:bg-surface-dark text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors">
-<span class="material-symbols-outlined text-[20px]">arrow_back_ios_new</span>
-</button>
-<div class="w-10"></div> <!-- Spacer for balance -->
-</div>
-<div class="flex flex-col gap-2">
-<h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Choose your path</h1>
-<p class="text-slate-500 dark:text-slate-400 text-base font-normal leading-relaxed">
-                    We'll customize your tools and prayer focus based on your selected tradition.
+  <body
+    class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-white transition-colors duration-200"
+  >
+    <div
+      class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto shadow-2xl"
+    >
+      <!-- Header Section -->
+      <header class="pt-8 pb-2 px-6">
+        <div class="flex items-center justify-between mb-6">
+          <button
+            class="flex items-center justify-center w-10 h-10 rounded-full bg-slate-200 dark:bg-surface-dark text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors"
+          >
+            <span class="material-symbols-outlined text-[20px]">arrow_back_ios_new</span>
+          </button>
+          <div class="w-10"></div>
+          <!-- Spacer for balance -->
+        </div>
+        <div class="flex flex-col gap-2">
+          <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+            Choose your path
+          </h1>
+          <p class="text-slate-500 dark:text-slate-400 text-base font-normal leading-relaxed">
+            We'll customize your tools and prayer focus based on your selected tradition.
+          </p>
+        </div>
+      </header>
+      <!-- Main Content: Tradition Selection -->
+      <main class="flex-1 px-4 py-4 overflow-y-auto">
+        <form class="flex flex-col gap-4">
+          <!-- Option 1: Christianity -->
+          <label class="relative cursor-pointer group">
+            <input
+              checked=""
+              class="peer sr-only tradition-radio"
+              name="tradition"
+              type="radio"
+              value="christianity"
+            />
+            <div
+              class="flex items-center gap-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark p-4 transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-600"
+            >
+              <div
+                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+              >
+                <span class="material-symbols-outlined text-[28px]">church</span>
+              </div>
+              <div class="flex grow flex-col">
+                <h3 class="text-base font-semibold text-slate-900 dark:text-white">Christianity</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">
+                  Biblical prayers and scripture focus
                 </p>
-</div>
-</header>
-<!-- Main Content: Tradition Selection -->
-<main class="flex-1 px-4 py-4 overflow-y-auto">
-<form class="flex flex-col gap-4">
-<!-- Option 1: Christianity -->
-<label class="relative cursor-pointer group">
-<input checked="" class="peer sr-only tradition-radio" name="tradition" type="radio" value="christianity"/>
-<div class="flex items-center gap-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark p-4 transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-600">
-<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
-<span class="material-symbols-outlined text-[28px]">church</span>
-</div>
-<div class="flex grow flex-col">
-<h3 class="text-base font-semibold text-slate-900 dark:text-white">Christianity</h3>
-<p class="text-sm text-slate-500 dark:text-slate-400">Biblical prayers and scripture focus</p>
-</div>
-<div class="check-circle h-6 w-6 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center transition-colors">
-<span class="material-symbols-outlined text-[16px] text-white opacity-0 check-icon transition-opacity">check</span>
-</div>
-</div>
-</label>
-<!-- Option 2: Islam -->
-<label class="relative cursor-pointer group">
-<input class="peer sr-only tradition-radio" name="tradition" type="radio" value="islam"/>
-<div class="flex items-center gap-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark p-4 transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-600">
-<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400">
-<span class="material-symbols-outlined text-[28px]">mosque</span>
-</div>
-<div class="flex grow flex-col">
-<h3 class="text-base font-semibold text-slate-900 dark:text-white">Islam</h3>
-<p class="text-sm text-slate-500 dark:text-slate-400">Prayer times, Qibla, and Quranic focus</p>
-</div>
-<div class="check-circle h-6 w-6 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center transition-colors">
-<span class="material-symbols-outlined text-[16px] text-white opacity-0 check-icon transition-opacity">check</span>
-</div>
-</div>
-</label>
-<!-- Option 3: Buddhism -->
-<label class="relative cursor-pointer group">
-<input class="peer sr-only tradition-radio" name="tradition" type="radio" value="buddhism"/>
-<div class="flex items-center gap-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark p-4 transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-600">
-<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400">
-<span class="material-symbols-outlined text-[28px]">temple_buddhist</span>
-</div>
-<div class="flex grow flex-col">
-<h3 class="text-base font-semibold text-slate-900 dark:text-white">Buddhism</h3>
-<p class="text-sm text-slate-500 dark:text-slate-400">Meditation timers and sutra chants</p>
-</div>
-<div class="check-circle h-6 w-6 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center transition-colors">
-<span class="material-symbols-outlined text-[16px] text-white opacity-0 check-icon transition-opacity">check</span>
-</div>
-</div>
-</label>
-<!-- Option 4: General -->
-<label class="relative cursor-pointer group">
-<input class="peer sr-only tradition-radio" name="tradition" type="radio" value="general"/>
-<div class="flex items-center gap-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark p-4 transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-600">
-<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400">
-<span class="material-symbols-outlined text-[28px]">self_improvement</span>
-</div>
-<div class="flex grow flex-col">
-<h3 class="text-base font-semibold text-slate-900 dark:text-white">General</h3>
-<p class="text-sm text-slate-500 dark:text-slate-400">Universal mindfulness and focus tools</p>
-</div>
-<div class="check-circle h-6 w-6 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center transition-colors">
-<span class="material-symbols-outlined text-[16px] text-white opacity-0 check-icon transition-opacity">check</span>
-</div>
-</div>
-</label>
-</form>
-</main>
-<!-- Footer / CTA -->
-<footer class="p-6 bg-gradient-to-t from-background-light via-background-light/95 to-transparent dark:from-background-dark dark:via-background-dark/95 pb-8">
-<button class="flex w-full cursor-pointer items-center justify-center rounded-full h-14 bg-primary text-white text-lg font-bold shadow-lg shadow-blue-900/30 hover:bg-blue-600 active:scale-[0.98] transition-all">
-                Continue
-            </button>
-<p class="text-center text-xs text-slate-400 dark:text-slate-500 mt-4">
-                You can change this later in settings
-            </p>
-</footer>
-</div>
-</body></html>
+              </div>
+              <div
+                class="check-circle h-6 w-6 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center transition-colors"
+              >
+                <span
+                  class="material-symbols-outlined text-[16px] text-white opacity-0 check-icon transition-opacity"
+                  >check</span
+                >
+              </div>
+            </div>
+          </label>
+          <!-- Option 2: Islam -->
+          <label class="relative cursor-pointer group">
+            <input
+              class="peer sr-only tradition-radio"
+              name="tradition"
+              type="radio"
+              value="islam"
+            />
+            <div
+              class="flex items-center gap-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark p-4 transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-600"
+            >
+              <div
+                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400"
+              >
+                <span class="material-symbols-outlined text-[28px]">mosque</span>
+              </div>
+              <div class="flex grow flex-col">
+                <h3 class="text-base font-semibold text-slate-900 dark:text-white">Islam</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">
+                  Prayer times, Qibla, and Quranic focus
+                </p>
+              </div>
+              <div
+                class="check-circle h-6 w-6 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center transition-colors"
+              >
+                <span
+                  class="material-symbols-outlined text-[16px] text-white opacity-0 check-icon transition-opacity"
+                  >check</span
+                >
+              </div>
+            </div>
+          </label>
+          <!-- Option 3: Buddhism -->
+          <label class="relative cursor-pointer group">
+            <input
+              class="peer sr-only tradition-radio"
+              name="tradition"
+              type="radio"
+              value="buddhism"
+            />
+            <div
+              class="flex items-center gap-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark p-4 transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-600"
+            >
+              <div
+                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400"
+              >
+                <span class="material-symbols-outlined text-[28px]">temple_buddhist</span>
+              </div>
+              <div class="flex grow flex-col">
+                <h3 class="text-base font-semibold text-slate-900 dark:text-white">Buddhism</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">
+                  Meditation timers and sutra chants
+                </p>
+              </div>
+              <div
+                class="check-circle h-6 w-6 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center transition-colors"
+              >
+                <span
+                  class="material-symbols-outlined text-[16px] text-white opacity-0 check-icon transition-opacity"
+                  >check</span
+                >
+              </div>
+            </div>
+          </label>
+          <!-- Option 4: General -->
+          <label class="relative cursor-pointer group">
+            <input
+              class="peer sr-only tradition-radio"
+              name="tradition"
+              type="radio"
+              value="general"
+            />
+            <div
+              class="flex items-center gap-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark p-4 transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-600"
+            >
+              <div
+                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400"
+              >
+                <span class="material-symbols-outlined text-[28px]">self_improvement</span>
+              </div>
+              <div class="flex grow flex-col">
+                <h3 class="text-base font-semibold text-slate-900 dark:text-white">General</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">
+                  Universal mindfulness and focus tools
+                </p>
+              </div>
+              <div
+                class="check-circle h-6 w-6 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center transition-colors"
+              >
+                <span
+                  class="material-symbols-outlined text-[16px] text-white opacity-0 check-icon transition-opacity"
+                  >check</span
+                >
+              </div>
+            </div>
+          </label>
+        </form>
+      </main>
+      <!-- Footer / CTA -->
+      <footer
+        class="p-6 bg-gradient-to-t from-background-light via-background-light/95 to-transparent dark:from-background-dark dark:via-background-dark/95 pb-8"
+      >
+        <button
+          class="flex w-full cursor-pointer items-center justify-center rounded-full h-14 bg-primary text-white text-lg font-bold shadow-lg shadow-blue-900/30 hover:bg-blue-600 active:scale-[0.98] transition-all"
+        >
+          Continue
+        </button>
+        <p class="text-center text-xs text-slate-400 dark:text-slate-500 mt-4">
+          You can change this later in settings
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>

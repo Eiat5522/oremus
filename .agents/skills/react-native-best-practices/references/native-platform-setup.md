@@ -10,11 +10,11 @@ Navigate iOS and Android tooling, dependency management, and build systems in Re
 
 ## Quick Reference
 
-| Platform | IDE | Package Manager | Build System |
-|----------|-----|-----------------|--------------|
-| JavaScript | VS Code | npm/yarn | Metro |
-| iOS | Xcode | CocoaPods | xcodebuild |
-| Android | Android Studio | Gradle | Gradle |
+| Platform   | IDE            | Package Manager | Build System |
+| ---------- | -------------- | --------------- | ------------ |
+| JavaScript | VS Code        | npm/yarn        | Metro        |
+| iOS        | Xcode          | CocoaPods       | xcodebuild   |
+| Android    | Android Studio | Gradle          | Gradle       |
 
 ```bash
 # Common commands
@@ -32,11 +32,11 @@ xed ios/                            # Open Xcode
 
 ## IDEs Overview
 
-| Platform | IDE | Key Features |
-|----------|-----|--------------|
-| JavaScript | VS Code, WebStorm | TypeScript, ESLint, Prettier |
-| iOS | Xcode | View Hierarchy, Instruments, Signing |
-| Android | Android Studio | Layout Inspector, Profiler, Logcat |
+| Platform   | IDE               | Key Features                         |
+| ---------- | ----------------- | ------------------------------------ |
+| JavaScript | VS Code, WebStorm | TypeScript, ESLint, Prettier         |
+| iOS        | Xcode             | View Hierarchy, Instruments, Signing |
+| Android    | Android Studio    | Layout Inspector, Profiler, Logcat   |
 
 ## Dependency Management
 
@@ -75,6 +75,7 @@ end
 ```
 
 Version operators:
+
 - `~> 5.0` = ≥5.0, <6.0 (minor updates)
 - `~> 5.0.1` = ≥5.0.1, <5.1 (patch only)
 
@@ -105,6 +106,7 @@ dependencies {
 ### JavaScript (Metro)
 
 Metro handles JS transpilation via Babel:
+
 - Transforms modern JS to engine-compatible code
 - Handles module resolution
 - Creates JS bundle
@@ -169,7 +171,7 @@ cd ios && bundle exec pod install     # Install pods
 xed .                                  # Open Xcode
 xcrun simctl list                      # List simulators
 
-# Android  
+# Android
 cd android && ./gradlew clean          # Clean build
 ./gradlew tasks                        # List available tasks
 ./gradlew assembleRelease              # Build release APK
@@ -194,13 +196,13 @@ npx expo prebuild                      # Generate native projects
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Pod install fails | `bundle exec pod install --repo-update` |
-| Xcode build fails | Clean build folder (Cmd+Shift+K) |
-| Android Gradle sync fails | `./gradlew clean` then sync |
-| Can't find simulator | `xcrun simctl list` to verify name |
-| Metro cache issues | `npx react-native start --reset-cache` |
+| Issue                     | Solution                                |
+| ------------------------- | --------------------------------------- |
+| Pod install fails         | `bundle exec pod install --repo-update` |
+| Xcode build fails         | Clean build folder (Cmd+Shift+K)        |
+| Android Gradle sync fails | `./gradlew clean` then sync             |
+| Can't find simulator      | `xcrun simctl list` to verify name      |
+| Metro cache issues        | `npx react-native start --reset-cache`  |
 
 ## Related Skills
 

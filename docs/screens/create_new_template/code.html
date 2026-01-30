@@ -1,154 +1,273 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="dark" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Create New Template</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#1152d4",
-                        "background-light": "#f6f6f8",
-                        "background-dark": "#101622",
-                        "surface-dark": "#1A2230", // Custom surface for cards/inputs matching dark theme
-                        "text-secondary": "#9da6b9"
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"]
-                    },
-                    borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
-                },
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Create New Template</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: '#1152d4',
+              'background-light': '#f6f6f8',
+              'background-dark': '#101622',
+              'surface-dark': '#1A2230', // Custom surface for cards/inputs matching dark theme
+              'text-secondary': '#9da6b9',
             },
-        }
+            fontFamily: {
+              display: ['Inter', 'sans-serif'],
+            },
+            borderRadius: { DEFAULT: '1rem', lg: '2rem', xl: '3rem', full: '9999px' },
+          },
+        },
+      };
     </script>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
   </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased selection:bg-primary selection:text-white">
-<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden">
-<!-- Top AppBar -->
-<div class="sticky top-0 z-10 flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between border-b border-gray-200 dark:border-gray-800">
-<div class="text-slate-900 dark:text-white flex size-12 shrink-0 items-center justify-start cursor-pointer transition-opacity hover:opacity-70">
-<span class="material-symbols-outlined text-[24px]">close</span>
-</div>
-<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">New Template</h2>
-</div>
-<!-- Scrollable Form Content -->
-<main class="flex-1 flex flex-col gap-6 p-4 pb-32">
-<!-- Section: Template Name -->
-<div class="flex flex-col gap-2">
-<label class="flex flex-col w-full">
-<p class="text-slate-900 dark:text-white text-base font-medium leading-normal pb-2">Template Name</p>
-<input class="form-input flex w-full min-w-0 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border-none bg-white dark:bg-surface-dark h-14 placeholder:text-text-secondary p-4 text-base font-normal leading-normal shadow-sm" placeholder="e.g., Morning Lectio Divina" value=""/>
-</label>
-</div>
-<!-- Section: Timing -->
-<div class="flex flex-col gap-2">
-<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pt-2">Timing</h3>
-<div class="bg-white dark:bg-surface-dark rounded-xl p-4 shadow-sm flex flex-col gap-4">
-<div class="flex items-center justify-between">
-<span class="text-text-secondary text-sm font-medium uppercase tracking-wider">Duration</span>
-<span class="text-primary font-bold text-lg">20 min</span>
-</div>
-<!-- Custom Wheel Picker Representation -->
-<div class="relative h-16 w-full overflow-hidden flex items-center justify-center mask-image-gradient">
-<!-- Fade masks -->
-<div class="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white dark:from-surface-dark to-transparent z-10 pointer-events-none"></div>
-<div class="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white dark:from-surface-dark to-transparent z-10 pointer-events-none"></div>
-<!-- Picker Items -->
-<div class="flex items-center gap-6 overflow-x-auto no-scrollbar snap-x w-full justify-center px-[40%]">
-<div class="snap-center shrink-0 text-text-secondary text-lg font-medium opacity-50 scale-75">10</div>
-<div class="snap-center shrink-0 text-text-secondary text-lg font-medium opacity-75 scale-90">15</div>
-<div class="snap-center shrink-0 text-primary dark:text-white text-3xl font-bold scale-110 relative">
-                                20
-                                <span class="text-xs font-normal absolute -bottom-4 left-1/2 -translate-x-1/2 text-text-secondary">min</span>
-</div>
-<div class="snap-center shrink-0 text-text-secondary text-lg font-medium opacity-75 scale-90">25</div>
-<div class="snap-center shrink-0 text-text-secondary text-lg font-medium opacity-50 scale-75">30</div>
-</div>
-<!-- Selection Indicator -->
-<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-12 border-y-2 border-primary/30 rounded-lg pointer-events-none"></div>
-</div>
-</div>
-</div>
-<!-- Section: Distraction Control -->
-<div class="flex flex-col gap-2">
-<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pt-2">Distraction Control</h3>
-<div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm">
-<!-- Prep Ritual Toggle -->
-<div class="p-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800/50">
-<div class="flex flex-col gap-1 pr-4">
-<p class="text-slate-900 dark:text-white text-base font-medium leading-normal">Prep Ritual</p>
-<p class="text-text-secondary text-xs leading-normal">Includes 2 min breathing exercise before start.</p>
-</div>
-<!-- Toggle Switch -->
-<button aria-checked="true" class="relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background-dark" role="switch">
-<span class="sr-only">Use setting</span>
-<span aria-hidden="true" class="translate-x-5 pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-</button>
-</div>
-<!-- Refocus Frequency -->
-<div class="p-4 flex flex-col gap-3">
-<div class="flex justify-between items-center">
-<p class="text-slate-900 dark:text-white text-base font-medium leading-normal">Refocus Prompts</p>
-<span class="text-xs text-primary font-medium bg-primary/10 px-2 py-0.5 rounded">Low</span>
-</div>
-<!-- Segmented Control -->
-<div class="flex p-1 bg-gray-100 dark:bg-[#111620] rounded-lg">
-<button class="flex-1 py-2 text-sm font-medium text-text-secondary rounded-md hover:text-slate-900 dark:hover:text-white transition-colors">None</button>
-<button class="flex-1 py-2 text-sm font-medium text-slate-900 dark:text-white bg-white dark:bg-surface-dark shadow-sm rounded-md transition-all">Low</button>
-<button class="flex-1 py-2 text-sm font-medium text-text-secondary rounded-md hover:text-slate-900 dark:hover:text-white transition-colors">Medium</button>
-</div>
-<p class="text-text-secondary text-xs leading-normal px-1">Gentle reminders to return focus if app is backgrounded.</p>
-</div>
-</div>
-</div>
-<!-- Section: Environment -->
-<div class="flex flex-col gap-2">
-<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pt-2">Environment</h3>
-<div class="grid grid-cols-3 gap-3">
-<!-- Normal Mode -->
-<button class="group flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-white dark:bg-surface-dark border-2 border-transparent hover:border-primary/50 focus:border-primary transition-all shadow-sm">
-<div class="p-2 rounded-full bg-gray-100 dark:bg-[#111620] text-text-secondary group-focus:text-primary group-focus:bg-primary/10 transition-colors">
-<span class="material-symbols-outlined">brightness_5</span>
-</div>
-<span class="text-sm font-medium text-slate-900 dark:text-white">Normal</span>
-</button>
-<!-- Dim Mode -->
-<button class="group flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-white dark:bg-surface-dark border-2 border-primary shadow-sm relative overflow-hidden">
-<div class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></div>
-<div class="p-2 rounded-full bg-primary/20 text-primary transition-colors">
-<span class="material-symbols-outlined">brightness_4</span>
-</div>
-<span class="text-sm font-medium text-slate-900 dark:text-white">Dim</span>
-</button>
-<!-- Black Mode -->
-<button class="group flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-white dark:bg-surface-dark border-2 border-transparent hover:border-primary/50 focus:border-primary transition-all shadow-sm">
-<div class="p-2 rounded-full bg-gray-100 dark:bg-[#111620] text-text-secondary group-focus:text-primary group-focus:bg-primary/10 transition-colors">
-<span class="material-symbols-outlined">visibility_off</span>
-</div>
-<span class="text-sm font-medium text-slate-900 dark:text-white">Black</span>
-</button>
-</div>
-<p class="text-text-secondary text-xs leading-normal px-2 pt-1">Black mode turns the screen pixels off to save battery.</p>
-</div>
-</main>
-<!-- Floating Action Button Area -->
-<div class="fixed bottom-0 left-0 w-full p-4 bg-gradient-to-t from-background-light dark:from-background-dark via-background-light dark:via-background-dark to-transparent pt-8 pb-8 z-20">
-<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold text-base h-14 rounded-full shadow-lg shadow-primary/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
-<span class="material-symbols-outlined text-[20px]">check</span>
-                Save Template
+  <body
+    class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased selection:bg-primary selection:text-white"
+  >
+    <div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden">
+      <!-- Top AppBar -->
+      <div
+        class="sticky top-0 z-10 flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between border-b border-gray-200 dark:border-gray-800"
+      >
+        <div
+          class="text-slate-900 dark:text-white flex size-12 shrink-0 items-center justify-start cursor-pointer transition-opacity hover:opacity-70"
+        >
+          <span class="material-symbols-outlined text-[24px]">close</span>
+        </div>
+        <h2
+          class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12"
+        >
+          New Template
+        </h2>
+      </div>
+      <!-- Scrollable Form Content -->
+      <main class="flex-1 flex flex-col gap-6 p-4 pb-32">
+        <!-- Section: Template Name -->
+        <div class="flex flex-col gap-2">
+          <label class="flex flex-col w-full">
+            <p class="text-slate-900 dark:text-white text-base font-medium leading-normal pb-2">
+              Template Name
+            </p>
+            <input
+              class="form-input flex w-full min-w-0 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border-none bg-white dark:bg-surface-dark h-14 placeholder:text-text-secondary p-4 text-base font-normal leading-normal shadow-sm"
+              placeholder="e.g., Morning Lectio Divina"
+              value=""
+            />
+          </label>
+        </div>
+        <!-- Section: Timing -->
+        <div class="flex flex-col gap-2">
+          <h3
+            class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pt-2"
+          >
+            Timing
+          </h3>
+          <div class="bg-white dark:bg-surface-dark rounded-xl p-4 shadow-sm flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+              <span class="text-text-secondary text-sm font-medium uppercase tracking-wider"
+                >Duration</span
+              >
+              <span class="text-primary font-bold text-lg">20 min</span>
+            </div>
+            <!-- Custom Wheel Picker Representation -->
+            <div
+              class="relative h-16 w-full overflow-hidden flex items-center justify-center mask-image-gradient"
+            >
+              <!-- Fade masks -->
+              <div
+                class="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white dark:from-surface-dark to-transparent z-10 pointer-events-none"
+              ></div>
+              <div
+                class="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white dark:from-surface-dark to-transparent z-10 pointer-events-none"
+              ></div>
+              <!-- Picker Items -->
+              <div
+                class="flex items-center gap-6 overflow-x-auto no-scrollbar snap-x w-full justify-center px-[40%]"
+              >
+                <div
+                  class="snap-center shrink-0 text-text-secondary text-lg font-medium opacity-50 scale-75"
+                >
+                  10
+                </div>
+                <div
+                  class="snap-center shrink-0 text-text-secondary text-lg font-medium opacity-75 scale-90"
+                >
+                  15
+                </div>
+                <div
+                  class="snap-center shrink-0 text-primary dark:text-white text-3xl font-bold scale-110 relative"
+                >
+                  20
+                  <span
+                    class="text-xs font-normal absolute -bottom-4 left-1/2 -translate-x-1/2 text-text-secondary"
+                    >min</span
+                  >
+                </div>
+                <div
+                  class="snap-center shrink-0 text-text-secondary text-lg font-medium opacity-75 scale-90"
+                >
+                  25
+                </div>
+                <div
+                  class="snap-center shrink-0 text-text-secondary text-lg font-medium opacity-50 scale-75"
+                >
+                  30
+                </div>
+              </div>
+              <!-- Selection Indicator -->
+              <div
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-12 border-y-2 border-primary/30 rounded-lg pointer-events-none"
+              ></div>
+            </div>
+          </div>
+        </div>
+        <!-- Section: Distraction Control -->
+        <div class="flex flex-col gap-2">
+          <h3
+            class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pt-2"
+          >
+            Distraction Control
+          </h3>
+          <div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm">
+            <!-- Prep Ritual Toggle -->
+            <div
+              class="p-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800/50"
+            >
+              <div class="flex flex-col gap-1 pr-4">
+                <p class="text-slate-900 dark:text-white text-base font-medium leading-normal">
+                  Prep Ritual
+                </p>
+                <p class="text-text-secondary text-xs leading-normal">
+                  Includes 2 min breathing exercise before start.
+                </p>
+              </div>
+              <!-- Toggle Switch -->
+              <button
+                aria-checked="true"
+                class="relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background-dark"
+                role="switch"
+              >
+                <span class="sr-only">Use setting</span>
+                <span
+                  aria-hidden="true"
+                  class="translate-x-5 pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                ></span>
+              </button>
+            </div>
+            <!-- Refocus Frequency -->
+            <div class="p-4 flex flex-col gap-3">
+              <div class="flex justify-between items-center">
+                <p class="text-slate-900 dark:text-white text-base font-medium leading-normal">
+                  Refocus Prompts
+                </p>
+                <span class="text-xs text-primary font-medium bg-primary/10 px-2 py-0.5 rounded"
+                  >Low</span
+                >
+              </div>
+              <!-- Segmented Control -->
+              <div class="flex p-1 bg-gray-100 dark:bg-[#111620] rounded-lg">
+                <button
+                  class="flex-1 py-2 text-sm font-medium text-text-secondary rounded-md hover:text-slate-900 dark:hover:text-white transition-colors"
+                >
+                  None
+                </button>
+                <button
+                  class="flex-1 py-2 text-sm font-medium text-slate-900 dark:text-white bg-white dark:bg-surface-dark shadow-sm rounded-md transition-all"
+                >
+                  Low
+                </button>
+                <button
+                  class="flex-1 py-2 text-sm font-medium text-text-secondary rounded-md hover:text-slate-900 dark:hover:text-white transition-colors"
+                >
+                  Medium
+                </button>
+              </div>
+              <p class="text-text-secondary text-xs leading-normal px-1">
+                Gentle reminders to return focus if app is backgrounded.
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- Section: Environment -->
+        <div class="flex flex-col gap-2">
+          <h3
+            class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pt-2"
+          >
+            Environment
+          </h3>
+          <div class="grid grid-cols-3 gap-3">
+            <!-- Normal Mode -->
+            <button
+              class="group flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-white dark:bg-surface-dark border-2 border-transparent hover:border-primary/50 focus:border-primary transition-all shadow-sm"
+            >
+              <div
+                class="p-2 rounded-full bg-gray-100 dark:bg-[#111620] text-text-secondary group-focus:text-primary group-focus:bg-primary/10 transition-colors"
+              >
+                <span class="material-symbols-outlined">brightness_5</span>
+              </div>
+              <span class="text-sm font-medium text-slate-900 dark:text-white">Normal</span>
             </button>
-</div>
-</div>
-</body></html>
+            <!-- Dim Mode -->
+            <button
+              class="group flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-white dark:bg-surface-dark border-2 border-primary shadow-sm relative overflow-hidden"
+            >
+              <div class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></div>
+              <div class="p-2 rounded-full bg-primary/20 text-primary transition-colors">
+                <span class="material-symbols-outlined">brightness_4</span>
+              </div>
+              <span class="text-sm font-medium text-slate-900 dark:text-white">Dim</span>
+            </button>
+            <!-- Black Mode -->
+            <button
+              class="group flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-white dark:bg-surface-dark border-2 border-transparent hover:border-primary/50 focus:border-primary transition-all shadow-sm"
+            >
+              <div
+                class="p-2 rounded-full bg-gray-100 dark:bg-[#111620] text-text-secondary group-focus:text-primary group-focus:bg-primary/10 transition-colors"
+              >
+                <span class="material-symbols-outlined">visibility_off</span>
+              </div>
+              <span class="text-sm font-medium text-slate-900 dark:text-white">Black</span>
+            </button>
+          </div>
+          <p class="text-text-secondary text-xs leading-normal px-2 pt-1">
+            Black mode turns the screen pixels off to save battery.
+          </p>
+        </div>
+      </main>
+      <!-- Floating Action Button Area -->
+      <div
+        class="fixed bottom-0 left-0 w-full p-4 bg-gradient-to-t from-background-light dark:from-background-dark via-background-light dark:via-background-dark to-transparent pt-8 pb-8 z-20"
+      >
+        <button
+          class="w-full bg-primary hover:bg-primary/90 text-white font-bold text-base h-14 rounded-full shadow-lg shadow-primary/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+        >
+          <span class="material-symbols-outlined text-[20px]">check</span>
+          Save Template
+        </button>
+      </div>
+    </div>
+  </body>
+</html>

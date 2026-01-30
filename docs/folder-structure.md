@@ -1,6 +1,7 @@
 # Folder Structure (React Native + Expo + Expo Router)
 
 A practical structure that keeps **routing in `app/`** and app logic in `src/`. It supports:
+
 - Firebase Auth (identity)
 - Local SQLite (source of truth)
 - Tradition add-ons (Qibla, daily prompts)
@@ -169,6 +170,7 @@ src
 ---
 
 ## Content strategy for “daily prompts”
+
 Store the **actual text** (verses/chants/intentions) in code under:
 
 - `src/features/addons/dailyPrompt/promptCatalog.ts`
@@ -178,6 +180,7 @@ Only store **keys** in SQLite (`daily_prompt_state.prompt_key`, `favorite_prompt
 ---
 
 ## Suggested provider setup (`app/_layout.tsx`)
+
 - Initialize Firebase
 - Open SQLite DB + run migrations
 - Start auth listener
@@ -189,4 +192,3 @@ Only store **keys** in SQLite (`daily_prompt_state.prompt_key`, `favorite_prompt
   - else → `(tabs)`
 
 (You can track onboarding completion in SQLite with a `preferences` field or a tiny `user_flags` table if you prefer.)
-

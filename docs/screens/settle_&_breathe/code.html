@@ -1,115 +1,165 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="dark" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Settle &amp; Breathe</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#1152d4",
-                        "background-light": "#f6f6f8",
-                        "background-dark": "#101622",
-                    },
-                    fontFamily: {
-                        "display": ["Inter"]
-                    },
-                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
-                },
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Settle &amp; Breathe</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: '#1152d4',
+              'background-light': '#f6f6f8',
+              'background-dark': '#101622',
             },
-        }
+            fontFamily: {
+              display: ['Inter'],
+            },
+            borderRadius: { DEFAULT: '1rem', lg: '2rem', xl: '3rem', full: '9999px' },
+          },
+        },
+      };
     </script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24;
+      }
+      /* Custom pulse for the breathing orb without using JS animations */
+      @keyframes subtle-breath {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.4;
         }
-        /* Custom pulse for the breathing orb without using JS animations */
-        @keyframes subtle-breath {
-            0%, 100% { transform: scale(1); opacity: 0.4; }
-            50% { transform: scale(1.15); opacity: 0.8; }
+        50% {
+          transform: scale(1.15);
+          opacity: 0.8;
         }
-        .animate-breath {
-            animation: subtle-breath 6s ease-in-out infinite;
-        }
+      }
+      .animate-breath {
+        animation: subtle-breath 6s ease-in-out infinite;
+      }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
   </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-white selection:bg-primary/30 antialiased overflow-hidden">
-<div class="relative flex h-screen w-full flex-col bg-background-light dark:bg-background-dark max-w-[430px] mx-auto overflow-hidden">
-<!-- Top App Bar / Progress Navigation -->
-<header class="flex flex-col gap-2 p-6 pt-8">
-<div class="flex items-center justify-between mb-2">
-<span class="text-xs font-semibold uppercase tracking-widest text-primary">Preparation Ritual</span>
-<span class="material-symbols-outlined text-slate-400 text-sm">lock</span>
-</div>
-<!-- Progress Bar Component -->
-<div class="flex flex-col gap-3">
-<div class="flex gap-6 justify-between items-end">
-<p class="text-slate-800 dark:text-white text-base font-medium leading-normal">Settle &amp; Breathe</p>
-<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">Step 2 of 3</p>
-</div>
-<div class="flex gap-1.5 w-full h-1.5">
-<div class="flex-1 rounded-full bg-primary/40"></div>
-<div class="flex-1 rounded-full bg-primary"></div>
-<div class="flex-1 rounded-full bg-slate-200 dark:bg-slate-800"></div>
-</div>
-</div>
-</header>
-<!-- Main Content Area -->
-<main class="flex flex-1 flex-col items-center justify-center px-8 text-center">
-<!-- Headline Text Component -->
-<div class="mb-12">
-<h2 class="text-slate-900 dark:text-white tracking-tight text-[28px] font-bold leading-tight pb-3">
-                    Take a moment to settle your mind.
-                </h2>
-<!-- Body Text Component -->
-<p class="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal px-4">
-                    Focus on the rhythm of your breath and find a quiet center.
-                </p>
-</div>
-<!-- Central Breathing Orb (Custom Component for context) -->
-<div class="relative flex items-center justify-center w-full aspect-square max-w-[280px]">
-<!-- Outer Glow -->
-<div class="absolute inset-0 rounded-full bg-primary/10 blur-3xl animate-breath"></div>
-<!-- The Orb -->
-<div class="relative w-48 h-48 rounded-full bg-gradient-to-tr from-primary to-blue-400 flex items-center justify-center shadow-[0_0_50px_-12px_rgba(17,82,212,0.5)] animate-breath">
-<div class="w-40 h-40 rounded-full border border-white/20 flex items-center justify-center backdrop-blur-sm">
-<span class="material-symbols-outlined text-white text-5xl opacity-40">spa</span>
-</div>
-</div>
-<!-- Secondary visual ring -->
-<div class="absolute w-64 h-64 rounded-full border border-primary/20 scale-110"></div>
-</div>
-<div class="mt-12 h-12 flex flex-col items-center justify-center">
-<p class="text-primary text-sm font-medium tracking-widest uppercase opacity-70">Slowly Inhale</p>
-</div>
-</main>
-<!-- Footer / Action Area -->
-<footer class="p-8 flex flex-col items-center gap-6">
-<!-- Minimal Skip Button -->
-<button class="px-6 py-2 rounded-full text-slate-400 text-sm font-medium transition-colors hover:text-slate-900 dark:hover:text-white">
-                Skip preparation
-            </button>
-<!-- Local Storage Indicator -->
-<div class="flex items-center gap-2 text-[10px] text-slate-500 uppercase tracking-tighter opacity-50">
-<span class="material-symbols-outlined text-[12px]">database</span>
-<span>Data stored locally on device</span>
-</div>
-</footer>
-<!-- Image Placeholder (Hidden/Technical for component compliance) -->
-<div class="hidden">
-<div class="w-full bg-center bg-no-repeat bg-cover" data-alt="Abstract soft blue gradient circles on dark background" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBDL0ZWFOdWyr9JhkA1C6axxhJXCwj6AnoM4Yc4SigPdut6CHuKgsv2STwPoyG5q0fyj3LaGm5DFtcQ5byQl6gQcHzSzogFYcOqI2zgk8aFwKrgw689xAm26oWZInDRbI7W4wZD17S76XEjOL2-8z3D1JpYN_oLfq9DHP75jPNYmQ9xOmutuza0EUm9DFT7m7cIcxiOu3w-L_feakU1N_vYJ_fVBsI3TSCtmCIlSh3XWAnfvgw6rW6WyIvNy0B14tZfPIpJHs-O7sQ");'></div>
-</div>
-</div>
-</body></html>
+  <body
+    class="bg-background-light dark:bg-background-dark font-display text-white selection:bg-primary/30 antialiased overflow-hidden"
+  >
+    <div
+      class="relative flex h-screen w-full flex-col bg-background-light dark:bg-background-dark max-w-[430px] mx-auto overflow-hidden"
+    >
+      <!-- Top App Bar / Progress Navigation -->
+      <header class="flex flex-col gap-2 p-6 pt-8">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-semibold uppercase tracking-widest text-primary"
+            >Preparation Ritual</span
+          >
+          <span class="material-symbols-outlined text-slate-400 text-sm">lock</span>
+        </div>
+        <!-- Progress Bar Component -->
+        <div class="flex flex-col gap-3">
+          <div class="flex gap-6 justify-between items-end">
+            <p class="text-slate-800 dark:text-white text-base font-medium leading-normal">
+              Settle &amp; Breathe
+            </p>
+            <p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">
+              Step 2 of 3
+            </p>
+          </div>
+          <div class="flex gap-1.5 w-full h-1.5">
+            <div class="flex-1 rounded-full bg-primary/40"></div>
+            <div class="flex-1 rounded-full bg-primary"></div>
+            <div class="flex-1 rounded-full bg-slate-200 dark:bg-slate-800"></div>
+          </div>
+        </div>
+      </header>
+      <!-- Main Content Area -->
+      <main class="flex flex-1 flex-col items-center justify-center px-8 text-center">
+        <!-- Headline Text Component -->
+        <div class="mb-12">
+          <h2
+            class="text-slate-900 dark:text-white tracking-tight text-[28px] font-bold leading-tight pb-3"
+          >
+            Take a moment to settle your mind.
+          </h2>
+          <!-- Body Text Component -->
+          <p class="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal px-4">
+            Focus on the rhythm of your breath and find a quiet center.
+          </p>
+        </div>
+        <!-- Central Breathing Orb (Custom Component for context) -->
+        <div class="relative flex items-center justify-center w-full aspect-square max-w-[280px]">
+          <!-- Outer Glow -->
+          <div class="absolute inset-0 rounded-full bg-primary/10 blur-3xl animate-breath"></div>
+          <!-- The Orb -->
+          <div
+            class="relative w-48 h-48 rounded-full bg-gradient-to-tr from-primary to-blue-400 flex items-center justify-center shadow-[0_0_50px_-12px_rgba(17,82,212,0.5)] animate-breath"
+          >
+            <div
+              class="w-40 h-40 rounded-full border border-white/20 flex items-center justify-center backdrop-blur-sm"
+            >
+              <span class="material-symbols-outlined text-white text-5xl opacity-40">spa</span>
+            </div>
+          </div>
+          <!-- Secondary visual ring -->
+          <div class="absolute w-64 h-64 rounded-full border border-primary/20 scale-110"></div>
+        </div>
+        <div class="mt-12 h-12 flex flex-col items-center justify-center">
+          <p class="text-primary text-sm font-medium tracking-widest uppercase opacity-70">
+            Slowly Inhale
+          </p>
+        </div>
+      </main>
+      <!-- Footer / Action Area -->
+      <footer class="p-8 flex flex-col items-center gap-6">
+        <!-- Minimal Skip Button -->
+        <button
+          class="px-6 py-2 rounded-full text-slate-400 text-sm font-medium transition-colors hover:text-slate-900 dark:hover:text-white"
+        >
+          Skip preparation
+        </button>
+        <!-- Local Storage Indicator -->
+        <div
+          class="flex items-center gap-2 text-[10px] text-slate-500 uppercase tracking-tighter opacity-50"
+        >
+          <span class="material-symbols-outlined text-[12px]">database</span>
+          <span>Data stored locally on device</span>
+        </div>
+      </footer>
+      <!-- Image Placeholder (Hidden/Technical for component compliance) -->
+      <div class="hidden">
+        <div
+          class="w-full bg-center bg-no-repeat bg-cover"
+          data-alt="Abstract soft blue gradient circles on dark background"
+          style="
+            background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBDL0ZWFOdWyr9JhkA1C6axxhJXCwj6AnoM4Yc4SigPdut6CHuKgsv2STwPoyG5q0fyj3LaGm5DFtcQ5byQl6gQcHzSzogFYcOqI2zgk8aFwKrgw689xAm26oWZInDRbI7W4wZD17S76XEjOL2-8z3D1JpYN_oLfq9DHP75jPNYmQ9xOmutuza0EUm9DFT7m7cIcxiOu3w-L_feakU1N_vYJ_fVBsI3TSCtmCIlSh3XWAnfvgw6rW6WyIvNy0B14tZfPIpJHs-O7sQ');
+          "
+        ></div>
+      </div>
+    </div>
+  </body>
+</html>
