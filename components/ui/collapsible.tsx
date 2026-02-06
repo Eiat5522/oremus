@@ -12,7 +12,7 @@ export function Collapsible({ children, title }: PropsWithChildren & { title: st
   const theme = useColorScheme() ?? 'light';
   const iconStyle = useMemo(
     () => ({ transform: [{ rotate: isOpen ? '90deg' : '0deg' }] }),
-    [isOpen]
+    [isOpen],
   );
 
   return (
@@ -23,7 +23,8 @@ export function Collapsible({ children, title }: PropsWithChildren & { title: st
         activeOpacity={0.8}
         accessibilityRole="button"
         accessibilityState={{ expanded: isOpen }}
-        accessibilityLabel={`${title}, ${isOpen ? 'expanded' : 'collapsed'}`}>
+        accessibilityLabel={`${title}, ${isOpen ? 'expanded' : 'collapsed'}`}
+      >
         <IconSymbol
           name="chevron.right"
           size={18}

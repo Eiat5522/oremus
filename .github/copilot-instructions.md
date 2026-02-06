@@ -3,8 +3,8 @@
 ## Project overview
 
 - Expo + Expo Router app with file-based routing; entry point is expo-router/entry in [package.json](../package.json).
-- Root navigation is a Stack with a Tabs group and a modal route in [app/_layout.tsx](../app/_layout.tsx).
-- The Tabs navigator and tab icons live in app/(tabs)/_layout.tsx.
+- Root navigation is a Stack with a Tabs group and a modal route in [app/\_layout.tsx](../app/_layout.tsx).
+- The Tabs navigator and tab icons live in app/(tabs)/\_layout.tsx.
 
 ## Architecture and UI patterns
 

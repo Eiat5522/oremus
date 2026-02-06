@@ -1,13 +1,6 @@
 import React from 'react';
-import { 
-  StyleSheet, 
-  ScrollView, 
-  View, 
-  TouchableOpacity,
-  Dimensions,
-  TextInput
-} from 'react-native';
-import { Stack } from 'expo-router';
+import { StyleSheet, ScrollView, View, TouchableOpacity } from 'react-native';
+import { Stack, useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -16,8 +9,6 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-const { width } = Dimensions.get('window');
-
 export default function LibraryScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
@@ -25,7 +16,7 @@ export default function LibraryScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <Stack.Screen 
+      <Stack.Screen
         options={{
           headerShown: true,
           headerTransparent: true,
@@ -41,24 +32,28 @@ export default function LibraryScreen() {
               <IconSymbol name="search" size={24} color={theme.text} />
             </TouchableOpacity>
           ),
-        }} 
+        }}
       />
-      
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Hero Verse Card */}
         <View style={styles.heroSection}>
           <TouchableOpacity onPress={() => router.push('/tradition/christian')}>
             <Card variant="default" style={styles.verseCard}>
               <View style={styles.verseDecoration}>
-                <IconSymbol name="auto.stories" size={160} color={theme.primary} style={{ opacity: 0.05 }} />
+                <IconSymbol
+                  name="auto.stories"
+                  size={160}
+                  color={theme.primary}
+                  style={{ opacity: 0.05 }}
+                />
               </View>
               <View style={styles.verseContent}>
                 <ThemedText style={styles.verseLabel}>VERSE OF THE DAY</ThemedText>
                 <ThemedText style={styles.verseText}>
-                  "For unto us a child is born, unto us a son is given: and the government shall be upon his shoulder: and his name shall be called Wonderful, Counsellor, The mighty God, The everlasting Father, The Prince of Peace."
+                  &quot;For unto us a child is born, unto us a son is given: and the government
+                  shall be upon his shoulder: and his name shall be called Wonderful, Counsellor,
+                  The mighty God, The everlasting Father, The Prince of Peace.&quot;
                 </ThemedText>
                 <View style={styles.verseFooter}>
                   <IconSymbol name="bookmark.fill" size={14} color={theme.muted} />
@@ -71,34 +66,38 @@ export default function LibraryScreen() {
 
         {/* Section Header */}
         <View style={styles.sectionHeader}>
-          <ThemedText type="title" style={styles.sectionTitle}>Tradition Tools</ThemedText>
-          <ThemedText style={styles.sectionSubtitle}>Specialized tools for your practice</ThemedText>
+          <ThemedText type="title" style={styles.sectionTitle}>
+            Tradition Tools
+          </ThemedText>
+          <ThemedText style={styles.sectionSubtitle}>
+            Specialized tools for your practice
+          </ThemedText>
         </View>
 
         {/* Library List */}
         <View style={styles.libraryList}>
-          <LibraryItem 
-            title="Qibla Compass" 
-            description="Find the direction of Makkah from anywhere" 
-            icon="kaaba" 
+          <LibraryItem
+            title="Qibla Compass"
+            description="Find the direction of Makkah from anywhere"
+            icon="kaaba"
             onPress={() => router.push('/tradition/qibla')}
           />
-          <LibraryItem 
-            title="Buddhist Chants" 
-            description="Tibetan, Zen, and Theravada mantras" 
-            icon="flower.fill" 
+          <LibraryItem
+            title="Buddhist Chants"
+            description="Tibetan, Zen, and Theravada mantras"
+            icon="flower.fill"
             onPress={() => router.push('/tradition/buddhist')}
           />
-          <LibraryItem 
-            title="Quiet Reflection" 
-            description="Universal mindfulness and focus tools" 
-            icon="spa" 
+          <LibraryItem
+            title="Quiet Reflection"
+            description="Universal mindfulness and focus tools"
+            icon="spa"
             onPress={() => router.push('/tradition/general')}
           />
-          <LibraryItem 
-            title="Advent & Christmas" 
-            description="Preparing for the coming of Christ the King" 
-            icon="sparkles" 
+          <LibraryItem
+            title="Advent & Christmas"
+            description="Preparing for the coming of Christ the King"
+            icon="sparkles"
             active
             onPress={() => router.push('/tradition/christian')}
           />
@@ -110,7 +109,9 @@ export default function LibraryScreen() {
             <IconSymbol name="shield.person.fill" size={12} color={theme.muted} />
             <ThemedText style={styles.privacyText}>LOCAL DATA ONLY • PRIVACY FIRST</ThemedText>
           </View>
-          <ThemedText style={styles.footerSubtext}>Your spiritual journey stays on your device.</ThemedText>
+          <ThemedText style={styles.footerSubtext}>
+            Your spiritual journey stays on your device.
+          </ThemedText>
         </View>
 
         <View style={{ height: 40 }} />
@@ -124,16 +125,29 @@ function LibraryItem({ title, description, icon, active = false, onPress }: any)
   const theme = Colors[colorScheme];
 
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={[styles.libraryItem, { backgroundColor: theme.surface }]}
       onPress={onPress}
     >
-      <View style={[styles.itemIconContainer, { backgroundColor: active ? `${theme.primary}1A` : (colorScheme === 'light' ? '#f1f5f9' : '#1e293b') }]}>
+      <View
+        style={[
+          styles.itemIconContainer,
+          {
+            backgroundColor: active
+              ? `${theme.primary}1A`
+              : colorScheme === 'light'
+                ? '#f1f5f9'
+                : '#1e293b',
+          },
+        ]}
+      >
         <IconSymbol name={icon} size={24} color={active ? theme.primary : theme.text} />
       </View>
       <View style={styles.itemContent}>
         <ThemedText style={styles.itemTitle}>{title}</ThemedText>
-        <ThemedText style={styles.itemDescription} numberOfLines={2}>{description}</ThemedText>
+        <ThemedText style={styles.itemDescription} numberOfLines={2}>
+          {description}
+        </ThemedText>
       </View>
       <IconSymbol name="chevron.right" size={20} color={theme.muted} />
     </TouchableOpacity>

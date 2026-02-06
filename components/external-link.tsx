@@ -29,6 +29,3 @@ export function ExternalLink({ href, onPress, ...rest }: Props) {
     />
   );
 }
-    />
-  );
-}

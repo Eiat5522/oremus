@@ -1,14 +1,6 @@
-import React from 'react';
-import { 
-  StyleSheet, 
-  ScrollView, 
-  View, 
-  SafeAreaView, 
-  TouchableOpacity,
-  Dimensions
-} from 'react-native';
-import { Image } from 'expo-image';
 import { Stack, useRouter } from 'expo-router';
+import React from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -18,8 +10,6 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-const { width } = Dimensions.get('window');
-
 export default function HomeScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
@@ -27,7 +17,7 @@ export default function HomeScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <Stack.Screen 
+      <Stack.Screen
         options={{
           headerShown: true,
           headerTransparent: true,
@@ -43,13 +33,10 @@ export default function HomeScreen() {
               <IconSymbol name="settings" size={24} color={theme.text} />
             </TouchableOpacity>
           ),
-        }} 
+        }}
       />
-      
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Greeting & Hero */}
         <View style={styles.section}>
           <ThemedText style={styles.greetingText}>
@@ -61,9 +48,9 @@ export default function HomeScreen() {
 
         {/* Main Action: Start Prayer */}
         <View style={styles.section}>
-          <Button 
-            title="Start Session" 
-            size="lg" 
+          <Button
+            title="Start Session"
+            size="lg"
             icon={<IconSymbol name="play.fill" size={24} color="#fff" />}
             onPress={() => router.push('/active-session')}
           />
@@ -76,22 +63,27 @@ export default function HomeScreen() {
         {/* Habit Tracker */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>Your Journey</ThemedText>
+            <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
+              Your Journey
+            </ThemedText>
             <View style={[styles.streakBadge, { backgroundColor: theme.surface }]}>
               <IconSymbol name="flame.fill" size={14} color="#fb923c" />
               <ThemedText style={styles.streakText}>12 Day Streak</ThemedText>
             </View>
           </View>
-          
+
           <View style={styles.streakDotsContainer}>
             {[...Array(14)].map((_, i) => (
-              <View 
-                key={i} 
+              <View
+                key={i}
                 style={[
                   styles.streakDot,
-                  { backgroundColor: i < 11 ? `${theme.primary}4D` : i === 11 ? theme.primary : theme.muted + '4D' },
-                  i === 11 && { borderWidth: 2, borderColor: `${theme.primary}4D` }
-                ]} 
+                  {
+                    backgroundColor:
+                      i < 11 ? `${theme.primary}4D` : i === 11 ? theme.primary : theme.muted + '4D',
+                  },
+                  i === 11 && { borderWidth: 2, borderColor: `${theme.primary}4D` },
+                ]}
               />
             ))}
           </View>
@@ -103,16 +95,27 @@ export default function HomeScreen() {
 
         {/* Today's Prompt */}
         <View style={styles.section}>
-          <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>Today's Prompt</ThemedText>
+          <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
+            Today&apos;s Prompt
+          </ThemedText>
           <Card variant="accent" style={styles.promptCard}>
             <View style={styles.promptHeader}>
               <IconSymbol name="lightbulb.fill" size={20} color={theme.primary} />
               <ThemedText style={styles.promptLabel}>DAILY REFLECTION</ThemedText>
             </View>
             <ThemedText style={styles.promptText}>
-              "What burden can you lay down today to find more peace?"
+              &quot;What burden can you lay down today to find more peace?&quot;
             </ThemedText>
-            <TouchableOpacity style={[styles.journalButton, { backgroundColor: colorScheme === 'light' ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.1)' }]}>
+            <TouchableOpacity
+              style={[
+                styles.journalButton,
+                {
+                  backgroundColor:
+                    colorScheme === 'light' ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.1)',
+                },
+              ]}
+              onPress={() => {/* TODO: Navigate to journal or open journal modal */}}
+            >
               <ThemedText style={styles.journalButtonText}>Journal this</ThemedText>
             </TouchableOpacity>
           </Card>
@@ -121,34 +124,38 @@ export default function HomeScreen() {
         {/* Favorite Templates */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>Favorite Templates</ThemedText>
+            <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
+              Favorite Templates
+            </ThemedText>
             <TouchableOpacity>
-              <ThemedText style={{ color: theme.primary, fontSize: 12, fontWeight: '600' }}>View all</ThemedText>
+              <ThemedText style={{ color: theme.primary, fontSize: 12, fontWeight: '600' }}>
+                View all
+              </ThemedText>
             </TouchableOpacity>
           </View>
-          
-          <ScrollView 
-            horizontal 
+
+          <ScrollView
+            horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.templateScroll}
           >
-            <TemplateCard 
-              title="Morning Office" 
-              subtitle="15 min • Liturgy" 
-              icon="spa" 
-              color={theme.primary} 
+            <TemplateCard
+              title="Morning Office"
+              subtitle="15 min • Liturgy"
+              icon="spa"
+              color={theme.primary}
             />
-            <TemplateCard 
-              title="Examen" 
-              subtitle="10 min • Reflection" 
-              icon="brain.headset" 
-              color="#a855f7" 
+            <TemplateCard
+              title="Examen"
+              subtitle="10 min • Reflection"
+              icon="brain.headset"
+              color="#a855f7"
             />
-            <TemplateCard 
-              title="Silent Wait" 
-              subtitle="20 min • Meditation" 
-              icon="hourglass" 
-              color="#14b8a6" 
+            <TemplateCard
+              title="Silent Wait"
+              subtitle="20 min • Meditation"
+              icon="hourglass"
+              color="#14b8a6"
             />
           </ScrollView>
         </View>
@@ -159,7 +166,17 @@ export default function HomeScreen() {
   );
 }
 
-function TemplateCard({ title, subtitle, icon, color }: { title: string, subtitle: string, icon: any, color: string }) {
+function TemplateCard({
+  title,
+  subtitle,
+  icon,
+  color,
+}: {
+  title: string;
+  subtitle: string;
+  icon: any;
+  color: string;
+}) {
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
 

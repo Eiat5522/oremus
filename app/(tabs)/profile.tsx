@@ -1,12 +1,5 @@
 import React from 'react';
-import { 
-  StyleSheet, 
-  ScrollView, 
-  View, 
-  TouchableOpacity,
-  Dimensions,
-  Image
-} from 'react-native';
+import { StyleSheet, ScrollView, View, TouchableOpacity, Image } from 'react-native';
 import { Stack } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
@@ -17,15 +10,13 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-const { width } = Dimensions.get('window');
-
 export default function ProfileScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
 
   return (
     <ThemedView style={styles.container}>
-      <Stack.Screen 
+      <Stack.Screen
         options={{
           headerShown: true,
           headerTransparent: true,
@@ -43,30 +34,36 @@ export default function ProfileScreen() {
               <IconSymbol name="settings" size={24} color={theme.text} />
             </TouchableOpacity>
           ),
-        }} 
+        }}
       />
-      
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Profile Header */}
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
-            <Image 
-              source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDlRsitAUHhAJL2HPTIZDpJmf_oWjwXfZfh2vD0kAe0RxWS-ZV9wTm_yMifwO_Lv7NbiPi2kzLhLqZZkke7kJVBa24kqT6l_guj1nbe3K8Afqg3w2RgEhsv3tlQT_o2Y1GlxIzPMdvJOEBEC8AQcjzVDb-n1kFJZwrFxuxKqdPzem3h-AgK93WGSuWNahyeuRXkjOvOnXr7lyqOtKHVrP_ywczBWc2DmNa2NMWeG9jTyBtkdfjdvk-db3hpONSWlQf4AAxKT_L88zA' }} 
-              style={styles.avatar} 
+            <Image
+              source={{
+                uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDlRsitAUHhAJL2HPTIZDpJmf_oWjwXfZfh2vD0kAe0RxWS-ZV9wTm_yMifwO_Lv7NbiPi2kzLhLqZZkke7kJVBa24kqT6l_guj1nbe3K8Afqg3w2RgEhsv3tlQT_o2Y1GlxIzPMdvJOEBEC8AQcjzVDb-n1kFJZwrFxuxKqdPzem3h-AgK93WGSuWNahyeuRXkjOvOnXr7lyqOtKHVrP_ywczBWc2DmNa2NMWeG9jTyBtkdfjdvk-db3hpONSWlQf4AAxKT_L88zA',
+              }}
+              style={styles.avatar}
             />
-            <View style={[styles.editBadge, { backgroundColor: theme.primary, borderColor: theme.background }]}>
+            <View
+              style={[
+                styles.editBadge,
+                { backgroundColor: theme.primary, borderColor: theme.background },
+              ]}
+            >
               <IconSymbol name="pencil" size={12} color="#fff" />
             </View>
           </View>
-          
+
           <View style={styles.profileInfo}>
             <ThemedText style={styles.userName}>Gabriel Vance</ThemedText>
             <View style={[styles.traditionBadge, { backgroundColor: `${theme.primary}1A` }]}>
               <IconSymbol name="sparkles" size={14} color={theme.primary} />
-              <ThemedText style={[styles.traditionText, { color: theme.primary }]}>General Tradition</ThemedText>
+              <ThemedText style={[styles.traditionText, { color: theme.primary }]}>
+                General Tradition
+              </ThemedText>
             </View>
           </View>
         </View>
@@ -74,24 +71,24 @@ export default function ProfileScreen() {
         {/* Preferences Section */}
         <View style={styles.section}>
           <ThemedText style={styles.sectionLabel}>PREFERENCES</ThemedText>
-          <View style={[styles.settingsList, { backgroundColor: theme.surface, borderColor: colorScheme === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)' }]}>
-            <SettingItem 
-              icon="slider.horizontal.3" 
-              title="Edit Preferences" 
-              color={theme.primary} 
+          <View
+            style={[
+              styles.settingsList,
+              {
+                backgroundColor: theme.surface,
+                borderColor:
+                  colorScheme === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)',
+              },
+            ]}
+          >
+            <SettingItem
+              icon="slider.horizontal.3"
+              title="Edit Preferences"
+              color={theme.primary}
               isFirst
             />
-            <SettingItem 
-              icon="doc.text" 
-              title="Manage Templates" 
-              color="#10b981" 
-            />
-            <SettingItem 
-              icon="bell.fill" 
-              title="Notifications" 
-              color="#fbbf24" 
-              isLast
-            />
+            <SettingItem icon="doc.text" title="Manage Templates" color="#10b981" />
+            <SettingItem icon="bell.fill" title="Notifications" color="#fbbf24" isLast />
           </View>
         </View>
 
@@ -99,18 +96,25 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Card style={styles.privacyCard}>
             <View style={styles.privacyHeader}>
-              <View style={[styles.privacyIconContainer, { backgroundColor: `${theme.primary}1A` }]}>
+              <View
+                style={[styles.privacyIconContainer, { backgroundColor: `${theme.primary}1A` }]}
+              >
                 <IconSymbol name="shield.lock" size={20} color={theme.primary} />
               </View>
               <ThemedText style={styles.privacyTitle}>Data & Privacy</ThemedText>
             </View>
             <ThemedText style={styles.privacyDescription}>
-              Your data is private. Sessions, notes, and templates are stored on this device only and <ThemedText style={{ color: theme.primary, fontWeight: '600' }}>not synced to the cloud</ThemedText>.
+              Your data is private. Sessions, notes, and templates are stored on this device only
+              and{' '}
+              <ThemedText style={{ color: theme.primary, fontWeight: '600' }}>
+                not synced to the cloud
+              </ThemedText>
+              .
             </ThemedText>
-            
+
             <View style={styles.privacyActions}>
-              <Button 
-                title="Export Data (JSON)" 
+              <Button
+                title="Export Data (JSON)"
                 icon={<IconSymbol name="square.and.arrow.up.fill" size={18} color="#fff" />}
                 style={styles.exportBtn}
               />
@@ -141,11 +145,13 @@ function SettingItem({ icon, title, color, isFirst, isLast }: any) {
   const theme = Colors[colorScheme];
 
   return (
-    <TouchableOpacity style={[ 
-      styles.settingItem, 
-      !isLast && styles.borderBottom,
-      !isLast && { borderBottomColor: colorScheme === 'light' ? '#f1f5f9' : '#1e293b' }
-    ]}> 
+    <TouchableOpacity
+      style={[
+        styles.settingItem,
+        !isLast && styles.borderBottom,
+        !isLast && { borderBottomColor: colorScheme === 'light' ? '#f1f5f9' : '#1e293b' },
+      ]}
+    >
       <View style={[styles.settingIconContainer, { backgroundColor: `${color}1A` }]}>
         <IconSymbol name={icon} size={20} color={color} />
       </View>

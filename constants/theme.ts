@@ -49,7 +49,7 @@ export const Fonts = Platform.select({
   default: {
     sans: 'normal',
     serif: 'serif',
-    /** Falls back to normal on Android (no system rounded font) */    
+    /** Falls back to normal on Android (no system rounded font) */
     rounded: 'normal',
     mono: 'monospace',
   },

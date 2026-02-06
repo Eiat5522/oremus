@@ -9,13 +9,7 @@ export interface IconSymbolProps {
   weight?: SymbolWeight;
 }
 
-export function IconSymbol({
-  name,
-  size = 24,
-  color,
-  style,
-  weight = 'regular',
-}: IconSymbolProps) {
+export function IconSymbol({ name, size = 24, color, style, weight = 'regular' }: IconSymbolProps) {
   return (
     <SymbolView
       weight={weight}

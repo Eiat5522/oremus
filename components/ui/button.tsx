@@ -1,12 +1,12 @@
 import React from 'react';
-import { 
-  Pressable, 
-  Text, 
-  StyleSheet, 
-  ActivityIndicator, 
-  ViewStyle, 
+import {
+  Pressable,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  ViewStyle,
   TextStyle,
-  Platform
+  Platform,
 } from 'react-native';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -45,10 +45,18 @@ export function Button({
       case 'primary':
         return {
           backgroundColor: theme.primary,
-          shadowColor: theme.primary,
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.2,
-          shadowRadius: 8,
+          ...Platform.select({
+            ios: {
+              shadowColor: 'rgba(17, 82, 212, 1)',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.2,
+              shadowRadius: 8,
+            },
+            android: {},
+            web: {
+              boxShadow: '0px 4px 8px rgba(17, 82, 212, 0.2)',
+            },
+          }),
           elevation: 4,
         };
       case 'secondary':
@@ -113,9 +121,7 @@ export function Button({
       ) : (
         <>
           {icon}
-          <Text style={[styles.text, getTextStyle(), textStyle]}>
-            {title}
-          </Text>
+          <Text style={[styles.text, getTextStyle(), textStyle]}>{title}</Text>
         </>
       )}
     </Pressable>

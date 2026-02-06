@@ -1,20 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  TouchableOpacity, 
-  Animated,
-  Dimensions,
-  Easing
-} from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { StyleSheet, View, TouchableOpacity, Animated, Easing, Platform } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-
-const { width } = Dimensions.get('window');
 
 export default function QiblaScreen() {
   const router = useRouter();
@@ -30,21 +21,21 @@ export default function QiblaScreen() {
           toValue: 148,
           duration: 2000,
           easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
         Animated.timing(rotateAnim, {
           toValue: 142,
           duration: 2500,
           easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
-      ])
+      ]),
     ).start();
-  }, []);
+  }, [rotateAnim]);
 
   return (
     <ThemedView style={styles.container}>
-      <Stack.Screen 
+      <Stack.Screen
         options={{
           headerShown: true,
           headerTransparent: true,
@@ -59,13 +50,15 @@ export default function QiblaScreen() {
               <IconSymbol name="info.circle" size={24} color={theme.text} />
             </TouchableOpacity>
           ),
-        }} 
+        }}
       />
 
       <View style={styles.content}>
         {/* Calibration Status */}
         <View style={styles.statusContainer}>
-          <View style={[styles.statusBadge, { backgroundColor: '#0bda731A', borderColor: '#0bda7333' }]}>
+          <View
+            style={[styles.statusBadge, { backgroundColor: '#0bda731A', borderColor: '#0bda7333' }]}
+          >
             <View style={styles.pingContainer}>
               <View style={[styles.ping, { backgroundColor: '#0bda73' }]} />
               <View style={[styles.dot, { backgroundColor: '#0bda73' }]} />
@@ -82,29 +75,52 @@ export default function QiblaScreen() {
 
         {/* Digital Compass Visual */}
         <View style={styles.compassContainer}>
-          <View style={[styles.outerRing, { borderColor: colorScheme === 'light' ? '#0bda730D' : '#ffffff0D' }]}>
+          <View
+            style={[
+              styles.outerRing,
+              { borderColor: colorScheme === 'light' ? '#0bda730D' : '#ffffff0D' },
+            ]}
+          >
             <View style={[styles.tickRing, { borderColor: '#0bda7333' }]} />
-            
-            <Animated.View style={[
-              styles.needleContainer, 
-              { transform: [{ rotate: rotateAnim.interpolate({
-                inputRange: [0, 360],
-                outputRange: ['0deg', '360deg']
-              }) }] }
-            ]}>
+
+            <Animated.View
+              style={[
+                styles.needleContainer,
+                {
+                  transform: [
+                    {
+                      rotate: rotateAnim.interpolate({
+                        inputRange: [0, 360],
+                        outputRange: ['0deg', '360deg'],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
               <View style={styles.needle}>
                 <IconSymbol name="kaaba" size={48} color="#0bda73" style={styles.kaabaIcon} />
                 <View style={styles.needleStem} />
               </View>
             </Animated.View>
 
-            <View style={[styles.centerPoint, { backgroundColor: '#0bda73', borderColor: theme.background }]} />
+            <View
+              style={[
+                styles.centerPoint,
+                { backgroundColor: '#0bda73', borderColor: theme.background },
+              ]}
+            />
           </View>
         </View>
 
         {/* Distance & Info */}
         <View style={styles.statsSection}>
-          <View style={[styles.distanceCard, { backgroundColor: '#0bda730D', borderColor: '#0bda731A' }]}>
+          <View
+            style={[
+              styles.distanceCard,
+              { backgroundColor: '#0bda730D', borderColor: '#0bda731A' },
+            ]}
+          >
             <ThemedText style={styles.distanceLabel}>DISTANCE TO MAKKAH</ThemedText>
             <ThemedText style={styles.distanceValue}>4,785 km</ThemedText>
           </View>
@@ -139,8 +155,6 @@ export default function QiblaScreen() {
     </ThemedView>
   );
 }
-
-import { useRef } from 'react';
 
 const styles = StyleSheet.create({
   container: {
@@ -240,10 +254,20 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   kaabaIcon: {
-    shadowColor: '#0bda73',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: 'rgba(11, 218, 115, 1)',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.8,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 6,
+      },
+      web: {
+        boxShadow: '0px 0px 8px rgba(11, 218, 115, 0.8)',
+      },
+    }),
   },
   needleStem: {
     width: 6,
@@ -258,10 +282,7 @@ const styles = StyleSheet.create({
     height: 16,
     borderRadius: 8,
     borderWidth: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.3)',
     elevation: 4,
   },
   statsSection: {
@@ -338,10 +359,7 @@ const styles = StyleSheet.create({
     height: 56,
     paddingHorizontal: 32,
     borderRadius: 28,
-    shadowColor: '#0bda73',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    boxShadow: '0px 4px 8px rgba(11, 218, 115, 0.3)',
     elevation: 6,
   },
   floatingButtonText: {

@@ -1,11 +1,5 @@
 import React from 'react';
-import { 
-  StyleSheet, 
-  ScrollView, 
-  View, 
-  TouchableOpacity,
-  Dimensions
-} from 'react-native';
+import { StyleSheet, ScrollView, View, TouchableOpacity, Dimensions } from 'react-native';
 import { Stack } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
@@ -23,7 +17,7 @@ export default function JournalScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <Stack.Screen 
+      <Stack.Screen
         options={{
           headerShown: true,
           headerTransparent: true,
@@ -41,34 +35,27 @@ export default function JournalScreen() {
               <ThemedText style={{ color: theme.primary, fontWeight: '600' }}>Export</ThemedText>
             </TouchableOpacity>
           ),
-        }} 
+        }}
       />
-      
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Weekly Progress Title */}
         <View style={styles.sectionHeader}>
-          <ThemedText type="title" style={styles.sectionTitle}>Weekly Progress</ThemedText>
+          <ThemedText type="title" style={styles.sectionTitle}>
+            Weekly Progress
+          </ThemedText>
           <ThemedText style={styles.dateRangeText}>Oct 24 - Oct 30</ThemedText>
         </View>
 
         {/* Stats Grid */}
         <View style={styles.statsGrid}>
-          <StatCard 
-            title="Sessions" 
-            value="12" 
-            trend="+20%" 
-            icon="calendar" 
-            bgIcon="spa"
-          />
-          <StatCard 
-            title="Minutes" 
-            value="340" 
+          <StatCard title="Sessions" value="12" trend="+20%" icon="calendar" bgIcon="spa" />
+          <StatCard
+            title="Minutes"
+            value="340"
             unit="m"
-            trend="+15%" 
-            icon="timer" 
+            trend="+15%"
+            icon="timer"
             bgIcon="hourglass"
           />
           <Card style={styles.fullWidthStatCard}>
@@ -105,30 +92,32 @@ export default function JournalScreen() {
 
         {/* Recent Sessions */}
         <View style={styles.recentHeader}>
-          <ThemedText type="defaultSemiBold" style={styles.sectionTitleSmall}>Recent Sessions</ThemedText>
+          <ThemedText type="defaultSemiBold" style={styles.sectionTitleSmall}>
+            Recent Sessions
+          </ThemedText>
         </View>
 
         <View style={styles.sessionList}>
-          <SessionItem 
-            title="Today, 6:00 AM" 
-            type="Hesychasm" 
-            duration="20 min" 
+          <SessionItem
+            title="Today, 6:00 AM"
+            type="Hesychasm"
+            duration="20 min"
             icon="twilight"
             color={theme.primary}
             rating={5}
           />
-          <SessionItem 
-            title="Yesterday, 8:30 PM" 
-            type="Rosary" 
-            duration="15 min" 
+          <SessionItem
+            title="Yesterday, 8:30 PM"
+            type="Rosary"
+            duration="15 min"
             icon="moon.fill"
             color="#475569"
             rating={4}
           />
-          <SessionItem 
-            title="Mon, Oct 24" 
-            type="Centering Prayer" 
-            duration="10 min" 
+          <SessionItem
+            title="Mon, Oct 24"
+            type="Centering Prayer"
+            duration="10 min"
             icon="brain.headset"
             color="#6366f1"
             rating={3}
@@ -138,7 +127,9 @@ export default function JournalScreen() {
         {/* Privacy Footer */}
         <View style={styles.footer}>
           <IconSymbol name="shield.lock" size={14} color={theme.muted} />
-          <ThemedText style={styles.footerText}>Your data is stored securely on this device only.</ThemedText>
+          <ThemedText style={styles.footerText}>
+            Your data is stored securely on this device only.
+          </ThemedText>
         </View>
 
         <View style={{ height: 40 }} />
@@ -188,11 +179,11 @@ function SessionItem({ title, type, duration, icon, color, rating }: any) {
           <ThemedText style={styles.sessionTitle}>{title}</ThemedText>
           <View style={styles.starsRow}>
             {[...Array(5)].map((_, i) => (
-              <IconSymbol 
-                key={i} 
-                name="star.fill" 
-                size={12} 
-                color={i < rating ? "#fbbf24" : theme.muted + '4D'} 
+              <IconSymbol
+                key={i}
+                name="star.fill"
+                size={12}
+                color={i < rating ? '#fbbf24' : theme.muted + '4D'}
               />
             ))}
           </View>

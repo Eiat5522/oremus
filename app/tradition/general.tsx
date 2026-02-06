@@ -1,21 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  TouchableOpacity, 
-  Switch,
-  Dimensions,
-  ImageBackground
-} from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Switch, Dimensions } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 export default function GeneralScreen() {
   const [ambientSounds, setAmbientSounds] = useState(true);
@@ -25,12 +17,17 @@ export default function GeneralScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: '#101622' }]}>
-      <Stack.Screen 
+      <Stack.Screen
         options={{
           headerShown: true,
           headerTransparent: true,
           headerTitle: 'General Reflection',
-          headerTitleStyle: { color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: 'bold', letterSpacing: 1.5 },
+          headerTitleStyle: {
+            color: 'rgba(255,255,255,0.6)',
+            fontSize: 12,
+            fontWeight: 'bold',
+            letterSpacing: 1.5,
+          },
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()} style={styles.headerIcon}>
               <IconSymbol name="arrow.left" size={20} color="rgba(255,255,255,0.7)" />
@@ -41,7 +38,7 @@ export default function GeneralScreen() {
               <IconSymbol name="settings" size={20} color="rgba(255,255,255,0.7)" />
             </TouchableOpacity>
           ),
-        }} 
+        }}
       />
 
       <View style={styles.zenOverlay}>
@@ -53,13 +50,13 @@ export default function GeneralScreen() {
           <View style={styles.spaIconContainer}>
             <IconSymbol name="spa" size={48} color="rgba(255,255,255,0.4)" />
           </View>
-          
+
           <ThemedText style={styles.promptText}>
             What are you grateful for in this moment?
           </ThemedText>
 
-          <Button 
-            title="Start Quiet Reflection" 
+          <Button
+            title="Start Quiet Reflection"
             size="lg"
             onPress={() => router.push('/active-session')}
             style={styles.startButton}
@@ -90,7 +87,9 @@ export default function GeneralScreen() {
               <IconSymbol name="lock.fill" size={12} color="rgba(255,255,255,0.4)" />
               <ThemedText style={styles.privacyText}>LOCAL STORAGE ONLY</ThemedText>
             </View>
-            <ThemedText style={styles.footerSubtext}>Your reflections never leave this device</ThemedText>
+            <ThemedText style={styles.footerSubtext}>
+              Your reflections never leave this device
+            </ThemedText>
           </View>
         </View>
       </View>

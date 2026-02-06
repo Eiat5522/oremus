@@ -6,7 +6,7 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export const unstable_settings = {
-  initialRouteName: 'onboarding',
+  initialRouteName: 'onboarding/index',
 };
 
 export default function RootLayout() {
@@ -15,9 +15,9 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="onboarding" />
+        <Stack.Screen name="onboarding/index" />
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="active-session" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="active-session/index" options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen name="tradition/qibla" options={{ presentation: 'modal' }} />
         <Stack.Screen name="tradition/buddhist" options={{ presentation: 'modal' }} />
         <Stack.Screen name="tradition/christian" options={{ presentation: 'modal' }} />

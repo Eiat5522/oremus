@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import { 
-  StyleSheet, 
-  ScrollView, 
-  View, 
-  TouchableOpacity,
-  Dimensions,
-  Platform
-} from 'react-native';
+import { StyleSheet, ScrollView, View, TouchableOpacity } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
@@ -14,8 +7,6 @@ import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-
-const { width } = Dimensions.get('window');
 
 type BuddhistTradition = 'tibetan' | 'zen' | 'theravada' | 'pure-land';
 
@@ -34,7 +25,7 @@ export default function BuddhistScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <Stack.Screen 
+      <Stack.Screen
         options={{
           headerShown: true,
           headerTransparent: true,
@@ -55,29 +46,29 @@ export default function BuddhistScreen() {
               </TouchableOpacity>
             </View>
           ),
-        }} 
+        }}
       />
-      
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Tradition Tabs */}
         <View style={styles.tabsContainer}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsScroll}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.tabsScroll}
+          >
             {traditions.map((t) => (
-              <TouchableOpacity 
-                key={t.id} 
+              <TouchableOpacity
+                key={t.id}
                 onPress={() => setActiveTradition(t.id as BuddhistTradition)}
-                style={[
-                  styles.tab, 
-                  activeTradition === t.id && { borderBottomColor: '#f4a825' }
-                ]}
+                style={[styles.tab, activeTradition === t.id && { borderBottomColor: '#f4a825' }]}
               >
-                <ThemedText style={[
-                  styles.tabText, 
-                  { color: activeTradition === t.id ? '#f4a825' : '#8a7b60' }
-                ]}>
+                <ThemedText
+                  style={[
+                    styles.tabText,
+                    { color: activeTradition === t.id ? '#f4a825' : '#8a7b60' },
+                  ]}
+                >
                   {t.label}
                 </ThemedText>
               </TouchableOpacity>
@@ -88,19 +79,37 @@ export default function BuddhistScreen() {
         {/* Featured Mantra */}
         <View style={styles.section}>
           <ThemedText style={styles.sectionTitle}>Selected Tradition</ThemedText>
-          <View style={[styles.featuredCard, { backgroundColor: colorScheme === 'light' ? '#f5f3f0' : '#2d2417', borderLeftColor: '#f4a825' }]}>
+          <View
+            style={[
+              styles.featuredCard,
+              {
+                backgroundColor: colorScheme === 'light' ? '#f5f3f0' : '#2d2417',
+                borderLeftColor: '#f4a825',
+              },
+            ]}
+          >
             <View style={styles.featuredContent}>
               <View>
                 <View style={styles.traditionTag}>
                   <ThemedText style={styles.traditionTagText}>TIBETAN BUDDHISM</ThemedText>
                 </View>
                 <ThemedText style={styles.featuredTitle}>Om Mani Padme Hum</ThemedText>
-                <ThemedText style={styles.featuredSubtitle}>"The Jewel is in the Lotus"</ThemedText>
+                <ThemedText style={styles.featuredSubtitle}>
+                  &quot;The Jewel is in the Lotus&quot;
+                </ThemedText>
                 <ThemedText style={styles.featuredDescription}>
                   The most common mantra in Tibet, recited to invoke the embodiment of compassion.
                 </ThemedText>
               </View>
-              <View style={[styles.featuredIconContainer, { backgroundColor: colorScheme === 'light' ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.05)' }]}>
+              <View
+                style={[
+                  styles.featuredIconContainer,
+                  {
+                    backgroundColor:
+                      colorScheme === 'light' ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.05)',
+                  },
+                ]}
+              >
                 <IconSymbol name="flower.fill" size={40} color="#f4a825" />
               </View>
             </View>
@@ -113,29 +122,25 @@ export default function BuddhistScreen() {
             <ThemedText style={styles.sectionTitle}>Chants & Mantras</ThemedText>
             <ThemedText style={styles.countText}>4 Found</ThemedText>
           </View>
-          
+
           <View style={styles.list}>
-            <ChantItem 
-              title="Om Mani Padme Hum" 
-              subtitle="Mantra of Compassion" 
-              icon="sparkles" 
+            <ChantItem
+              title="Om Mani Padme Hum"
+              subtitle="Mantra of Compassion"
+              icon="sparkles"
               bpm="60 BPM"
               active
             />
-            <ChantItem 
-              title="Tayata Om Bekanze" 
-              subtitle="Medicine Buddha Healing" 
-              icon="heart.text.square.fill" 
+            <ChantItem
+              title="Tayata Om Bekanze"
+              subtitle="Medicine Buddha Healing"
+              icon="heart.text.square.fill"
             />
-            <ChantItem 
-              title="Om Tare Tuttare" 
-              subtitle="Green Tara for Protection" 
-              icon="eco" 
-            />
-            <ChantItem 
-              title="Vajrasattva Mantra" 
-              subtitle="100-Syllable Purification" 
-              icon="drop.fill" 
+            <ChantItem title="Om Tare Tuttare" subtitle="Green Tara for Protection" icon="eco" />
+            <ChantItem
+              title="Vajrasattva Mantra"
+              subtitle="100-Syllable Purification"
+              icon="drop.fill"
             />
           </View>
         </View>
@@ -143,14 +148,29 @@ export default function BuddhistScreen() {
         {/* Practice Settings */}
         <View style={styles.section}>
           <ThemedText style={styles.sectionTitle}>Practice Settings</ThemedText>
-          <View style={[styles.settingsCard, { backgroundColor: colorScheme === 'light' ? '#f5f3f0' : '#2d2417' }]}>
+          <View
+            style={[
+              styles.settingsCard,
+              { backgroundColor: colorScheme === 'light' ? '#f5f3f0' : '#2d2417' },
+            ]}
+          >
             <View style={styles.settingsHeader}>
               <ThemedText style={styles.settingsLabel}>Auto-scroll Pace</ThemedText>
               <ThemedText style={styles.settingsValue}>60 BPM</ThemedText>
             </View>
-            <View style={[styles.sliderTrack, { backgroundColor: colorScheme === 'light' ? '#e6e2db' : '#3d3221' }]}>
+            <View
+              style={[
+                styles.sliderTrack,
+                { backgroundColor: colorScheme === 'light' ? '#e6e2db' : '#3d3221' },
+              ]}
+            >
               <View style={[styles.sliderFill, { width: '40%', backgroundColor: '#f4a825' }]} />
-              <View style={[styles.sliderThumb, { left: '40%', borderColor: '#f4a825', backgroundColor: '#fff' }]} />
+              <View
+                style={[
+                  styles.sliderThumb,
+                  { left: '40%', borderColor: '#f4a825', backgroundColor: '#fff' },
+                ]}
+              />
             </View>
             <View style={styles.sliderLabels}>
               <ThemedText style={styles.sliderLabelText}>Meditative</ThemedText>
@@ -183,11 +203,20 @@ function ChantItem({ title, subtitle, icon, bpm, active = false }: any) {
   const theme = Colors[colorScheme];
 
   return (
-    <TouchableOpacity style={[
-      styles.chantItem,
-      active && { backgroundColor: '#f4a8251A', borderColor: '#f4a82533', borderWidth: 1 }
-    ]}>
-      <View style={[styles.chantIconContainer, { backgroundColor: active ? '#f4a82533' : (colorScheme === 'light' ? '#f5f3f0' : '#3d3221') }]}>
+    <TouchableOpacity
+      style={[
+        styles.chantItem,
+        active && { backgroundColor: '#f4a8251A', borderColor: '#f4a82533', borderWidth: 1 },
+      ]}
+    >
+      <View
+        style={[
+          styles.chantIconContainer,
+          {
+            backgroundColor: active ? '#f4a82533' : colorScheme === 'light' ? '#f5f3f0' : '#3d3221',
+          },
+        ]}
+      >
         <IconSymbol name={icon} size={24} color={active ? '#f4a825' : theme.text} />
       </View>
       <View style={styles.chantContent}>
@@ -196,10 +225,10 @@ function ChantItem({ title, subtitle, icon, bpm, active = false }: any) {
       </View>
       <View style={styles.chantAction}>
         {bpm && <ThemedText style={styles.bpmText}>{bpm}</ThemedText>}
-        <IconSymbol 
-          name={active ? "checkmark.circle.fill" : "play.circle.fill"} 
-          size={active ? 20 : 24} 
-          color={active ? "#f4a825" : "#8a7b6080"} 
+        <IconSymbol
+          name={active ? 'checkmark.circle.fill' : 'play.circle.fill'}
+          size={active ? 20 : 24}
+          color={active ? '#f4a825' : '#8a7b6080'}
         />
       </View>
     </TouchableOpacity>
@@ -273,10 +302,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 24,
     borderLeftWidth: 4,
-    shadowColor: '#f4a825',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
+    boxShadow: '0px 4px 10px rgba(244, 168, 37, 0.1)',
     elevation: 4,
   },
   featuredContent: {
@@ -396,10 +422,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 2,
     top: -6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    boxShadow: '0px 2px 2px rgba(0, 0, 0, 0.2)',
     elevation: 2,
   },
   sliderLabels: {
@@ -433,10 +456,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 64,
     borderRadius: 16,
-    shadowColor: '#f4a825',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    boxShadow: '0px 4px 8px rgba(244, 168, 37, 0.3)',
     elevation: 6,
     gap: 8,
   },

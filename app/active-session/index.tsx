@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  TouchableOpacity, 
-  TextInput, 
-  ScrollView, 
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
   Animated,
-  Dimensions,
-  Easing
+  Easing,
+  Platform,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
@@ -17,8 +17,6 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import Svg, { Circle } from 'react-native-svg';
-
-const { width, height } = Dimensions.get('window');
 
 type SessionStep = 'intention' | 'breathe' | 'active';
 
@@ -47,33 +45,23 @@ export default function ActiveSessionScreen() {
     switch (step) {
       case 'intention':
         return (
-          <IntentionStep 
-            intention={intention} 
-            setIntention={setIntention} 
-            onNext={() => setStep('breathe')} 
+          <IntentionStep
+            intention={intention}
+            setIntention={setIntention}
+            onNext={() => setStep('breathe')}
           />
         );
       case 'breathe':
-        return (
-          <BreatheStep 
-            onNext={() => setStep('active')} 
-            onSkip={() => setStep('active')}
-          />
-        );
+        return <BreatheStep onNext={() => setStep('active')} onSkip={() => setStep('active')} />;
       case 'active':
-        return (
-          <ActiveTimerStep 
-            intention={intention || 'Morning Silence'} 
-            onEnd={handleClose}
-          />
-        );
+        return <ActiveTimerStep intention={intention || 'Morning Silence'} onEnd={handleClose} />;
     }
   };
 
   return (
     <ThemedView style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
-      
+
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleClose} style={styles.iconButton}>
@@ -83,9 +71,7 @@ export default function ActiveSessionScreen() {
           <ThemedText style={styles.headerLabel}>
             {step === 'active' ? 'IN SESSION' : 'PREPARATION'}
           </ThemedText>
-          <ThemedText style={styles.headerStep}>
-            {getStepText(step)}
-          </ThemedText>
+          <ThemedText style={styles.headerStep}>{getStepText(step)}</ThemedText>
         </View>
         <View style={styles.iconButtonPlaceholder} />
       </View>
@@ -93,15 +79,20 @@ export default function ActiveSessionScreen() {
       {/* Progress Bar */}
       {step !== 'active' && (
         <View style={styles.progressContainer}>
-          <View style={[styles.progressBar, { backgroundColor: colorScheme === 'light' ? '#e2e8f0' : '#1e293b' }]}>
-            <View 
+          <View
+            style={[
+              styles.progressBar,
+              { backgroundColor: colorScheme === 'light' ? '#e2e8f0' : '#1e293b' },
+            ]}
+          >
+            <View
               style={[
-                styles.progressFill, 
-                { 
+                styles.progressFill,
+                {
                   backgroundColor: theme.primary,
-                  width: step === 'intention' ? '33.33%' : '66.66%'
-                }
-              ]} 
+                  width: step === 'intention' ? '33.33%' : '66.66%',
+                },
+              ]}
             />
           </View>
         </View>
@@ -141,12 +132,12 @@ function IntentionStep({ intention, setIntention, onNext }: IntentionStepProps) 
         <ThemedText style={styles.inputLabel}>Your Intention</ThemedText>
         <TextInput
           style={[
-            styles.textArea, 
-            { 
-              backgroundColor: theme.surface, 
+            styles.textArea,
+            {
+              backgroundColor: theme.surface,
               color: theme.text,
-              borderColor: colorScheme === 'light' ? '#e2e8f0' : '#1e293b'
-            }
+              borderColor: colorScheme === 'light' ? '#e2e8f0' : '#1e293b',
+            },
           ]}
           placeholder="Write your own intention..."
           placeholderTextColor="#64748b"
@@ -160,10 +151,16 @@ function IntentionStep({ intention, setIntention, onNext }: IntentionStepProps) 
         <ThemedText style={styles.inputLabel}>Suggestions</ThemedText>
         <View style={styles.presetsGrid}>
           {presets.map((p) => (
-            <TouchableOpacity 
+            <TouchableOpacity
               key={p.label}
               onPress={() => setIntention(p.label)}
-              style={[styles.presetChip, { backgroundColor: theme.surface, borderColor: colorScheme === 'light' ? '#e2e8f0' : '#1e293b' }]}
+              style={[
+                styles.presetChip,
+                {
+                  backgroundColor: theme.surface,
+                  borderColor: colorScheme === 'light' ? '#e2e8f0' : '#1e293b',
+                },
+              ]}
             >
               <IconSymbol name={p.icon as any} size={18} color={p.color} />
               <ThemedText style={styles.presetLabel}>{p.label}</ThemedText>
@@ -201,24 +198,24 @@ function BreatheStep({ onNext, onSkip }: BreatheStepProps) {
           toValue: 1,
           duration: 3000,
           easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
         Animated.timing(breathAnim, {
           toValue: 0,
           duration: 3000,
           easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
-      ])
+      ]),
     );
     animation.start();
-    
+
     const timer = setTimeout(onNext, 12000); // Auto-advance after 2 breath cycles
     return () => {
       animation.stop();
       clearTimeout(timer);
     };
-  }, []);
+  }, [breathAnim, onNext]);
 
   const scale = breathAnim.interpolate({
     inputRange: [0, 1],
@@ -234,12 +231,21 @@ function BreatheStep({ onNext, onSkip }: BreatheStepProps) {
     <View style={styles.stepContentCenter}>
       <View style={styles.headlineContainer}>
         <ThemedText style={styles.headline}>Take a moment to settle your mind.</ThemedText>
-        <ThemedText style={styles.subheadline}>Focus on the rhythm of your breath and find a quiet center.</ThemedText>
+        <ThemedText style={styles.subheadline}>
+          Focus on the rhythm of your breath and find a quiet center.
+        </ThemedText>
       </View>
 
       <View style={styles.orbContainer}>
-        <Animated.View style={[styles.orbGlow, { backgroundColor: theme.primary, opacity, transform: [{ scale: 1.5 }] }]} />
-        <Animated.View style={[styles.orb, { backgroundColor: theme.primary, transform: [{ scale }] }]}>
+        <Animated.View
+          style={[
+            styles.orbGlow,
+            { backgroundColor: theme.primary, opacity, transform: [{ scale: 1.5 }] },
+          ]}
+        />
+        <Animated.View
+          style={[styles.orb, { backgroundColor: theme.primary, transform: [{ scale }] }]}
+        >
           <View style={styles.orbInner}>
             <IconSymbol name="spa" size={48} color="#fff" style={{ opacity: 0.4 }} />
           </View>
@@ -249,10 +255,19 @@ function BreatheStep({ onNext, onSkip }: BreatheStepProps) {
 
       <View style={styles.breathInstruction}>
         <Animated.View style={{ opacity: breathAnim }}>
-          <ThemedText style={[styles.breathText, { color: theme.primary }]}>SLOWLY INHALE</ThemedText>
+          <ThemedText style={[styles.breathText, { color: theme.primary }]}>
+            SLOWLY INHALE
+          </ThemedText>
         </Animated.View>
-        <Animated.View style={{ position: 'absolute', opacity: breathAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }) }}>
-          <ThemedText style={[styles.breathText, { color: theme.primary }]}>GENTLY EXHALE</ThemedText>
+        <Animated.View
+          style={{
+            position: 'absolute',
+            opacity: breathAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }),
+          }}
+        >
+          <ThemedText style={[styles.breathText, { color: theme.primary }]}>
+            GENTLY EXHALE
+          </ThemedText>
         </Animated.View>
       </View>
 
@@ -331,21 +346,37 @@ function ActiveTimerStep({ intention, onEnd }: any) {
       </View>
 
       <View style={styles.timerControls}>
-        <TouchableOpacity style={[styles.distractedButton, { backgroundColor: theme.surface, borderColor: colorScheme === 'light' ? '#e2e8f0' : '#1e293b' }]}>
+        <TouchableOpacity
+          style={[
+            styles.distractedButton,
+            {
+              backgroundColor: theme.surface,
+              borderColor: colorScheme === 'light' ? '#e2e8f0' : '#1e293b',
+            },
+          ]}
+        >
           <IconSymbol name="waves" size={20} color="#94a3b8" />
-          <ThemedText style={styles.distractedText}>I'm distracted</ThemedText>
+          <ThemedText style={styles.distractedText}>I&apos;m distracted</ThemedText>
         </TouchableOpacity>
 
         <View style={styles.playbackRow}>
-          <TouchableOpacity onPress={onEnd} style={[styles.controlButtonSmall, { backgroundColor: `${theme.surface}80` }]}>
+          <TouchableOpacity
+            onPress={onEnd}
+            style={[styles.controlButtonSmall, { backgroundColor: `${theme.surface}80` }]}
+          >
             <IconSymbol name="close" size={24} color={theme.muted} />
           </TouchableOpacity>
-          
-          <TouchableOpacity onPress={() => setIsActive(!isActive)} style={[styles.controlButtonLarge, { backgroundColor: theme.primary }]}>
-            <IconSymbol name={isActive ? "pause.fill" : "play.fill"} size={32} color="#fff" />
+
+          <TouchableOpacity
+            onPress={() => setIsActive(!isActive)}
+            style={[styles.controlButtonLarge, { backgroundColor: theme.primary }]}
+          >
+            <IconSymbol name={isActive ? 'pause.fill' : 'play.fill'} size={32} color="#fff" />
           </TouchableOpacity>
-          
-          <TouchableOpacity style={[styles.controlButtonSmall, { backgroundColor: `${theme.surface}80` }]}>
+
+          <TouchableOpacity
+            style={[styles.controlButtonSmall, { backgroundColor: `${theme.surface}80` }]}
+          >
             <IconSymbol name="volume.up.fill" size={24} color={theme.muted} />
           </TouchableOpacity>
         </View>
@@ -505,10 +536,20 @@ const styles = StyleSheet.create({
     borderRadius: 96,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#1152d4',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
+    ...Platform.select({
+      ios: {
+        shadowColor: 'rgba(17, 82, 212, 1)',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.5,
+        shadowRadius: 20,
+      },
+      android: {
+        elevation: 10,
+      },
+      web: {
+        boxShadow: '0px 0px 20px rgba(17, 82, 212, 0.5)',
+      },
+    }),
   },
   orbInner: {
     width: 160,
@@ -625,10 +666,19 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#1152d4',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: 'rgba(17, 82, 212, 1)',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+      },
+      android: {
+        elevation: 8,
+      },
+      web: {
+        boxShadow: '0px 4px 10px rgba(17, 82, 212, 0.3)',
+      },
+    }),
   },
 });
