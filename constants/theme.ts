@@ -13,6 +13,8 @@ const abyssSurface = '#1A2230';
 export const Colors = {
   light: {
     text: '#0f172a', // Slate 900
+    textSecondary: '#64748b', // Slate 500
+    textTertiary: '#94a3b8', // Slate 400
     background: mistWhite,
     tint: spiritBlue,
     icon: '#64748b', // Slate 500
@@ -21,9 +23,13 @@ export const Colors = {
     surface: '#ffffff',
     primary: spiritBlue,
     muted: '#64748b',
+    borderLight: '#e2e8f0', // Slate 200
+    borderDark: '#cbd5e1', // Slate 300 (used for light-mode subtle controls)
   },
   dark: {
     text: '#ffffff',
+    textSecondary: '#94a3b8', // Slate 400
+    textTertiary: '#cbd5e1', // Slate 300
     background: deepSanctuary,
     tint: spiritBlue,
     icon: '#94a3b8',
@@ -32,6 +38,8 @@ export const Colors = {
     surface: abyssSurface,
     primary: spiritBlue,
     muted: '#94a3b8',
+    borderLight: '#1e293b', // Slate 800 (used for dark-mode subtle surfaces)
+    borderDark: '#334155', // Slate 700
   },
 };
 

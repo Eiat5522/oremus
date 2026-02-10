@@ -1,21 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  Animated,
-  Easing,
-  Platform,
-} from 'react-native';
-import { Stack, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Stack, useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  Easing,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 
 type SessionStep = 'intention' | 'breathe' | 'active';
@@ -36,6 +37,7 @@ export default function ActiveSessionScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
+  const insets = useSafeAreaInsets();
 
   const handleClose = () => {
     router.back();
@@ -63,7 +65,7 @@ export default function ActiveSessionScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
         <TouchableOpacity onPress={handleClose} style={styles.iconButton}>
           <IconSymbol name="close" size={24} color={theme.text} />
         </TouchableOpacity>
@@ -309,40 +311,43 @@ function ActiveTimerStep({ intention, onEnd }: any) {
 
   const progress = seconds / 900;
   const strokeDashoffset = 301.59 * progress;
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.timerStepContent}>
-      <View style={styles.timerHeader}>
-        <ThemedText style={styles.timerIntentionLabel}>{intention}</ThemedText>
-      </View>
-
-      <View style={styles.timerDisplayContainer}>
-        <View style={[styles.timerGlow, { backgroundColor: theme.primary }]} />
-        <View style={styles.timerRing}>
-          <Svg width="320" height="320" viewBox="0 0 100 100">
-            <Circle
-              cx="50"
-              cy="50"
-              r="48"
-              stroke={colorScheme === 'light' ? '#e2e8f0' : '#1e293b'}
-              strokeWidth="0.5"
-              fill="none"
-            />
-            <Circle
-              cx="50"
-              cy="50"
-              r="48"
-              stroke={theme.primary}
-              strokeWidth="0.5"
-              fill="none"
-              strokeDasharray="301.59"
-              strokeDashoffset={301.59 - strokeDashoffset}
-              strokeLinecap="round"
-              transform="rotate(-90 50 50)"
-            />
-          </Svg>
+    <View style={[styles.timerStepContent, { paddingBottom: insets.bottom + 20 }]}>
+      <View style={{ flex: 1, justifyContent: 'center', width: '100%', alignItems: 'center' }}>
+        <View style={styles.timerHeader}>
+          <ThemedText style={styles.timerIntentionLabel}>{intention}</ThemedText>
         </View>
-        <ThemedText style={styles.timerText}>{formatTime(seconds)}</ThemedText>
+
+        <View style={styles.timerDisplayContainer}>
+          <View style={[styles.timerGlow, { backgroundColor: theme.primary }]} />
+          <View style={styles.timerRing}>
+            <Svg width="320" height="320" viewBox="0 0 100 100">
+              <Circle
+                cx="50"
+                cy="50"
+                r="48"
+                stroke={colorScheme === 'light' ? '#e2e8f0' : '#1e293b'}
+                strokeWidth="0.5"
+                fill="none"
+              />
+              <Circle
+                cx="50"
+                cy="50"
+                r="48"
+                stroke={theme.primary}
+                strokeWidth="0.5"
+                fill="none"
+                strokeDasharray="301.59"
+                strokeDashoffset={301.59 - strokeDashoffset}
+                strokeLinecap="round"
+                transform="rotate(-90 50 50)"
+              />
+            </Svg>
+          </View>
+          <ThemedText style={styles.timerText}>{formatTime(seconds)}</ThemedText>
+        </View>
       </View>
 
       <View style={styles.timerControls}>
@@ -393,7 +398,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 60,
     paddingHorizontal: 16,
     paddingBottom: 12,
   },
@@ -628,8 +632,6 @@ const styles = StyleSheet.create({
     letterSpacing: -2,
   },
   timerControls: {
-    position: 'absolute',
-    bottom: 60,
     alignItems: 'center',
     gap: 40,
     width: '100%',

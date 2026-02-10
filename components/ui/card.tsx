@@ -18,7 +18,10 @@ export function Card({ children, style, variant = 'default' }: CardProps) {
       case 'elevated':
         return {
           backgroundColor: theme.surface,
-          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
           elevation: 3,
           borderWidth: Platform.OS === 'android' ? 0 : 1,
           borderColor: colorScheme === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)',

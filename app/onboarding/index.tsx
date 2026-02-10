@@ -1,68 +1,31 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
+import { Tradition, TRADITION_OPTIONS } from '@/constants/traditions';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-
-type Tradition = 'christianity' | 'islam' | 'buddhism' | 'general';
-
-interface TraditionOption {
-  id: Tradition;
-  title: string;
-  description: string;
-  icon: any;
-  color: string;
-  bgColor: { light: string; dark: string };
-}
+import { useTradition } from '@/hooks/use-tradition';
+import { Stack, useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function OnboardingScreen() {
   const [selectedTradition, setSelectedTradition] = useState<Tradition>('christianity');
+  const { setTradition } = useTradition();
   const router = useRouter();
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
 
-  const traditions: TraditionOption[] = [
-    {
-      id: 'christianity',
-      title: 'Christianity',
-      description: 'Biblical prayers and scripture focus',
-      icon: 'church',
-      color: '#3b82f6',
-      bgColor: { light: '#eff6ff', dark: 'rgba(30, 58, 138, 0.2)' },
-    },
-    {
-      id: 'islam',
-      title: 'Islam',
-      description: 'Prayer times, Qibla, and Quranic focus',
-      icon: 'mosque',
-      color: '#10b981',
-      bgColor: { light: '#ecfdf5', dark: 'rgba(6, 78, 59, 0.2)' },
-    },
-    {
-      id: 'buddhism',
-      title: 'Buddhism',
-      description: 'Meditation timers and sutra chants',
-      icon: 'temple.buddhist',
-      color: '#f59e0b',
-      bgColor: { light: '#fffbeb', dark: 'rgba(120, 53, 15, 0.2)' },
-    },
-    {
-      id: 'general',
-      title: 'General',
-      description: 'Universal mindfulness and focus tools',
-      icon: 'brain.headset',
-      color: '#a855f7',
-      bgColor: { light: '#faf5ff', dark: 'rgba(88, 28, 135, 0.2)' },
-    },
-  ];
-
-  const handleContinue = () => {
-    // In a real app, we'd save this to storage/state
-    router.replace('/(tabs)');
+  const handleContinue = async () => {
+    try {
+      await setTradition(selectedTradition);
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error('Failed to save tradition preference:', error);
+      // Optionally show a toast/alert to the user
+      router.replace('/(tabs)'); // Navigate anyway or handle differently
+    }
   };
 
   return (
@@ -70,7 +33,7 @@ export default function OnboardingScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.backButton, { backgroundColor: theme.surface }]}
           onPress={() => router.back()}
         >
@@ -89,7 +52,7 @@ export default function OnboardingScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.traditionList}>
-          {traditions.map((tradition) => (
+          {TRADITION_OPTIONS.map((tradition) => (
             <TouchableOpacity
               key={tradition.id}
               onPress={() => setSelectedTradition(tradition.id)}
@@ -140,7 +103,7 @@ export default function OnboardingScreen() {
                 ]}
               >
                 {selectedTradition === tradition.id && (
-                  <IconSymbol name="checkmark" size={14} color="#fff" />
+                  <IconSymbol name="checkmark" size={14} color={theme.surface} />
                 )}
               </View>
             </TouchableOpacity>

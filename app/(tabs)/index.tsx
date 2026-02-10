@@ -4,16 +4,20 @@ import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import type { IconSymbolName } from '@/components/ui/icon-symbol';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTradition } from '@/hooks/use-tradition';
+import { useUser } from '@/hooks/use-user';
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
   const router = useRouter();
+  const { tradition } = useTradition();
+  const { userName } = useUser();
 
   return (
     <ThemedView style={styles.container}>
@@ -30,7 +34,7 @@ export default function HomeScreen() {
           ),
           headerRight: () => (
             <TouchableOpacity style={styles.iconButton} onPress={() => router.push('/profile')}>
-              <IconSymbol name="settings" size={24} color={theme.text} />
+              <IconSymbol name="person" size={24} color={theme.text} />
             </TouchableOpacity>
           ),
         }}
@@ -41,19 +45,49 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <ThemedText style={styles.greetingText}>
             Peace be with you, {'\n'}
-            <ThemedText style={{ color: theme.primary, fontWeight: 'bold' }}>Thomas</ThemedText>
+            <ThemedText style={{ color: theme.primary, fontWeight: 'bold' }}>{userName}</ThemedText>
           </ThemedText>
           <ThemedText style={styles.subGreetingText}>Ready to find your center today?</ThemedText>
         </View>
 
-        {/* Main Action: Start Prayer */}
+        {/* Main Actions */}
         <View style={styles.section}>
-          <Button
-            title="Start Session"
-            size="lg"
-            icon={<IconSymbol name="play.fill" size={24} color="#fff" />}
-            onPress={() => router.push('/active-session')}
+          {tradition === 'christianity' && (
+            <TraditionActionCard
+              title="Daily Scripture"
+              subtitle="Verse of the day"
+              icon="book.fill"
+              color="#3b82f6"
+              onPress={() => router.push('/tradition/christian')}
+            />
+          )}
+          {tradition === 'islam' && (
+            <TraditionActionCard
+              title="Qibla Compass"
+              subtitle="Find Mecca & Prayer Times"
+              icon="location.fill"
+              color="#10b981"
+              onPress={() => router.push('/tradition/qibla')}
+            />
+          )}
+          {tradition === 'buddhism' && (
+            <TraditionActionCard
+              title="Chants & Mantras"
+              subtitle="Meditation & Sutras"
+              icon="spa"
+              color="#f59e0b"
+              onPress={() => router.push('/tradition/buddhist')}
+            />
+          )}
+
+          <TraditionActionCard
+            title="Quiet Reflection"
+            subtitle="Universal mindfulness"
+            icon="brain.headset"
+            color="#a855f7"
+            onPress={() => router.push('/tradition/general')}
           />
+
           <View style={styles.lastSessionContainer}>
             <IconSymbol name="hourglass" size={14} color={theme.muted} />
             <ThemedText style={styles.lastSessionText}>Last session: 12h ago</ThemedText>
@@ -101,7 +135,9 @@ export default function HomeScreen() {
           <Card variant="accent" style={styles.promptCard}>
             <View style={styles.promptHeader}>
               <IconSymbol name="lightbulb.fill" size={20} color={theme.primary} />
-              <ThemedText style={styles.promptLabel}>DAILY REFLECTION</ThemedText>
+              <ThemedText style={[styles.promptLabel, { color: theme.primary }]}>
+                DAILY REFLECTION
+              </ThemedText>
             </View>
             <ThemedText style={styles.promptText}>
               &quot;What burden can you lay down today to find more peace?&quot;
@@ -114,7 +150,9 @@ export default function HomeScreen() {
                     colorScheme === 'light' ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.1)',
                 },
               ]}
-              onPress={() => {/* TODO: Navigate to journal or open journal modal */}}
+              onPress={() => {
+                /* TODO: Navigate to journal or open journal modal */
+              }}
             >
               <ThemedText style={styles.journalButtonText}>Journal this</ThemedText>
             </TouchableOpacity>
@@ -127,7 +165,7 @@ export default function HomeScreen() {
             <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
               Favorite Templates
             </ThemedText>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/templates')}>
               <ThemedText style={{ color: theme.primary, fontSize: 12, fontWeight: '600' }}>
                 View all
               </ThemedText>
@@ -163,6 +201,59 @@ export default function HomeScreen() {
         <View style={{ height: 100 }} />
       </ScrollView>
     </ThemedView>
+  );
+}
+
+function TraditionActionCard({
+  title,
+  subtitle,
+  icon,
+  color,
+  onPress,
+}: {
+  title: string;
+  subtitle: string;
+  icon: IconSymbolName;
+  color: string;
+  onPress: () => void;
+}) {
+  const colorScheme = useColorScheme() ?? 'light';
+  const theme = Colors[colorScheme];
+
+  return (
+    <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={{ marginBottom: 12 }}>
+      <Card
+        variant="default"
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          padding: 16,
+          gap: 16,
+          borderWidth: 1,
+          borderColor: colorScheme === 'dark' ? '#333' : '#e2e8f0',
+        }}
+      >
+        <View
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            backgroundColor: `${color}1A`,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <IconSymbol name={icon} size={24} color={color} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <ThemedText type="defaultSemiBold" style={{ fontSize: 18 }}>
+            {title}
+          </ThemedText>
+          <ThemedText style={{ color: theme.muted, fontSize: 14 }}>{subtitle}</ThemedText>
+        </View>
+        <IconSymbol name="chevron.right" size={20} color={theme.muted} />
+      </Card>
+    </TouchableOpacity>
   );
 }
 
@@ -303,7 +394,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
     letterSpacing: 1,
-    color: '#1152d4',
   },
   promptText: {
     fontSize: 20,

@@ -1,18 +1,21 @@
+import { Stack, useRouter } from 'expo-router';
 import React from 'react';
-import { StyleSheet, ScrollView, View, TouchableOpacity, Image } from 'react-native';
-import { Stack } from 'expo-router';
+import { Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTradition } from '@/hooks/use-tradition';
 
 export default function ProfileScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
+  const { traditionDetails } = useTradition();
+  const router = useRouter();
 
   return (
     <ThemedView style={styles.container}>
@@ -59,12 +62,14 @@ export default function ProfileScreen() {
 
           <View style={styles.profileInfo}>
             <ThemedText style={styles.userName}>Gabriel Vance</ThemedText>
-            <View style={[styles.traditionBadge, { backgroundColor: `${theme.primary}1A` }]}>
-              <IconSymbol name="sparkles" size={14} color={theme.primary} />
-              <ThemedText style={[styles.traditionText, { color: theme.primary }]}>
-                General Tradition
-              </ThemedText>
-            </View>
+            {traditionDetails && (
+              <View style={[styles.traditionBadge, { backgroundColor: `${traditionDetails.color}1A` }]}>
+                <IconSymbol name={traditionDetails.icon} size={14} color={traditionDetails.color} />
+                <ThemedText style={[styles.traditionText, { color: traditionDetails.color }]}>
+                  {traditionDetails.title}
+                </ThemedText>
+              </View>
+            )}
           </View>
         </View>
 
@@ -83,9 +88,10 @@ export default function ProfileScreen() {
           >
             <SettingItem
               icon="slider.horizontal.3"
-              title="Edit Preferences"
+              title="Change Tradition"
               color={theme.primary}
               isFirst
+              onPress={() => router.push('/onboarding')}
             />
             <SettingItem icon="doc.text" title="Manage Templates" color="#10b981" />
             <SettingItem icon="bell.fill" title="Notifications" color="#fbbf24" isLast />
@@ -140,12 +146,13 @@ export default function ProfileScreen() {
   );
 }
 
-function SettingItem({ icon, title, color, isFirst, isLast }: any) {
+function SettingItem({ icon, title, color, isFirst, isLast, onPress }: any) {
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
 
   return (
     <TouchableOpacity
+      onPress={onPress}
       style={[
         styles.settingItem,
         !isLast && styles.borderBottom,
