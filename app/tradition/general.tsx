@@ -21,6 +21,7 @@ export default function GeneralScreen() {
         options={{
           headerShown: true,
           headerTransparent: true,
+          gestureEnabled: false,
           headerTitle: 'General Reflection',
           headerTitleStyle: {
             color: 'rgba(255,255,255,0.6)',

@@ -1,11 +1,12 @@
-import React from 'react';
-import { StyleSheet, ScrollView, View, TouchableOpacity } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
+import React, { useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { christianVerses, type ChristianVerse } from '@/constants/religious-content';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -13,132 +14,125 @@ export default function ChristianScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
+  const [selectedVerseId, setSelectedVerseId] = useState<string | null>(
+    christianVerses[0]?.id ?? null,
+  );
+
+  const selectedVerse = useMemo(
+    () => christianVerses.find((verse) => verse.id === selectedVerseId) ?? null,
+    [selectedVerseId],
+  );
+
+  const randomizeVerse = () => {
+    if (christianVerses.length === 0) {
+      return;
+    }
+    if (christianVerses.length <= 1) {
+      setSelectedVerseId(christianVerses[0]?.id ?? null);
+      return;
+    }
+    let nextVerse = selectedVerse ?? christianVerses[0];
+    while (nextVerse.id === selectedVerse?.id) {
+      const idx = Math.floor(Math.random() * christianVerses.length);
+      nextVerse = christianVerses[idx];
+    }
+    setSelectedVerseId(nextVerse.id);
+  };
 
   return (
     <ThemedView style={styles.container}>
       <Stack.Screen
         options={{
+          title: 'Religious Verses',
           headerShown: true,
           headerTransparent: true,
-          headerTitle: 'Daily Scripture',
+          gestureEnabled: false,
           headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()} style={styles.headerIcon}>
-              <IconSymbol name="book.fill" size={24} color={theme.text} />
-            </TouchableOpacity>
-          ),
-          headerRight: () => (
-            <TouchableOpacity style={styles.headerIcon}>
-              <IconSymbol name="search" size={24} color={theme.text} />
-            </TouchableOpacity>
+            <Pressable onPress={() => router.back()} style={styles.headerIcon}>
+              <IconSymbol name="arrow.left" size={20} color={theme.text} />
+            </Pressable>
           ),
         }}
       />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Hero Verse Card */}
-        <View style={styles.heroSection}>
-          <Card variant="default" style={styles.verseCard}>
-            <View style={styles.verseDecoration}>
-              <IconSymbol
-                name="auto.stories"
-                size={160}
-                color={theme.primary}
-                style={{ opacity: 0.05 }}
-              />
-            </View>
-            <View style={styles.verseContent}>
-              <ThemedText style={styles.verseLabel}>VERSE OF THE DAY</ThemedText>
-              <ThemedText style={styles.verseText}>
-                &quot;For unto us a child is born, unto us a son is given: and the government shall
-                be upon his shoulder: and his name shall be called Wonderful, Counsellor, The mighty
-                God, The everlasting Father, The Prince of Peace.&quot;
-              </ThemedText>
-              <View style={styles.verseFooter}>
-                <IconSymbol name="bookmark.fill" size={14} color={theme.muted} />
-                <ThemedText style={styles.verseReference}>Isaiah 9:6</ThemedText>
-              </View>
-            </View>
-          </Card>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.heroCard}>
+          <ThemedText style={styles.sectionLabel}>Selected verse</ThemedText>
+          {selectedVerse ? (
+            <>
+              <ThemedText style={styles.verseText}>&quot;{selectedVerse.text}&quot;</ThemedText>
+              <ThemedText style={styles.reference}>{selectedVerse.reference}</ThemedText>
+            </>
+          ) : (
+            <ThemedText style={styles.verseText}>No verses available.</ThemedText>
+          )}
         </View>
 
-        {/* Section Header */}
-        <View style={styles.sectionHeader}>
-          <ThemedText style={styles.sectionTitle}>Scripture Library</ThemedText>
-          <ThemedText style={styles.sectionSubtitle}>
-            Guided readings for your daily walk
-          </ThemedText>
-        </View>
-
-        {/* Library List */}
-        <View style={styles.libraryList}>
-          <LibraryItem
-            title="Advent & Christmas"
-            description="Preparing for the coming of Christ the King"
-            icon="sparkles"
-            active
-          />
-          <LibraryItem
-            title="Table Blessings"
-            description="Prayers and gratitude for the nourishment of body and soul"
-            icon="fork.knife"
-          />
-          <LibraryItem
-            title="Strength & Courage"
-            description="Fortifying the spirit through trials and uncertainty"
-            icon="fort.fill"
-          />
-          <LibraryItem
-            title="Inner Peace"
-            description="Finding rest for your soul in the presence of God"
-            icon="leaf.fill"
+        <View style={styles.actionRow}>
+          <Pressable onPress={randomizeVerse} style={styles.randomButton}>
+            <IconSymbol name="sparkles" size={16} color="#1d4ed8" />
+            <ThemedText style={styles.randomButtonText}>Pick random verse</ThemedText>
+          </Pressable>
+          <Button
+            title="Start Session"
+            onPress={() => {
+              if (!selectedVerse) {
+                return;
+              }
+              router.push({
+                pathname: '/tradition/christian-session' as never,
+                params: { verseId: selectedVerse.id },
+              });
+            }}
+            disabled={!selectedVerse}
+            style={styles.startButton}
           />
         </View>
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <View style={styles.privacyRow}>
-            <IconSymbol name="shield.person.fill" size={12} color={theme.muted} />
-            <ThemedText style={styles.privacyText}>LOCAL DATA ONLY • PRIVACY FIRST</ThemedText>
-          </View>
-          <ThemedText style={styles.footerSubtext}>
-            Your spiritual journey stays on your device.
-          </ThemedText>
+        <View style={styles.list}>
+          {christianVerses.map((verse) => (
+            <VerseItem
+              key={verse.id}
+              verse={verse}
+              active={verse.id === selectedVerseId}
+              onPress={() => setSelectedVerseId(verse.id)}
+            />
+          ))}
         </View>
-
-        <View style={{ height: 40 }} />
       </ScrollView>
     </ThemedView>
   );
 }
 
-function LibraryItem({ title, description, icon, active = false }: any) {
-  const colorScheme = useColorScheme() ?? 'light';
-  const theme = Colors[colorScheme];
-
+function VerseItem({
+  verse,
+  active,
+  onPress,
+}: {
+  verse: ChristianVerse;
+  active: boolean;
+  onPress: () => void;
+}) {
   return (
-    <TouchableOpacity style={[styles.libraryItem, { backgroundColor: theme.surface }]}>
-      <View
-        style={[
-          styles.itemIconContainer,
-          {
-            backgroundColor: active
-              ? `${theme.primary}1A`
-              : colorScheme === 'light'
-                ? '#f1f5f9'
-                : '#1e293b',
-          },
-        ]}
-      >
-        <IconSymbol name={icon} size={24} color={active ? theme.primary : theme.text} />
-      </View>
-      <View style={styles.itemContent}>
-        <ThemedText style={styles.itemTitle}>{title}</ThemedText>
-        <ThemedText style={styles.itemDescription} numberOfLines={2}>
-          {description}
+    <Pressable
+      onPress={onPress}
+      style={[
+        styles.verseItem,
+        active && { borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.08)' },
+      ]}
+    >
+      <View style={styles.verseItemText}>
+        <ThemedText style={styles.verseItemTitle}>{verse.title}</ThemedText>
+        <ThemedText style={styles.verseItemMeta}>
+          {verse.reference} • {verse.category}
         </ThemedText>
       </View>
-      <IconSymbol name="chevron.right" size={20} color={theme.muted} />
-    </TouchableOpacity>
+      <IconSymbol
+        name={active ? 'checkmark.circle.fill' : 'chevron.right'}
+        size={20}
+        color="#3b82f6"
+      />
+    </Pressable>
   );
 }
 
@@ -146,125 +140,85 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContent: {
-    paddingTop: 100,
-  },
   headerIcon: {
     padding: 8,
-    marginHorizontal: 8,
+    marginLeft: 8,
   },
-  heroSection: {
-    paddingHorizontal: 20,
-    marginBottom: 24,
-  },
-  verseCard: {
-    minHeight: 300,
-    justifyContent: 'flex-end',
-    padding: 32,
-    backgroundColor: '#fdfbf7',
-  },
-  verseDecoration: {
-    position: 'absolute',
-    top: -20,
-    right: -20,
-  },
-  verseContent: {
+  content: {
+    paddingTop: 100,
+    paddingHorizontal: 16,
+    paddingBottom: 32,
     gap: 16,
   },
-  verseLabel: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    letterSpacing: 2,
-    color: '#1152d4',
+  heroCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.24)',
+    backgroundColor: 'rgba(59, 130, 246, 0.08)',
+    padding: 16,
+    gap: 8,
+  },
+  sectionLabel: {
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    color: '#1d4ed8',
+    fontWeight: '700',
   },
   verseText: {
-    fontSize: 24,
+    fontSize: 20,
+    lineHeight: 30,
     fontStyle: 'italic',
-    lineHeight: 36,
-    color: '#111318',
   },
-  verseFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.05)',
-    paddingTop: 16,
+  reference: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1d4ed8',
   },
-  verseReference: {
-    fontSize: 16,
-    fontStyle: 'italic',
-    color: '#64748b',
-    fontWeight: '500',
+  actionRow: {
+    gap: 10,
   },
-  sectionHeader: {
-    paddingHorizontal: 20,
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-  sectionSubtitle: {
-    fontSize: 14,
-    color: '#64748b',
-    marginTop: 4,
-  },
-  libraryList: {
-    paddingHorizontal: 12,
-    gap: 4,
-  },
-  libraryItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 16,
-    minHeight: 80,
-  },
-  itemIconContainer: {
-    width: 48,
-    height: 48,
+  randomButton: {
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.4)',
+    backgroundColor: 'rgba(59, 130, 246, 0.08)',
     borderRadius: 12,
+    minHeight: 48,
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
   },
-  itemContent: {
-    flex: 1,
-    marginLeft: 16,
-    marginRight: 8,
+  randomButtonText: {
+    color: '#1d4ed8',
+    fontWeight: '700',
   },
-  itemTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
+  startButton: {
+    borderRadius: 12,
   },
-  itemDescription: {
-    fontSize: 14,
-    color: '#64748b',
-    marginTop: 2,
+  list: {
+    gap: 8,
   },
-  footer: {
-    marginTop: 32,
-    padding: 32,
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.05)',
-  },
-  privacyRow: {
+  verseItem: {
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 12,
+    padding: 14,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    opacity: 0.5,
+    justifyContent: 'space-between',
+    gap: 10,
   },
-  privacyText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    letterSpacing: 1.5,
-    color: '#64748b',
+  verseItemText: {
+    flex: 1,
+    gap: 2,
   },
-  footerSubtext: {
-    fontSize: 10,
-    fontStyle: 'italic',
-    color: '#94a3b8',
-    marginTop: 8,
+  verseItemTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  verseItemMeta: {
+    fontSize: 13,
+    opacity: 0.7,
   },
 });

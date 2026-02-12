@@ -1,237 +1,164 @@
-import React, { useState } from 'react';
-import { StyleSheet, ScrollView, View, TouchableOpacity } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
+import React, { useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import {
+  buddhistPrayers,
+  type BuddhistPrayer,
+  type BuddhistTradition,
+} from '@/constants/religious-content';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-type BuddhistTradition = 'tibetan' | 'zen' | 'theravada' | 'pure-land';
+const TRADITIONS: { id: BuddhistTradition; label: string }[] = [
+  { id: 'tibetan', label: 'Tibetan' },
+  { id: 'zen', label: 'Zen' },
+  { id: 'theravada', label: 'Theravada' },
+  { id: 'pure-land', label: 'Pure Land' },
+];
 
 export default function BuddhistScreen() {
-  const [activeTradition, setActiveTradition] = useState<BuddhistTradition>('tibetan');
   const router = useRouter();
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
+  const [activeTradition, setActiveTradition] = useState<BuddhistTradition>('tibetan');
+  const [selectedPrayerId, setSelectedPrayerId] = useState<string>(
+    buddhistPrayers.find((prayer) => prayer.tradition === 'tibetan')?.id ??
+      buddhistPrayers[0]?.id ??
+      '',
+  );
 
-  const traditions = [
-    { id: 'tibetan', label: 'Tibetan' },
-    { id: 'zen', label: 'Zen' },
-    { id: 'theravada', label: 'Theravada' },
-    { id: 'pure-land', label: 'Pure Land' },
-  ];
+  const filteredPrayers = useMemo(
+    () => buddhistPrayers.filter((prayer) => prayer.tradition === activeTradition),
+    [activeTradition],
+  );
+
+  const selectedPrayer = useMemo(() => {
+    const prayer =
+      filteredPrayers.find((prayer) => prayer.id === selectedPrayerId) ??
+      filteredPrayers[0] ??
+      buddhistPrayers[0];
+    return prayer;
+  }, [filteredPrayers, selectedPrayerId]);
+
+  if (!selectedPrayer) {
+    return (
+      <ThemedView style={styles.container}>
+        <ThemedText>No prayers available</ThemedText>
+      </ThemedView>
+    );
+  }
 
   return (
     <ThemedView style={styles.container}>
       <Stack.Screen
         options={{
+          title: 'Buddhist Prayer',
           headerShown: true,
           headerTransparent: true,
-          headerTitle: 'Buddhist Traditions',
+          gestureEnabled: false,
           headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()} style={styles.headerIcon}>
-              <IconSymbol name="spa" size={24} color="#f4a825" />
-            </TouchableOpacity>
-          ),
-          headerRight: () => (
-            <View style={styles.headerRight}>
-              <View style={[styles.localBadge, { backgroundColor: '#dcfce7' }]}>
-                <IconSymbol name="shield.lock" size={14} color="#166534" />
-                <ThemedText style={styles.localText}>LOCAL</ThemedText>
-              </View>
-              <TouchableOpacity style={styles.headerIcon}>
-                <IconSymbol name="settings" size={24} color={theme.text} />
-              </TouchableOpacity>
-            </View>
+            <Pressable onPress={() => router.back()} style={styles.headerIcon}>
+              <IconSymbol name="arrow.left" size={20} color={theme.text} />
+            </Pressable>
           ),
         }}
       />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Tradition Tabs */}
-        <View style={styles.tabsContainer}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.tabsScroll}
-          >
-            {traditions.map((t) => (
-              <TouchableOpacity
-                key={t.id}
-                onPress={() => setActiveTradition(t.id as BuddhistTradition)}
-                style={[styles.tab, activeTradition === t.id && { borderBottomColor: '#f4a825' }]}
-              >
-                <ThemedText
-                  style={[
-                    styles.tabText,
-                    { color: activeTradition === t.id ? '#f4a825' : '#8a7b60' },
-                  ]}
-                >
-                  {t.label}
-                </ThemedText>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Featured Mantra */}
-        <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Selected Tradition</ThemedText>
-          <View
-            style={[
-              styles.featuredCard,
-              {
-                backgroundColor: colorScheme === 'light' ? '#f5f3f0' : '#2d2417',
-                borderLeftColor: '#f4a825',
-              },
-            ]}
-          >
-            <View style={styles.featuredContent}>
-              <View>
-                <View style={styles.traditionTag}>
-                  <ThemedText style={styles.traditionTagText}>TIBETAN BUDDHISM</ThemedText>
-                </View>
-                <ThemedText style={styles.featuredTitle}>Om Mani Padme Hum</ThemedText>
-                <ThemedText style={styles.featuredSubtitle}>
-                  &quot;The Jewel is in the Lotus&quot;
-                </ThemedText>
-                <ThemedText style={styles.featuredDescription}>
-                  The most common mantra in Tibet, recited to invoke the embodiment of compassion.
-                </ThemedText>
-              </View>
-              <View
-                style={[
-                  styles.featuredIconContainer,
-                  {
-                    backgroundColor:
-                      colorScheme === 'light' ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.05)',
-                  },
-                ]}
-              >
-                <IconSymbol name="flower.fill" size={40} color="#f4a825" />
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* Chants List */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <ThemedText style={styles.sectionTitle}>Chants & Mantras</ThemedText>
-            <ThemedText style={styles.countText}>4 Found</ThemedText>
-          </View>
-
-          <View style={styles.list}>
-            <ChantItem
-              title="Om Mani Padme Hum"
-              subtitle="Mantra of Compassion"
-              icon="sparkles"
-              bpm="60 BPM"
-              active
-            />
-            <ChantItem
-              title="Tayata Om Bekanze"
-              subtitle="Medicine Buddha Healing"
-              icon="heart.text.square.fill"
-            />
-            <ChantItem title="Om Tare Tuttare" subtitle="Green Tara for Protection" icon="eco" />
-            <ChantItem
-              title="Vajrasattva Mantra"
-              subtitle="100-Syllable Purification"
-              icon="drop.fill"
-            />
-          </View>
-        </View>
-
-        {/* Practice Settings */}
-        <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Practice Settings</ThemedText>
-          <View
-            style={[
-              styles.settingsCard,
-              { backgroundColor: colorScheme === 'light' ? '#f5f3f0' : '#2d2417' },
-            ]}
-          >
-            <View style={styles.settingsHeader}>
-              <ThemedText style={styles.settingsLabel}>Auto-scroll Pace</ThemedText>
-              <ThemedText style={styles.settingsValue}>60 BPM</ThemedText>
-            </View>
-            <View
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.tabs}>
+          {TRADITIONS.map((tradition) => (
+            <Pressable
+              key={tradition.id}
+              onPress={() => {
+                setActiveTradition(tradition.id);
+                const firstPrayer = buddhistPrayers.find(
+                  (prayer) => prayer.tradition === tradition.id,
+                );
+                if (firstPrayer) {
+                  setSelectedPrayerId(firstPrayer.id);
+                }
+              }}
               style={[
-                styles.sliderTrack,
-                { backgroundColor: colorScheme === 'light' ? '#e6e2db' : '#3d3221' },
+                styles.tab,
+                activeTradition === tradition.id && {
+                  borderColor: '#f59e0b',
+                  backgroundColor: '#fef3c7',
+                },
               ]}
             >
-              <View style={[styles.sliderFill, { width: '40%', backgroundColor: '#f4a825' }]} />
-              <View
-                style={[
-                  styles.sliderThumb,
-                  { left: '40%', borderColor: '#f4a825', backgroundColor: '#fff' },
-                ]}
-              />
-            </View>
-            <View style={styles.sliderLabels}>
-              <ThemedText style={styles.sliderLabelText}>Meditative</ThemedText>
-              <ThemedText style={styles.sliderLabelText}>Steady</ThemedText>
-              <ThemedText style={styles.sliderLabelText}>Rhythmic</ThemedText>
-            </View>
-          </View>
+              <ThemedText
+                style={[styles.tabText, activeTradition === tradition.id && { color: '#b45309' }]}
+              >
+                {tradition.label}
+              </ThemedText>
+            </Pressable>
+          ))}
         </View>
 
-        <ThemedText style={styles.footerNote}>
-          Focused Spiritual Practice • All data stored locally
-        </ThemedText>
+        <View style={styles.heroCard}>
+          <ThemedText style={styles.sectionLabel}>Selected prayer</ThemedText>
+          <ThemedText style={styles.heroTitle}>{selectedPrayer.title}</ThemedText>
+          <ThemedText style={styles.heroSubtitle}>{selectedPrayer.subtitle}</ThemedText>
+        </View>
 
-        <View style={{ height: 100 }} />
+        <View style={styles.list}>
+          {filteredPrayers.map((prayer) => (
+            <PrayerItem
+              key={prayer.id}
+              prayer={prayer}
+              isActive={prayer.id === selectedPrayer.id}
+              onPress={() => setSelectedPrayerId(prayer.id)}
+            />
+          ))}
+        </View>
+
+        <Button
+          title="Start Prayer Session"
+          size="lg"
+          onPress={() =>
+            router.push({
+              pathname: '/tradition/buddhist-session' as never,
+              params: { prayerId: selectedPrayer.id },
+            })
+          }
+        />
       </ScrollView>
-
-      {/* FAB */}
-      <View style={styles.fabContainer}>
-        <TouchableOpacity style={[styles.fab, { backgroundColor: '#f4a825' }]}>
-          <IconSymbol name="chevron.up.double" size={24} color="#fff" />
-          <ThemedText style={styles.fabText}>Start Chanting</ThemedText>
-        </TouchableOpacity>
-      </View>
     </ThemedView>
   );
 }
 
-function ChantItem({ title, subtitle, icon, bpm, active = false }: any) {
-  const colorScheme = useColorScheme() ?? 'light';
-  const theme = Colors[colorScheme];
-
+function PrayerItem({
+  prayer,
+  isActive,
+  onPress,
+}: {
+  prayer: BuddhistPrayer;
+  isActive: boolean;
+  onPress: () => void;
+}) {
   return (
-    <TouchableOpacity
+    <Pressable
+      onPress={onPress}
       style={[
-        styles.chantItem,
-        active && { backgroundColor: '#f4a8251A', borderColor: '#f4a82533', borderWidth: 1 },
+        styles.prayerItem,
+        isActive && { borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.08)' },
       ]}
     >
-      <View
-        style={[
-          styles.chantIconContainer,
-          {
-            backgroundColor: active ? '#f4a82533' : colorScheme === 'light' ? '#f5f3f0' : '#3d3221',
-          },
-        ]}
-      >
-        <IconSymbol name={icon} size={24} color={active ? '#f4a825' : theme.text} />
+      <View style={styles.prayerText}>
+        <ThemedText style={styles.prayerTitle}>{prayer.title}</ThemedText>
+        <ThemedText style={styles.prayerSubtitle}>{prayer.subtitle}</ThemedText>
       </View>
-      <View style={styles.chantContent}>
-        <ThemedText style={styles.chantTitle}>{title}</ThemedText>
-        <ThemedText style={styles.chantSubtitle}>{subtitle}</ThemedText>
-      </View>
-      <View style={styles.chantAction}>
-        {bpm && <ThemedText style={styles.bpmText}>{bpm}</ThemedText>}
-        <IconSymbol
-          name={active ? 'checkmark.circle.fill' : 'play.circle.fill'}
-          size={active ? 20 : 24}
-          color={active ? '#f4a825' : '#8a7b6080'}
-        />
-      </View>
-    </TouchableOpacity>
+      <IconSymbol
+        name={isActive ? 'checkmark.circle.fill' : 'play.circle.fill'}
+        size={22}
+        color="#f59e0b"
+      />
+    </Pressable>
   );
 }
 
@@ -243,226 +170,74 @@ const styles = StyleSheet.create({
     padding: 8,
     marginLeft: 8,
   },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginRight: 8,
-  },
-  localBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 4,
-  },
-  localText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#166534',
-  },
-  scrollContent: {
+  content: {
     paddingTop: 100,
-  },
-  tabsContainer: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#e6e2db',
-  },
-  tabsScroll: {
     paddingHorizontal: 16,
-    gap: 32,
+    paddingBottom: 28,
+    gap: 16,
+  },
+  tabs: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
   },
   tab: {
-    paddingVertical: 16,
-    borderBottomWidth: 3,
-    borderBottomColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
   tabText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    letterSpacing: 0.5,
+    fontSize: 13,
+    fontWeight: '700',
   },
-  section: {
-    paddingHorizontal: 16,
-    marginTop: 24,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  featuredCard: {
+  heroCard: {
     borderRadius: 16,
-    padding: 24,
-    borderLeftWidth: 4,
-    boxShadow: '0px 4px 10px rgba(244, 168, 37, 0.1)',
-    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.25)',
+    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+    padding: 16,
+    gap: 4,
   },
-  featuredContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  traditionTag: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#f4a8251A',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  traditionTagText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#f4a825',
-  },
-  featuredTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 8,
-  },
-  featuredSubtitle: {
-    fontSize: 14,
-    fontStyle: 'italic',
-    color: '#8a7b60',
-    marginTop: 4,
-  },
-  featuredDescription: {
-    fontSize: 14,
-    marginTop: 16,
-    lineHeight: 20,
-    maxWidth: 240,
-  },
-  featuredIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  countText: {
+  sectionLabel: {
     fontSize: 12,
-    color: '#8a7b60',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    color: '#92400e',
+    fontWeight: '700',
+  },
+  heroTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+  },
+  heroSubtitle: {
+    fontSize: 14,
+    opacity: 0.75,
   },
   list: {
     gap: 8,
   },
-  chantItem: {
+  prayerItem: {
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 14,
+    padding: 14,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    borderRadius: 12,
+    justifyContent: 'space-between',
+    gap: 12,
   },
-  chantIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  chantContent: {
+  prayerText: {
     flex: 1,
-    marginLeft: 12,
   },
-  chantTitle: {
+  prayerTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
-  chantSubtitle: {
-    fontSize: 12,
-    color: '#8a7b60',
+  prayerSubtitle: {
+    fontSize: 13,
+    opacity: 0.7,
     marginTop: 2,
-  },
-  chantAction: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  bpmText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#f4a825',
-  },
-  settingsCard: {
-    padding: 16,
-    borderRadius: 16,
-  },
-  settingsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  settingsLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  settingsValue: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#f4a825',
-  },
-  sliderTrack: {
-    height: 8,
-    borderRadius: 4,
-    position: 'relative',
-  },
-  sliderFill: {
-    height: '100%',
-    borderRadius: 4,
-  },
-  sliderThumb: {
-    position: 'absolute',
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    top: -6,
-    boxShadow: '0px 2px 2px rgba(0, 0, 0, 0.2)',
-    elevation: 2,
-  },
-  sliderLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 12,
-  },
-  sliderLabelText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#8a7b60',
-    textTransform: 'uppercase',
-  },
-  footerNote: {
-    textAlign: 'center',
-    fontSize: 12,
-    color: '#8a7b60',
-    marginTop: 32,
-  },
-  fabContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 24,
-    backgroundColor: 'transparent',
-  },
-  fab: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 64,
-    borderRadius: 16,
-    boxShadow: '0px 4px 8px rgba(244, 168, 37, 0.3)',
-    elevation: 6,
-    gap: 8,
-  },
-  fabText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
   },
 });
