@@ -39,6 +39,30 @@ export function getNextPrayer(prayerTimes: PrayerTimeEntry[], now: Date = new Da
   return prayerTimes.find((prayer) => prayer.time.getTime() > now.getTime()) ?? null;
 }
 
+export function getCurrentPrayerName(prayers: PrayerTimeEntry[], now: Date): PrayerName | null {
+  if (prayers.length === 0) {
+    return null;
+  }
+
+  for (let index = 0; index < prayers.length; index += 1) {
+    const current = prayers[index];
+    const next = prayers[index + 1];
+
+    if (!next) {
+      if (now.getTime() >= current.time.getTime()) {
+        return current.name;
+      }
+      break;
+    }
+
+    if (now.getTime() >= current.time.getTime() && now.getTime() < next.time.getTime()) {
+      return current.name;
+    }
+  }
+
+  return null;
+}
+
 export function formatTime(date: Date) {
   return date.toLocaleTimeString([], {
     hour: 'numeric',

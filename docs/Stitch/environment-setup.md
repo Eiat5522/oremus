@@ -12,11 +12,11 @@ To maintain high-velocity development, your system must act as a sophisticated h
 
 In this modern era of mobile SDKs, legacy tools like Intel HAXM have been officially deprecated. You must enable virtualization extensions—Intel VT-x or AMD-V (SVM Mode)—within your BIOS/UEFI settings and ensure "Windows Hypervisor Platform" is enabled in your Windows Features to allow these layers to function.
 
-Component	Minimum Professional Standard	Recommended Architectural Standard
-CPU	Intel i5 / AMD Ryzen 5 (4 Cores)	Intel i7+ / AMD Ryzen 7+ (8+ Cores)
-RAM	16 GB	32 GB (Critical for AVD memory footprint)
-Storage	256 GB NVMe SSD	1 TB PCIe Gen 5 NVMe (Configured as Dev Drive)
-OS	Windows 10 (22H2)	Windows 11 (Pro/Enterprise for Hyper-V)
+Component Minimum Professional Standard Recommended Architectural Standard
+CPU Intel i5 / AMD Ryzen 5 (4 Cores) Intel i7+ / AMD Ryzen 7+ (8+ Cores)
+RAM 16 GB 32 GB (Critical for AVD memory footprint)
+Storage 256 GB NVMe SSD 1 TB PCIe Gen 5 NVMe (Configured as Dev Drive)
+OS Windows 10 (22H2) Windows 11 (Pro/Enterprise for Hyper-V)
 
 With the hardware properly virtualized, we must address the primary bottleneck of Windows development: the filesystem.
 
@@ -26,9 +26,9 @@ Modern React Native projects involve a massive volume of small file operations, 
 
 Primary Architectural Benefits:
 
-* Build Time Reduction: Optimized metadata handling reduces build times by 20–30% during Metro bundling and native compilation.
-* I/O Optimization: ReFS strips away non-essential housekeeping filters, allowing the thousands of tiny JavaScript files to be processed with near-native Linux velocity.
-* File Durability: The "copy-on-write" mechanism protects your development cache from corruption during heavy I/O cycles.
+- Build Time Reduction: Optimized metadata handling reduces build times by 20–30% during Metro bundling and native compilation.
+- I/O Optimization: ReFS strips away non-essential housekeeping filters, allowing the thousands of tiny JavaScript files to be processed with near-native Linux velocity.
+- File Durability: The "copy-on-write" mechanism protects your development cache from corruption during heavy I/O cycles.
 
 Once your filesystem is optimized for high-throughput operations, we can move into the Linux environment where the core development logic resides.
 
@@ -38,11 +38,11 @@ Professional developers choose to run the Node.js runtime and Expo CLI inside WS
 
 The Linux Toolset Infrastructure
 
-* nvm (Node Version Manager): Essential for maintaining environment parity.
-* Node.js LTS (20.19.4+): The established baseline for stable Expo orchestration.
-* Watchman: A superior file-watching service. Installing this in WSL2 (sudo apt install watchman) prevents "Fast Refresh" lag and ensures the Metro bundler remains responsive.
-* Expo CLI & Package Managers: Globally installed via npm or managed via corepack (Yarn/pnpm).
-* VS Code (Remote WSL): This extension is the "bridge" for your IDE, allowing the Windows-based editor to operate directly on the Linux filesystem with no performance penalty.
+- nvm (Node Version Manager): Essential for maintaining environment parity.
+- Node.js LTS (20.19.4+): The established baseline for stable Expo orchestration.
+- Watchman: A superior file-watching service. Installing this in WSL2 (sudo apt install watchman) prevents "Fast Refresh" lag and ensures the Metro bundler remains responsive.
+- Expo CLI & Package Managers: Globally installed via npm or managed via corepack (Yarn/pnpm).
+- VS Code (Remote WSL): This extension is the "bridge" for your IDE, allowing the Windows-based editor to operate directly on the Linux filesystem with no performance penalty.
 
 While the code and the bundler live in the Linux isolation, the visual output—the Android Emulator—must reside on the Windows host to utilize hardware-accelerated graphics.
 
@@ -66,15 +66,15 @@ Problem A: The ADB Visibility Gap
 
 WSL2 cannot natively execute adb.exe without the explicit file extension, which breaks many Expo automated scripts.
 
-* Solution: Create a duplicate or alias. In your WSL terminal, run: sudo cp /mnt/c/Users/<YourWindowsUsername>/AppData/Local/Android/Sdk/platform-tools/adb.exe /mnt/c/Users/<YourWindowsUsername>/AppData/Local/Android/Sdk/platform-tools/adb This ensures that when Expo calls adb, it finds a binary it recognizes.
+- Solution: Create a duplicate or alias. In your WSL terminal, run: sudo cp /mnt/c/Users/<YourWindowsUsername>/AppData/Local/Android/Sdk/platform-tools/adb.exe /mnt/c/Users/<YourWindowsUsername>/AppData/Local/Android/Sdk/platform-tools/adb This ensures that when Expo calls adb, it finds a binary it recognizes.
 
 Problem B: The Networking Isolation
 
 WSL2 operates behind a NAT, making it difficult for a mobile device to reach the Metro bundler.
 
-Networking Method	Implementation	Best Use Case
-Mirrored Networking	Enable in C:\Users\<User>\.wslconfig using [wsl2] networkingMode=mirrored	The Professional Standard. Shares the Windows IP address with WSL2, eliminating port-forwarding issues.
-Expo Tunnel	Invoke via npx expo start --tunnel	Fallback for complex corporate firewalls or public Wi-Fi where LAN access is restricted.
+Networking Method Implementation Best Use Case
+Mirrored Networking Enable in C:\Users\<User>\.wslconfig using [wsl2] networkingMode=mirrored The Professional Standard. Shares the Windows IP address with WSL2, eliminating port-forwarding issues.
+Expo Tunnel Invoke via npx expo start --tunnel Fallback for complex corporate firewalls or public Wi-Fi where LAN access is restricted.
 
 Note: If using Mirrored Networking, ensure Windows Firewall allows inbound traffic on ports 8081 (Metro), 19000-19006 (Expo), and 5037 (ADB).
 
@@ -96,8 +96,8 @@ This lifecycle remains consistent regardless of which Expo workflow you choose f
 
 As a developer, you must choose the level of abstraction that fits your project's requirements.
 
-* Managed Workflow (via Prebuild): This is the modern standard. You remain in the JavaScript/TypeScript domain, and Expo handles native code generation through the npx expo prebuild mechanism. This prevents "lock-in" and simplifies SDK upgrades while maintaining high velocity.
-* Bare Workflow (Custom Native Modules): Choose this when your project requires custom C++ modules or third-party SDKs that demand direct modification of the /android or /ios directories. This grants full native control but requires you to manage the native Gradle build process yourself.
+- Managed Workflow (via Prebuild): This is the modern standard. You remain in the JavaScript/TypeScript domain, and Expo handles native code generation through the npx expo prebuild mechanism. This prevents "lock-in" and simplifies SDK upgrades while maintaining high velocity.
+- Bare Workflow (Custom Native Modules): Choose this when your project requires custom C++ modules or third-party SDKs that demand direct modification of the /android or /ios directories. This grants full native control but requires you to manage the native Gradle build process yourself.
 
 Whether you stay managed or go bare, your infrastructure must be resilient enough to handle common environmental friction.
 
@@ -105,10 +105,9 @@ Whether you stay managed or go bare, your infrastructure must be resilient enoug
 
 Even a perfectly orchestrated stack can encounter latency or connectivity issues. Use this guide to diagnose the three most common architectural failures:
 
-Issue	Technical Root Cause	Professional Fix
-404 / Connection Timeout	Firewall Block or IP Mismatch	Ensure Windows Network is "Private." Verify ports 8081, 19000-19006 are open. Set REACT_NATIVE_PACKAGER_HOSTNAME to your LAN IP.
-ENOENT / ADB Error	Broken Environment Bridge	Ensure WSLENV=ANDROID_HOME/p is set. Verify the adb (no extension) copy exists in the Windows SDK platform-tools folder.
-Virtualization Lag/Errors	BIOS or Version Mismatch	Confirm Intel VT-x/AMD-V is enabled. Ensure you are using JDK 17; if using JDK 21+, Gradle will likely fail during the native handshake.
+Issue Technical Root Cause Professional Fix
+404 / Connection Timeout Firewall Block or IP Mismatch Ensure Windows Network is "Private." Verify ports 8081, 19000-19006 are open. Set REACT_NATIVE_PACKAGER_HOSTNAME to your LAN IP.
+ENOENT / ADB Error Broken Environment Bridge Ensure WSLENV=ANDROID_HOME/p is set. Verify the adb (no extension) copy exists in the Windows SDK platform-tools folder.
+Virtualization Lag/Errors BIOS or Version Mismatch Confirm Intel VT-x/AMD-V is enabled. Ensure you are using JDK 17; if using JDK 21+, Gradle will likely fail during the native handshake.
 
 By mastering this multi-layered stack, you are moving beyond simple app development and into the realm of professional platform engineering. You have built a robust, high-performance environment capable of scaling with the most demanding mobile projects. Happy coding!
-

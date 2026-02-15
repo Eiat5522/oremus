@@ -63,7 +63,9 @@ export default function ProfileScreen() {
           <View style={styles.profileInfo}>
             <ThemedText style={styles.userName}>Gabriel Vance</ThemedText>
             {traditionDetails && (
-              <View style={[styles.traditionBadge, { backgroundColor: `${traditionDetails.color}1A` }]}>
+              <View
+                style={[styles.traditionBadge, { backgroundColor: `${traditionDetails.color}1A` }]}
+              >
                 <IconSymbol name={traditionDetails.icon} size={14} color={traditionDetails.color} />
                 <ThemedText style={[styles.traditionText, { color: traditionDetails.color }]}>
                   {traditionDetails.title}

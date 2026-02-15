@@ -8,4 +8,3 @@ const __dirname = dirname(__filename);
 const config = getDefaultConfig(__dirname);
 
 export default config;
-

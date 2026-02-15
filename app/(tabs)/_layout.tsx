@@ -5,9 +5,11 @@ import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTradition } from '@/hooks/use-tradition';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { tradition } = useTradition();
 
   return (
     <Tabs
@@ -22,6 +24,14 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="qibla"
+        options={{
+          href: tradition === 'islam' ? undefined : null,
+          title: 'Qibla',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="location.fill" color={color} />,
         }}
       />
       <Tabs.Screen

@@ -55,7 +55,7 @@ export function UserProvider({ children }: Readonly<{ children: React.ReactNode 
       setUser,
       userName,
     }),
-    [user, isLoading, setUser, userName]
+    [user, isLoading, setUser, userName],
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

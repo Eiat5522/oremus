@@ -18,22 +18,22 @@ export function TraditionProvider({ children }: Readonly<{ children: React.React
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-   const loadTradition = async () => {
-     try {
-       const storedTradition = await AsyncStorage.getItem(TRADITION_STORAGE_KEY);
-       if (storedTradition) {
-         const isValid = TRADITION_OPTIONS.some((t) => t.id === storedTradition);
-         if (isValid) {
-           setTraditionState(storedTradition as Tradition);
-         }
-       }
-     } catch (error) {
-       console.error('Failed to load tradition preference:', error);
-     } finally {
-       setIsLoading(false);
-     }
-   };
-   loadTradition();
+    const loadTradition = async () => {
+      try {
+        const storedTradition = await AsyncStorage.getItem(TRADITION_STORAGE_KEY);
+        if (storedTradition) {
+          const isValid = TRADITION_OPTIONS.some((t) => t.id === storedTradition);
+          if (isValid) {
+            setTraditionState(storedTradition as Tradition);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load tradition preference:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadTradition();
   }, []);
 
   const setTradition = useCallback(async (newTradition: Tradition) => {
@@ -46,25 +46,21 @@ export function TraditionProvider({ children }: Readonly<{ children: React.React
     }
   }, []);
 
- const traditionDetails = useMemo(
-   () => TRADITION_OPTIONS.find((t) => t.id === tradition),
-   [tradition]
- );
- const value = useMemo(
-   () => ({
-     tradition,
-     isLoading,
-     setTradition,
-     traditionDetails,
-   }),
-   [tradition, isLoading, setTradition, traditionDetails]
- );
-
-  return (
-    <TraditionContext.Provider value={value}>
-      {children}
-    </TraditionContext.Provider>
+  const traditionDetails = useMemo(
+    () => TRADITION_OPTIONS.find((t) => t.id === tradition),
+    [tradition],
   );
+  const value = useMemo(
+    () => ({
+      tradition,
+      isLoading,
+      setTradition,
+      traditionDetails,
+    }),
+    [tradition, isLoading, setTradition, traditionDetails],
+  );
+
+  return <TraditionContext.Provider value={value}>{children}</TraditionContext.Provider>;
 }
 
 export function useTradition() {
