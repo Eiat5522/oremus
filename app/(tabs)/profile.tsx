@@ -1,6 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 import React from 'react';
-import { Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -10,12 +10,38 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTradition } from '@/hooks/use-tradition';
+import { useUser } from '@/hooks/use-user';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function ProfileScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
   const { traditionDetails } = useTradition();
+  const { userProfileImage, setProfileImage } = useUser();
   const router = useRouter();
+
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      Alert.alert(
+        'Permission Required',
+        'Permission to access media library is required to change your profile picture.',
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      await setProfileImage(result.assets[0].uri);
+    }
+  };
 
   return (
     <ThemedView style={styles.container}>
@@ -44,20 +70,22 @@ export default function ProfileScreen() {
         {/* Profile Header */}
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
-            <Image
-              source={{
-                uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDlRsitAUHhAJL2HPTIZDpJmf_oWjwXfZfh2vD0kAe0RxWS-ZV9wTm_yMifwO_Lv7NbiPi2kzLhLqZZkke7kJVBa24kqT6l_guj1nbe3K8Afqg3w2RgEhsv3tlQT_o2Y1GlxIzPMdvJOEBEC8AQcjzVDb-n1kFJZwrFxuxKqdPzem3h-AgK93WGSuWNahyeuRXkjOvOnXr7lyqOtKHVrP_ywczBWc2DmNa2NMWeG9jTyBtkdfjdvk-db3hpONSWlQf4AAxKT_L88zA',
-              }}
-              style={styles.avatar}
-            />
-            <View
+            {userProfileImage ? (
+              <Image source={{ uri: userProfileImage }} style={styles.avatar} />
+            ) : (
+              <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                <IconSymbol name="person.fill" size={48} color="#9ca3af" />
+              </View>
+            )}
+            <TouchableOpacity
               style={[
                 styles.editBadge,
                 { backgroundColor: theme.primary, borderColor: theme.background },
               ]}
+              onPress={pickImage}
             >
               <IconSymbol name="pencil" size={12} color="#fff" />
-            </View>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.profileInfo}>
@@ -95,7 +123,6 @@ export default function ProfileScreen() {
               isFirst
               onPress={() => router.push('/onboarding')}
             />
-            <SettingItem icon="doc.text" title="Manage Templates" color="#10b981" />
             <SettingItem icon="bell.fill" title="Notifications" color="#fbbf24" isLast />
           </View>
         </View>
@@ -212,6 +239,11 @@ const styles = StyleSheet.create({
     borderRadius: 56,
     borderWidth: 4,
     borderColor: 'rgba(19, 91, 236, 0.2)',
+  },
+  avatarPlaceholder: {
+    backgroundColor: '#f1f5f9',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   editBadge: {
     position: 'absolute',

@@ -7,15 +7,23 @@ import { Tradition, TRADITION_OPTIONS } from '@/constants/traditions';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTradition } from '@/hooks/use-tradition';
 import { Stack, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function OnboardingScreen() {
-  const [selectedTradition, setSelectedTradition] = useState<Tradition>('christianity');
-  const { setTradition } = useTradition();
+  const { tradition, setTradition } = useTradition();
+  const [selectedTradition, setSelectedTradition] = useState<Tradition>(
+    tradition || 'christianity',
+  );
   const router = useRouter();
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
+
+  useEffect(() => {
+    if (tradition) {
+      setSelectedTradition(tradition);
+    }
+  }, [tradition]);
 
   const handleContinue = async () => {
     try {

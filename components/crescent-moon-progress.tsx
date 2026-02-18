@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Circle } from 'react-native-svg';
 import Animated, {
   useAnimatedProps,
   useSharedValue,
@@ -8,13 +8,14 @@ import Animated, {
   interpolateColor,
 } from 'react-native-reanimated';
 
-const AnimatedPath = Animated.createAnimatedComponent(Path);
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 interface CrescentMoonProgressProps {
   progress: number; // 0 to 1
   size?: number;
   color?: string;
   emptyColor?: string;
+  strokeWidth?: number;
 }
 
 export function CrescentMoonProgress({
@@ -22,6 +23,7 @@ export function CrescentMoonProgress({
   size = 80,
   color = '#10b981',
   emptyColor = 'rgba(0,0,0,0.1)',
+  strokeWidth = 8,
 }: CrescentMoonProgressProps) {
   const animatedProgress = useSharedValue(progress);
 
@@ -30,28 +32,43 @@ export function CrescentMoonProgress({
   }, [progress, animatedProgress]);
 
   const animatedProps = useAnimatedProps(() => {
+    // When complete, always use the filled color
+    const progressValue = animatedProgress.value >= 1 ? 1 : animatedProgress.value;
     return {
-      fill: interpolateColor(animatedProgress.value, [0, 1], [emptyColor, color]),
+      stroke: interpolateColor(progressValue, [0, 1], [emptyColor, color]),
     };
   });
 
+  const center = size / 2;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
-      <Svg width={size} height={size} viewBox="0 0 100 100">
-        {/* Crescent Moon Path */}
-        <AnimatedPath
-          d="M50 10A40 40 0 1 0 50 90A32 32 0 1 1 50 10"
-          animatedProps={animatedProps}
-          transform="rotate(-20 50 50)"
+      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        {/* Background circle */}
+        <Circle
+          cx={center}
+          cy={center}
+          r={radius}
+          stroke={emptyColor}
+          strokeWidth={strokeWidth}
+          fill="none"
         />
 
-        {/* Star - visible when progress is 1 */}
-        {progress >= 1 && (
-          <Path
-            d="M75 35L77 41L83 41L78 45L80 51L75 47L70 51L72 45L67 41L73 41L75 35Z"
-            fill={color}
-          />
-        )}
+        {/* Progress circle */}
+        <AnimatedCircle
+          cx={center}
+          cy={center}
+          r={radius}
+          animatedProps={animatedProps}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeDasharray={circumference}
+          strokeDashoffset={circumference * (1 - progress)}
+          strokeLinecap="round"
+          transform={`rotate(-90 ${center} ${center})`}
+        />
       </Svg>
     </View>
   );

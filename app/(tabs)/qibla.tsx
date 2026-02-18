@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
+import { useFocusEffect } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Linking, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -160,30 +161,30 @@ export default function QiblaScreen() {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    let mounted = true;
-
-    const loadPrayerCompletions = async () => {
-      try {
-        const stored = await AsyncStorage.getItem(PRAYER_COMPLETION_STORAGE_KEY);
-        if (!stored || !mounted) {
-          return;
-        }
-        const parsed = JSON.parse(stored) as PrayerCompletionStore;
-        setPrayerCompletions(parsed);
-      } catch {
-        if (mounted) {
-          setPrayerCompletions({});
-        }
+  const loadPrayerCompletions = React.useCallback(async () => {
+    try {
+      const stored = await AsyncStorage.getItem(PRAYER_COMPLETION_STORAGE_KEY);
+      if (!stored) {
+        setPrayerCompletions({});
+        return;
       }
-    };
-
-    void loadPrayerCompletions();
-
-    return () => {
-      mounted = false;
-    };
+      const parsed = JSON.parse(stored) as PrayerCompletionStore;
+      setPrayerCompletions(parsed);
+    } catch {
+      setPrayerCompletions({});
+    }
   }, []);
+
+  useEffect(() => {
+    void loadPrayerCompletions();
+  }, [loadPrayerCompletions]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      void loadPrayerCompletions();
+      void fetchActiveReminders();
+    }, [fetchActiveReminders, loadPrayerCompletions]),
+  );
 
   useEffect(() => {
     let mounted = true;

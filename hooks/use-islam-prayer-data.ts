@@ -11,9 +11,19 @@ import {
 } from '@/lib/prayer-times';
 
 const PRAYER_COMPLETION_STORAGE_KEY = '@oremus/islam-prayer-completion-v1';
+const PRAYER_RESCHEDULE_STORAGE_KEY = '@oremus/islam-prayer-rescheduled-v1';
 
 type DailyPrayerCompletion = Record<PrayerName, boolean>;
 type PrayerCompletionStore = Record<string, DailyPrayerCompletion>;
+
+export interface RescheduledPrayerData {
+  time: string; // ISO string
+  hasReminder: boolean;
+  reminderMinutes: number;
+}
+
+type DailyRescheduledPrayers = Record<PrayerName, RescheduledPrayerData>;
+type PrayerRescheduleStore = Record<string, DailyRescheduledPrayers>;
 
 function getDefaultCompletionState(): DailyPrayerCompletion {
   return {
@@ -30,6 +40,12 @@ function getLocalDateKey(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+function getComparisonTimeForDate(selectedDate: Date, now: Date): Date {
+  const comparison = new Date(selectedDate);
+  comparison.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+  return comparison;
 }
 
 function formatCountdown(target: Date, now: Date): string {
@@ -59,6 +75,7 @@ export function useIslamPrayerData(referenceDate?: Date) {
   const [canAskLocationPermission, setCanAskLocationPermission] = useState(true);
   const [isRequestingLocationPermission, setIsRequestingLocationPermission] = useState(false);
   const [prayerCompletions, setPrayerCompletions] = useState<PrayerCompletionStore>({});
+  const [rescheduledPrayers, setRescheduledPrayers] = useState<PrayerRescheduleStore>({});
 
   const todayKey = useMemo(() => getLocalDateKey(effectiveDate), [effectiveDate]);
 
@@ -67,16 +84,29 @@ export function useIslamPrayerData(referenceDate?: Date) {
     return getPrayerTimesForDate(coords.latitude, coords.longitude, effectiveDate);
   }, [coords, effectiveDate]);
 
-  const nextPrayer = useMemo(() => getNextPrayer(todayPrayers, now), [todayPrayers, now]);
+  const comparisonNow = useMemo(
+    () => getComparisonTimeForDate(effectiveDate, now),
+    [effectiveDate, now],
+  );
+
+  const nextPrayer = useMemo(
+    () => getNextPrayer(todayPrayers, comparisonNow),
+    [todayPrayers, comparisonNow],
+  );
 
   const currentPrayerName = useMemo(
-    () => getCurrentPrayerName(todayPrayers, now),
-    [todayPrayers, now],
+    () => getCurrentPrayerName(todayPrayers, comparisonNow),
+    [todayPrayers, comparisonNow],
   );
 
   const todayCompletion = useMemo(
     () => prayerCompletions[todayKey] ?? getDefaultCompletionState(),
     [prayerCompletions, todayKey],
+  );
+
+  const todayRescheduled = useMemo(
+    () => rescheduledPrayers[todayKey] ?? {},
+    [rescheduledPrayers, todayKey],
   );
 
   const completedCount = useMemo(
@@ -87,7 +117,7 @@ export function useIslamPrayerData(referenceDate?: Date) {
   const progress = completedCount / 5;
 
   const countdownText = nextPrayer
-    ? formatCountdown(nextPrayer.time, now)
+    ? formatCountdown(nextPrayer.time, comparisonNow)
     : 'No more prayers today';
 
   const requestLocationPermission = useCallback(async () => {
@@ -158,6 +188,38 @@ export function useIslamPrayerData(referenceDate?: Date) {
     }
   }, []);
 
+  const loadPrayerCompletions = useCallback(async () => {
+    try {
+      const stored = await AsyncStorage.getItem(PRAYER_COMPLETION_STORAGE_KEY);
+      if (!mountedRef.current) return;
+      if (!stored) {
+        setPrayerCompletions({});
+        return;
+      }
+      setPrayerCompletions(JSON.parse(stored) as PrayerCompletionStore);
+    } catch {
+      if (mountedRef.current) setPrayerCompletions({});
+    }
+  }, []);
+
+  const loadRescheduledPrayers = useCallback(async () => {
+    try {
+      const stored = await AsyncStorage.getItem(PRAYER_RESCHEDULE_STORAGE_KEY);
+      if (!mountedRef.current) return;
+      if (!stored) {
+        setRescheduledPrayers({});
+        return;
+      }
+      setRescheduledPrayers(JSON.parse(stored) as PrayerRescheduleStore);
+    } catch {
+      if (mountedRef.current) setRescheduledPrayers({});
+    }
+  }, []);
+
+  const refreshPrayerData = useCallback(async () => {
+    await Promise.all([loadPrayerCompletions(), loadRescheduledPrayers()]);
+  }, [loadPrayerCompletions, loadRescheduledPrayers]);
+
   useEffect(() => {
     mountedRef.current = true;
     return () => {
@@ -172,16 +234,6 @@ export function useIslamPrayerData(referenceDate?: Date) {
 
   useEffect(() => {
     let mounted = true;
-
-    const loadPrayerCompletions = async () => {
-      try {
-        const stored = await AsyncStorage.getItem(PRAYER_COMPLETION_STORAGE_KEY);
-        if (!stored || !mounted) return;
-        setPrayerCompletions(JSON.parse(stored) as PrayerCompletionStore);
-      } catch {
-        if (mounted) setPrayerCompletions({});
-      }
-    };
 
     const loadInitialPermission = async () => {
       try {
@@ -202,13 +254,13 @@ export function useIslamPrayerData(referenceDate?: Date) {
       }
     };
 
-    void loadPrayerCompletions();
+    void refreshPrayerData();
     void loadInitialPermission();
 
     return () => {
       mounted = false;
     };
-  }, [requestLocationPermission]);
+  }, [refreshPrayerData, requestLocationPermission]);
 
   const togglePrayerCompletion = useCallback(
     (name: PrayerName) => {
@@ -229,6 +281,60 @@ export function useIslamPrayerData(referenceDate?: Date) {
     [todayKey],
   );
 
+  const reschedulePrayer = useCallback(
+    (name: PrayerName, newTime: Date, hasReminder: boolean, reminderMinutes: number = 15) => {
+      setRescheduledPrayers((previous) => {
+        const dayState = previous[todayKey] ?? {};
+        const nextDayState: DailyRescheduledPrayers = {
+          ...dayState,
+          [name]: {
+            time: newTime.toISOString(),
+            hasReminder,
+            reminderMinutes,
+          },
+        };
+        const nextState: PrayerRescheduleStore = {
+          ...previous,
+          [todayKey]: nextDayState,
+        };
+        void AsyncStorage.setItem(PRAYER_RESCHEDULE_STORAGE_KEY, JSON.stringify(nextState));
+        return nextState;
+      });
+    },
+    [todayKey],
+  );
+
+  const cancelReschedule = useCallback(
+    (name: PrayerName) => {
+      setRescheduledPrayers((previous) => {
+        const dayState = previous[todayKey] ?? {};
+        const { [name]: _, ...rest } = dayState;
+        const nextState: PrayerRescheduleStore = {
+          ...previous,
+          [todayKey]: rest as DailyRescheduledPrayers,
+        };
+        void AsyncStorage.setItem(PRAYER_RESCHEDULE_STORAGE_KEY, JSON.stringify(nextState));
+        return nextState;
+      });
+    },
+    [todayKey],
+  );
+
+  const isPrayerRescheduled = useCallback(
+    (name: PrayerName): boolean => {
+      return name in todayRescheduled;
+    },
+    [todayRescheduled],
+  );
+
+  const getRescheduledTime = useCallback(
+    (name: PrayerName): Date | null => {
+      const data = todayRescheduled[name];
+      return data ? new Date(data.time) : null;
+    },
+    [todayRescheduled],
+  );
+
   return {
     now,
     todayPrayers,
@@ -246,5 +352,11 @@ export function useIslamPrayerData(referenceDate?: Date) {
     requestLocationPermission,
     togglePrayerCompletion,
     formatTime,
+    todayRescheduled,
+    reschedulePrayer,
+    cancelReschedule,
+    isPrayerRescheduled,
+    getRescheduledTime,
+    refreshPrayerData,
   };
 }

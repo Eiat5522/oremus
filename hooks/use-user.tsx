@@ -5,13 +5,16 @@ const USER_STORAGE_KEY = '@oremus/user';
 
 interface UserData {
   name: string;
+  profileImage?: string;
 }
 
 interface UserContextType {
   user: UserData | null;
   isLoading: boolean;
   setUser: (user: UserData) => Promise<void>;
+  setProfileImage: (imageUri: string) => Promise<void>;
   userName: string;
+  userProfileImage?: string;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -48,14 +51,28 @@ export function UserProvider({ children }: Readonly<{ children: React.ReactNode 
 
   const userName = useMemo(() => user?.name || 'Guest', [user]);
 
+  const setProfileImage = useCallback(
+    async (imageUri: string) => {
+      const currentUser = await AsyncStorage.getItem(USER_STORAGE_KEY);
+      const parsed = currentUser ? JSON.parse(currentUser) : { name: 'Guest' };
+      const newUser = { ...parsed, profileImage: imageUri };
+      await setUser(newUser);
+    },
+    [setUser],
+  );
+
+  const userProfileImage = useMemo(() => user?.profileImage, [user]);
+
   const value = useMemo(
     () => ({
       user,
       isLoading,
       setUser,
+      setProfileImage,
       userName,
+      userProfileImage,
     }),
-    [user, isLoading, setUser, userName],
+    [user, isLoading, setUser, setProfileImage, userName, userProfileImage],
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
