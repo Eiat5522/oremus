@@ -27,18 +27,19 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="prayers"
+        options={{
+          href: tradition === 'islam' ? undefined : null,
+          title: 'Prayers',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="timer" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="qibla"
         options={{
           href: tradition === 'islam' ? undefined : null,
           title: 'Qibla',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="location.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Journal',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="book.fill" color={color} />,
         }}
       />
       <Tabs.Screen

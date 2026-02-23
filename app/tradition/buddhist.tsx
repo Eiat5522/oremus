@@ -1,5 +1,6 @@
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { Stack, useRouter } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -11,8 +12,6 @@ import {
   type BuddhistPrayer,
   type BuddhistTradition,
 } from '@/constants/religious-content';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 
 const TRADITIONS: { id: BuddhistTradition; label: string }[] = [
   { id: 'tibetan', label: 'Tibetan' },
@@ -23,14 +22,14 @@ const TRADITIONS: { id: BuddhistTradition; label: string }[] = [
 
 export default function BuddhistScreen() {
   const router = useRouter();
-  const colorScheme = useColorScheme() ?? 'light';
-  const theme = Colors[colorScheme];
   const [activeTradition, setActiveTradition] = useState<BuddhistTradition>('tibetan');
   const [selectedPrayerId, setSelectedPrayerId] = useState<string>(
     buddhistPrayers.find((prayer) => prayer.tradition === 'tibetan')?.id ??
       buddhistPrayers[0]?.id ??
       '',
   );
+  const [quickPlayPrayerId, setQuickPlayPrayerId] = useState<string | null>(null);
+  const [audioError, setAudioError] = useState<string | null>(null);
 
   const filteredPrayers = useMemo(
     () => buddhistPrayers.filter((prayer) => prayer.tradition === activeTradition),
@@ -44,6 +43,69 @@ export default function BuddhistScreen() {
       buddhistPrayers[0];
     return prayer;
   }, [filteredPrayers, selectedPrayerId]);
+  const quickPlayPrayer = useMemo(
+    () => buddhistPrayers.find((prayer) => prayer.id === quickPlayPrayerId),
+    [quickPlayPrayerId],
+  );
+  const player = useAudioPlayer(quickPlayPrayer?.audioAsset);
+  const status = useAudioPlayerStatus(player);
+
+  const isReleasedPlayerError = useCallback((error: unknown) => {
+    return error instanceof Error && error.message.includes('NativeSharedObjectNotFoundException');
+  }, []);
+
+  const safePause = useCallback(() => {
+    try {
+      player.pause();
+    } catch (error) {
+      if (!isReleasedPlayerError(error)) {
+        console.error('Failed to pause Buddhist mantra audio:', error);
+      }
+    }
+  }, [isReleasedPlayerError, player]);
+
+  useEffect(() => {
+    return () => {
+      safePause();
+    };
+  }, [safePause]);
+
+  const toggleQuickPlay = useCallback(
+    async (prayer: BuddhistPrayer) => {
+      try {
+        setAudioError(null);
+        if (status.playing && quickPlayPrayerId === prayer.id) {
+          safePause();
+          return;
+        }
+        if (quickPlayPrayerId !== prayer.id) {
+          await player.replace(prayer.audioAsset);
+          setQuickPlayPrayerId(prayer.id);
+        }
+        if (status.duration > 0 && status.currentTime >= status.duration) {
+          await player.seekTo(0);
+        }
+        player.play();
+      } catch (error) {
+        console.error('Failed to play Buddhist mantra audio:', error);
+        setAudioError('Could not play mantra audio on this device.');
+      }
+    },
+    [player, quickPlayPrayerId, safePause, status.currentTime, status.duration, status.playing],
+  );
+
+  const openFullPlayer = useCallback(
+    (prayer: BuddhistPrayer) => {
+      setSelectedPrayerId(prayer.id);
+      safePause();
+      setQuickPlayPrayerId(null);
+      router.push({
+        pathname: '/tradition/buddhist-session' as never,
+        params: { prayerId: prayer.id },
+      });
+    },
+    [router, safePause],
+  );
 
   if (!selectedPrayer) {
     return (
@@ -59,13 +121,6 @@ export default function BuddhistScreen() {
         options={{
           title: 'Buddhist Prayer',
           headerShown: true,
-          headerTransparent: true,
-          gestureEnabled: false,
-          headerLeft: () => (
-            <Pressable onPress={() => router.back()} style={styles.headerIcon}>
-              <IconSymbol name="arrow.left" size={20} color={theme.text} />
-            </Pressable>
-          ),
         }}
       />
 
@@ -112,22 +167,37 @@ export default function BuddhistScreen() {
               key={prayer.id}
               prayer={prayer}
               isActive={prayer.id === selectedPrayer.id}
-              onPress={() => setSelectedPrayerId(prayer.id)}
+              isQuickPlaying={status.playing && prayer.id === quickPlayPrayerId}
+              onSelect={() => openFullPlayer(prayer)}
+              onQuickPlay={() => void toggleQuickPlay(prayer)}
             />
           ))}
         </View>
 
-        <Button
-          title="Start Prayer Session"
-          size="lg"
-          onPress={() =>
-            router.push({
-              pathname: '/tradition/buddhist-session' as never,
-              params: { prayerId: selectedPrayer.id },
-            })
-          }
-        />
+        <Button title="Quick Play" size="lg" onPress={() => void toggleQuickPlay(selectedPrayer)} />
       </ScrollView>
+
+      {quickPlayPrayer ? (
+        <View style={styles.miniPlayer}>
+          <Pressable style={styles.miniMeta} onPress={() => openFullPlayer(quickPlayPrayer)}>
+            <ThemedText style={styles.miniTitle} numberOfLines={1}>
+              {quickPlayPrayer.title}
+            </ThemedText>
+            <ThemedText style={styles.miniSubtitle} numberOfLines={1}>
+              {status.playing ? 'Playing now' : 'Paused'}
+            </ThemedText>
+          </Pressable>
+          <Pressable
+            style={styles.miniAction}
+            onPress={() => void toggleQuickPlay(quickPlayPrayer)}
+            accessibilityRole="button"
+            accessibilityLabel={status.playing ? 'Pause quick play' : 'Play quick play'}
+          >
+            <IconSymbol name={status.playing ? 'pause.fill' : 'play.fill'} size={22} color="#fff" />
+          </Pressable>
+        </View>
+      ) : null}
+      {audioError ? <ThemedText style={styles.errorText}>{audioError}</ThemedText> : null}
     </ThemedView>
   );
 }
@@ -135,30 +205,40 @@ export default function BuddhistScreen() {
 function PrayerItem({
   prayer,
   isActive,
-  onPress,
+  isQuickPlaying,
+  onSelect,
+  onQuickPlay,
 }: {
   prayer: BuddhistPrayer;
   isActive: boolean;
-  onPress: () => void;
+  isQuickPlaying: boolean;
+  onSelect: () => void;
+  onQuickPlay: () => void;
 }) {
   return (
-    <Pressable
-      onPress={onPress}
+    <View
       style={[
         styles.prayerItem,
         isActive && { borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.08)' },
       ]}
     >
-      <View style={styles.prayerText}>
+      <Pressable onPress={onSelect} style={styles.prayerText}>
         <ThemedText style={styles.prayerTitle}>{prayer.title}</ThemedText>
         <ThemedText style={styles.prayerSubtitle}>{prayer.subtitle}</ThemedText>
-      </View>
-      <IconSymbol
-        name={isActive ? 'checkmark.circle.fill' : 'play.circle.fill'}
-        size={22}
-        color="#f59e0b"
-      />
-    </Pressable>
+      </Pressable>
+      <Pressable
+        onPress={onQuickPlay}
+        style={styles.quickAction}
+        accessibilityRole="button"
+        accessibilityLabel={`Quick play ${prayer.title}`}
+      >
+        <IconSymbol
+          name={isQuickPlaying ? 'pause.fill' : 'play.circle.fill'}
+          size={22}
+          color="#f59e0b"
+        />
+      </Pressable>
+    </View>
   );
 }
 
@@ -166,14 +246,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  headerIcon: {
-    padding: 8,
-    marginLeft: 8,
-  },
   content: {
-    paddingTop: 100,
+    paddingTop: 16,
     paddingHorizontal: 16,
-    paddingBottom: 28,
+    paddingBottom: 120,
     gap: 16,
   },
   tabs: {
@@ -231,6 +307,13 @@ const styles = StyleSheet.create({
   prayerText: {
     flex: 1,
   },
+  quickAction: {
+    minHeight: 36,
+    minWidth: 36,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   prayerTitle: {
     fontSize: 16,
     fontWeight: '700',
@@ -239,5 +322,47 @@ const styles = StyleSheet.create({
     fontSize: 13,
     opacity: 0.7,
     marginTop: 2,
+  },
+  miniPlayer: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    bottom: 20,
+    backgroundColor: '#111827',
+    borderRadius: 16,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  miniMeta: {
+    flex: 1,
+    gap: 2,
+  },
+  miniTitle: {
+    color: '#f8fafc',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  miniSubtitle: {
+    color: '#cbd5e1',
+    fontSize: 12,
+  },
+  miniAction: {
+    width: 42,
+    height: 42,
+    borderRadius: 999,
+    backgroundColor: '#f59e0b',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorText: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    bottom: 86,
+    color: '#dc2626',
+    fontSize: 12,
+    textAlign: 'center',
   },
 });

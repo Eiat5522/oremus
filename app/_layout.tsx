@@ -40,7 +40,7 @@ function RootLayoutNav() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="active-session/index" options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen name="tradition/qibla" />
-        <Stack.Screen name="tradition/buddhist" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="tradition/buddhist" options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen
           name="tradition/buddhist-session"
           options={{ presentation: 'fullScreenModal' }}

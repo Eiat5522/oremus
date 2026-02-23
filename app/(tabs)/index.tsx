@@ -1,15 +1,11 @@
-import * as Notifications from 'expo-notifications';
 import { Stack, useRouter } from 'expo-router';
-import React, { useRef, useState } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
+import React from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { MosqueHeader } from '@/components/islam/MosqueHeader';
-import { PrayerActionSheet, PrayerActionSheetRef } from '@/components/islam/PrayerActionSheet';
 import { PrayerGrid } from '@/components/islam/PrayerGrid';
-import { PrayerList } from '@/components/islam/PrayerList';
-import { PrayerRescheduleModal } from '@/components/islam/PrayerRescheduleModal';
+import { IslamPrayerListSection } from '@/components/islam/islam-prayer-list-section';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Card } from '@/components/ui/card';
@@ -20,13 +16,11 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useIslamPrayerData } from '@/hooks/use-islam-prayer-data';
 import { useTradition } from '@/hooks/use-tradition';
 import { useUser } from '@/hooks/use-user';
-import type { PrayerName } from '@/lib/prayer-times';
 import { formatTime } from '@/lib/prayer-times';
 
 export default function HomeScreen() {
   const { tradition } = useTradition();
   const { userName } = useUser();
-  console.log('HomeScreen rendered - file clean');
 
   return (
     <ThemedView style={styles.container}>
@@ -48,201 +42,23 @@ export default function HomeScreen() {
 }
 
 function IslamHome({ userName }: { userName: string }) {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [reminderStatusMessage, setReminderStatusMessage] = useState<string | null>(null);
-  const [activeReminders, setActiveReminders] = React.useState<Set<string>>(new Set());
-  const [selectedPrayer, setSelectedPrayer] = useState<{
-    name: PrayerName;
-    label: string;
-    time: Date;
-  } | null>(null);
-  const [isRescheduleModalVisible, setIsRescheduleModalVisible] = useState(false);
-  const actionSheetRef = useRef<PrayerActionSheetRef>(null);
   const router = useRouter();
 
   const {
-    now,
     todayPrayers,
     nextPrayer,
     currentPrayerName,
-    todayCompletion,
     completedCount,
     progress,
     locationText,
     countdownText,
-    requestLocationPermission,
-    togglePrayerCompletion,
-    todayRescheduled,
-    reschedulePrayer,
-    refreshPrayerData,
-  } = useIslamPrayerData(selectedDate);
-
-  const isToday = selectedDate.toDateString() === new Date().toDateString();
-
-  const fetchActiveReminders = React.useCallback(async () => {
-    try {
-      const pending = await Notifications.getAllScheduledNotificationsAsync();
-      const reminderIds = new Set(
-        pending
-          .filter((n) => n.content.data?.feature === 'islam-prayer-session')
-          .map((n) => n.content.data?.reminderId as string)
-          .filter(Boolean),
-      );
-      setActiveReminders(reminderIds);
-    } catch (error) {
-      console.error('Failed to fetch active reminders:', error);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    void fetchActiveReminders();
-  }, [fetchActiveReminders]);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      void refreshPrayerData();
-      void fetchActiveReminders();
-    }, [fetchActiveReminders, refreshPrayerData]),
-  );
-
-  const changeDate = (days: number) => {
-    const nextDate = new Date(selectedDate);
-    nextDate.setDate(selectedDate.getDate() + days);
-    setSelectedDate(nextDate);
-  };
-
-  const ensureReminderPermission = async () => {
-    await Notifications.setNotificationChannelAsync('prayer-reminders', {
-      name: 'Prayer reminders',
-      importance: Notifications.AndroidImportance.HIGH,
-    });
-
-    const existingPermission = await Notifications.getPermissionsAsync();
-    let finalStatus = existingPermission.status;
-    if (finalStatus !== 'granted') {
-      const requested = await Notifications.requestPermissionsAsync();
-      finalStatus = requested.status;
-    }
-
-    return finalStatus === 'granted';
-  };
-
-  const schedulePrayerReminder = async (
-    prayer: { name: string; label: string; time: Date },
-    minutesBefore: number = 15,
-  ) => {
-    setReminderStatusMessage(null);
-
-    try {
-      const granted = await ensureReminderPermission();
-      if (!granted) {
-        setReminderStatusMessage('Notifications are blocked. Enable notifications in settings.');
-        return;
-      }
-
-      const scheduleDate = new Date(prayer.time);
-      scheduleDate.setMinutes(scheduleDate.getMinutes() - minutesBefore);
-
-      // If the reminder time has already passed, schedule for tomorrow
-      if (scheduleDate.getTime() <= new Date().getTime()) {
-        scheduleDate.setDate(scheduleDate.getDate() + 1);
-      }
-
-      const reminderId = `${prayer.name}:${scheduleDate.toISOString().slice(0, 10)}:${minutesBefore}`;
-      const pending = await Notifications.getAllScheduledNotificationsAsync();
-      const existingReminder = pending.find(
-        (notification) =>
-          notification.content.data?.feature === 'islam-prayer-session' &&
-          notification.content.data?.prayer === prayer.name &&
-          notification.content.data?.reminderMinutes === minutesBefore,
-      );
-
-      if (existingReminder) {
-        await Notifications.cancelScheduledNotificationAsync(existingReminder.identifier);
-        await fetchActiveReminders();
-        setReminderStatusMessage(`Reminder cancelled for ${prayer.label}.`);
-        return;
-      }
-
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: `${prayer.label} prayer reminder`,
-          body: `${prayer.label} is in ${minutesBefore} minutes.`,
-          sound: 'default',
-          data: {
-            feature: 'islam-prayer-session',
-            prayer: prayer.name,
-            reminderId,
-            reminderMinutes: minutesBefore,
-            reminderTriggerTime: scheduleDate.toISOString(),
-            prayerTime: prayer.time.toISOString(),
-          },
-        },
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.DATE,
-          date: scheduleDate,
-        },
-      });
-
-      await fetchActiveReminders();
-      setReminderStatusMessage(`Reminder set for ${prayer.label} (${minutesBefore} min before).`);
-    } catch (error) {
-      console.error('Failed to schedule prayer reminder:', error);
-      setReminderStatusMessage('Could not set reminder right now. Please try again.');
-    }
-  };
-
-  const handleOpenActionSheet = (prayer: { name: PrayerName; label: string; time: Date }) => {
-    setSelectedPrayer(prayer);
-    actionSheetRef.current?.open();
-  };
-
-  const handleSetNotification = (minutes: number) => {
-    if (selectedPrayer) {
-      void schedulePrayerReminder(selectedPrayer, minutes);
-    }
-  };
-
-  const handleReschedule = () => {
-    if (selectedPrayer) {
-      setIsRescheduleModalVisible(true);
-    }
-  };
-
-  const handleToggleComplete = () => {
-    if (selectedPrayer) {
-      togglePrayerCompletion(selectedPrayer.name);
-    }
-  };
-
-  const handleSaveReschedule = (newTime: Date, withReminder: boolean, reminderMinutes: number) => {
-    if (selectedPrayer) {
-      reschedulePrayer(selectedPrayer.name, newTime, withReminder, reminderMinutes);
-      if (withReminder) {
-        void schedulePrayerReminder({ ...selectedPrayer, time: newTime }, reminderMinutes);
-      } else {
-        setReminderStatusMessage(`${selectedPrayer.label} rescheduled to ${formatTime(newTime)}.`);
-      }
-    }
-  };
-
-  const getNextPrayerTime = (): Date | null => {
-    if (!selectedPrayer) return null;
-    const currentIndex = todayPrayers.findIndex((p) => p.name === selectedPrayer.name);
-    const nextPrayerItem = todayPrayers[currentIndex + 1];
-    return nextPrayerItem ? nextPrayerItem.time : null;
-  };
+  } = useIslamPrayerData();
 
   const currentPrayer = todayPrayers.find((p) => p.name === currentPrayerName);
 
   // Prepare data for child components
   const nextPrayerTimeFormatted = nextPrayer ? formatTime(nextPrayer.time) : '--:--';
   const [nextTime, nextPeriod] = nextPrayerTimeFormatted.split(' ');
-
-  const prayersWithTime = todayPrayers.map((p) => ({
-    ...p,
-    formattedTime: formatTime(p.time),
-  }));
 
   return (
     <ScrollView
@@ -256,7 +72,7 @@ function IslamHome({ userName }: { userName: string }) {
           nextPrayerTime={nextTime || '--:--'}
           period={(nextPeriod as 'am' | 'pm') || 'am'}
           timeRemaining={countdownText}
-          date={selectedDate.toLocaleDateString([], {
+          date={new Date().toLocaleDateString([], {
             weekday: 'short',
             month: 'short',
             day: 'numeric',
@@ -282,65 +98,7 @@ function IslamHome({ userName }: { userName: string }) {
         progress={progress}
         completedCount={completedCount}
       />
-
-      <PrayerList
-        date={selectedDate}
-        isToday={isToday}
-        onDateChange={changeDate}
-        prayers={prayersWithTime}
-        completions={todayCompletion}
-        currentPrayerName={currentPrayerName}
-        nextPrayerName={nextPrayer?.name ?? null}
-        now={now}
-        rescheduledPrayers={todayRescheduled}
-        onOpenActionSheet={handleOpenActionSheet}
-        activeReminders={activeReminders}
-        onToggleReminder={schedulePrayerReminder}
-      />
-
-      {reminderStatusMessage && (
-        <View style={{ padding: 16 }}>
-          <ThemedText style={styles.reminderStatusText}>{reminderStatusMessage}</ThemedText>
-        </View>
-      )}
-
-      {/* Permissions banner if needed */}
-      {locationText === 'Permission required' && (
-        <TouchableOpacity
-          style={styles.permissionButton}
-          onPress={() => void requestLocationPermission()}
-        >
-          <ThemedText style={styles.permissionButtonText}>Enable Location</ThemedText>
-        </TouchableOpacity>
-      )}
-
-      <View style={{ height: 90 }} />
-
-      {/* Action Sheet */}
-      {selectedPrayer && (
-        <PrayerActionSheet
-          ref={actionSheetRef}
-          prayerName={selectedPrayer.name}
-          prayerLabel={selectedPrayer.label}
-          isCompleted={todayCompletion[selectedPrayer.name] ?? false}
-          onSetNotification={handleSetNotification}
-          onReschedule={handleReschedule}
-          onToggleComplete={handleToggleComplete}
-        />
-      )}
-
-      {/* Reschedule Modal */}
-      {selectedPrayer && (
-        <PrayerRescheduleModal
-          visible={isRescheduleModalVisible}
-          prayerName={selectedPrayer.name}
-          prayerLabel={selectedPrayer.label}
-          originalTime={selectedPrayer.time}
-          nextPrayerTime={getNextPrayerTime()}
-          onClose={() => setIsRescheduleModalVisible(false)}
-          onSave={handleSaveReschedule}
-        />
-      )}
+      <IslamPrayerListSection />
     </ScrollView>
   );
 }

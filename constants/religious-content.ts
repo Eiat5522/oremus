@@ -7,6 +7,7 @@ export interface BuddhistPrayer {
   subtitle: string;
   text: string;
   audioAsset: number;
+  albumArt: number;
 }
 
 export interface ChristianVerse {
@@ -25,10 +26,11 @@ export const buddhistPrayers: BuddhistPrayer[] = [
     subtitle: 'Mantra of Compassion',
     text: `Om Mani Padme Hum.
 The jewel is in the lotus.
-May compassion arise in my heart,
+    May compassion arise in my heart,
 May wisdom guide my speech,
 May all beings be free from suffering.`,
     audioAsset: require('../assets/sounds/om-mani.wav'),
+    albumArt: require('../assets/images/mantras/om-mani-cover.png'),
   },
   {
     id: 'metta-sutta',
@@ -42,6 +44,7 @@ Without exception, weak or strong,
 May none deceive another,
 May none wish harm upon another.`,
     audioAsset: require('../assets/sounds/metta.wav'),
+    albumArt: require('../assets/images/mantras/metta-cover.png'),
   },
   {
     id: 'heart-sutra-verse',
@@ -54,6 +57,7 @@ Gone utterly beyond.
 Awakening, hail!`,
     // TODO: Replace with correct audio file when available (heart-sutra.wav)
     audioAsset: require('../assets/sounds/metta.wav'),
+    albumArt: require('../assets/images/mantras/metta-cover.png'),
   },
   {
     id: 'nembutsu',
@@ -66,6 +70,7 @@ I take refuge in Infinite Life.
 May gratitude and trust fill this moment.`,
     // TODO: Replace with correct audio file when available (nembutsu.wav)
     audioAsset: require('../assets/sounds/metta.wav'),
+    albumArt: require('../assets/images/mantras/metta-cover.png'),
   },
 ];
 

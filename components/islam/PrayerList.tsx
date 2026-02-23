@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View, Dimensions } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -15,8 +15,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import type { PrayerName } from '@/lib/prayer-times';
-
-const { width } = Dimensions.get('window');
+import { isPrayerSessionPassed } from '@/lib/prayer-session';
 
 function getPrayerIcon(prayerName: PrayerName): string {
   switch (prayerName) {
@@ -127,37 +126,6 @@ export function PrayerList({
     transform: [{ translateX: translateX.value * 0.3 }],
   }));
 
-  // Helper function to determine if a prayer should show red X (missed)
-  const isPrayerMissed = (prayer: { name: PrayerName; time: Date }, index: number): boolean => {
-    // Only check for today
-    if (!isToday) return false;
-
-    const isComplete = completions[prayer.name];
-    const isRescheduled = prayer.name in rescheduledPrayers;
-
-    // If completed or rescheduled, don't show red X
-    if (isComplete || isRescheduled) return false;
-
-    // Get the next prayer in the list
-    const nextPrayer = prayers[index + 1];
-
-    // For the last prayer (e.g., Isha), use midnight (end of day) as the cutoff
-    if (!nextPrayer) {
-      // Calculate midnight (start of next day)
-      const midnight = new Date(now);
-      midnight.setDate(midnight.getDate() + 1);
-      midnight.setHours(0, 0, 0, 0);
-
-      // If current time has passed midnight (i.e., we're into the next day), the prayer is missed
-      return now.getTime() >= midnight.getTime();
-    }
-
-    // Prayer is missed if current time has passed the next prayer's time
-    // (meaning we missed the window for this prayer)
-    const nextPrayerTime = new Date(nextPrayer.time);
-    return now.getTime() > nextPrayerTime.getTime();
-  };
-
   return (
     <View style={styles.container}>
       {/* Header with Swipe Gesture */}
@@ -187,8 +155,14 @@ export function PrayerList({
         {prayers.map((prayer, index) => {
           const isComplete = completions[prayer.name];
           const isCurrent = currentPrayerName === prayer.name;
-          const isNext = nextPrayerName === prayer.name;
-          const isMissed = isPrayerMissed(prayer, index);
+          const isMissed = isPrayerSessionPassed(
+            prayers,
+            index,
+            now,
+            isToday,
+            isComplete,
+            prayer.name in rescheduledPrayers,
+          );
           const isRescheduled = prayer.name in rescheduledPrayers;
           const isReminderActive = isReminderActiveForPrayer(
             prayer.name,
@@ -205,8 +179,8 @@ export function PrayerList({
                 isComplete && styles.completeRow,
                 isMissed && styles.missedRow,
               ]}
-              onPress={() => onOpenActionSheet(prayer)}
-              activeOpacity={0.7}
+              onPress={isMissed ? undefined : () => onOpenActionSheet(prayer)}
+              activeOpacity={isMissed ? 1 : 0.7}
             >
               <View style={styles.leftContent}>
                 <ThemedText style={[styles.prayerName, isCurrent && styles.currentText]}>
@@ -253,7 +227,8 @@ export function PrayerList({
                   isActive={isReminderActive}
                   activeColor="#fbbf24"
                   color={isCurrent ? '#ffffff' : theme.icon}
-                  onPress={() => onToggleReminder(prayer)}
+                  onPress={isMissed ? () => {} : () => onToggleReminder(prayer)}
+                  disabled={isMissed}
                 />
               </View>
             </TouchableOpacity>

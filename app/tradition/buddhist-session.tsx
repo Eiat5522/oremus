@@ -1,21 +1,26 @@
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { buddhistPrayers } from '@/constants/religious-content';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+
+function formatTime(seconds: number) {
+  const safeSeconds = Math.max(0, Math.floor(seconds));
+  const mins = Math.floor(safeSeconds / 60)
+    .toString()
+    .padStart(2, '0');
+  const secs = (safeSeconds % 60).toString().padStart(2, '0');
+  return `${mins}:${secs}`;
+}
 
 export default function BuddhistSessionScreen() {
   const router = useRouter();
   const { prayerId } = useLocalSearchParams<{ prayerId?: string }>();
-  const colorScheme = useColorScheme() ?? 'light';
-  const theme = Colors[colorScheme];
 
   const prayer = useMemo(() => {
     if (buddhistPrayers.length === 0) return null;
@@ -23,39 +28,23 @@ export default function BuddhistSessionScreen() {
     return buddhistPrayers.find((entry) => entry.id === prayerId);
   }, [prayerId]);
   const hasInvalidPrayerId = Boolean(prayerId) && prayer === undefined;
-
-  const scrollRef = useRef<ScrollView>(null);
-  const scrollOffset = useRef(0);
-  const maxOffset = useRef(0);
   const player = useAudioPlayer(prayer?.audioAsset);
   const status = useAudioPlayerStatus(player);
-
-  const [autoScroll, setAutoScroll] = useState(false);
-  const [scrollSpeed, setScrollSpeed] = useState(26);
   const [audioError, setAudioError] = useState<string | null>(null);
+
+  const isReleasedPlayerError = useCallback((error: unknown) => {
+    return error instanceof Error && error.message.includes('NativeSharedObjectNotFoundException');
+  }, []);
+
   const safePause = useCallback(() => {
     try {
       player.pause();
     } catch (error) {
-      console.warn('Audio pause skipped: player already released.', error);
-    }
-  }, [player]);
-
-  useEffect(() => {
-    if (!autoScroll) {
-      return;
-    }
-    const timer = setInterval(() => {
-      const nextOffset = Math.min(scrollOffset.current + scrollSpeed, maxOffset.current);
-      scrollRef.current?.scrollTo({ y: nextOffset, animated: true });
-      scrollOffset.current = nextOffset;
-      if (nextOffset >= maxOffset.current) {
-        setAutoScroll(false);
+      if (!isReleasedPlayerError(error)) {
+        console.error('Failed to pause Buddhist prayer audio:', error);
       }
-    }, 750);
-
-    return () => clearInterval(timer);
-  }, [autoScroll, scrollSpeed]);
+    }
+  }, [isReleasedPlayerError, player]);
 
   useEffect(() => {
     if (!prayer) {
@@ -68,7 +57,7 @@ export default function BuddhistSessionScreen() {
         await player.replace(prayer.audioAsset);
       } catch (error) {
         console.error('Failed to load Buddhist prayer audio:', error);
-        setAudioError('Could not load prayer audio on this device.');
+        setAudioError('Could not load mantra audio on this device.');
       }
     };
     void loadPrayerAudio();
@@ -80,11 +69,10 @@ export default function BuddhistSessionScreen() {
     };
   }, [safePause]);
 
-  const togglePlay = async () => {
+  const togglePlay = useCallback(async () => {
     if (!prayer) {
       return;
     }
-
     try {
       if (status.playing) {
         safePause();
@@ -95,20 +83,31 @@ export default function BuddhistSessionScreen() {
       }
       player.play();
     } catch (error) {
-      console.error('Failed to play Buddhist prayer audio:', error);
-      setAudioError('Could not play prayer audio on this device.');
-      return;
+      console.error('Failed to toggle Buddhist prayer audio:', error);
+      setAudioError('Could not play mantra audio on this device.');
     }
-  };
+  }, [player, prayer, safePause, status.currentTime, status.duration, status.playing]);
+
+  const seekBy = useCallback(
+    async (delta: number) => {
+      try {
+        const nextTime = Math.max(0, Math.min(status.currentTime + delta, status.duration || 0));
+        await player.seekTo(nextTime);
+      } catch (error) {
+        console.error('Failed to seek Buddhist prayer audio:', error);
+      }
+    },
+    [player, status.currentTime, status.duration],
+  );
 
   if (prayer === null) {
     return (
       <ThemedView style={[styles.container, styles.stateContainer]}>
-        <Stack.Screen options={{ title: 'Buddhist Session', headerShown: true }} />
+        <Stack.Screen options={{ title: 'Buddhist Player', headerShown: true }} />
         <View style={styles.stateCard}>
-          <ThemedText style={styles.stateTitle}>Prayer content unavailable</ThemedText>
+          <ThemedText style={styles.stateTitle}>Mantra unavailable</ThemedText>
           <ThemedText style={styles.stateMessage}>
-            No Buddhist prayers are configured right now. Please try again later.
+            No Buddhist chants are configured yet. Please try again later.
           </ThemedText>
           <Button title="Go Back" onPress={() => router.back()} />
         </View>
@@ -119,11 +118,11 @@ export default function BuddhistSessionScreen() {
   if (hasInvalidPrayerId) {
     return (
       <ThemedView style={[styles.container, styles.stateContainer]}>
-        <Stack.Screen options={{ title: 'Buddhist Session', headerShown: true }} />
+        <Stack.Screen options={{ title: 'Buddhist Player', headerShown: true }} />
         <View style={styles.stateCard}>
-          <ThemedText style={styles.stateTitle}>Prayer not found</ThemedText>
+          <ThemedText style={styles.stateTitle}>Mantra not found</ThemedText>
           <ThemedText style={styles.stateMessage}>
-            We couldn&apos;t find the requested Buddhist prayer. Please choose another prayer.
+            We couldn&apos;t find that mantra. Please choose another one.
           </ThemedText>
           <Button title="Go Back" onPress={() => router.back()} />
         </View>
@@ -135,68 +134,47 @@ export default function BuddhistSessionScreen() {
     <ThemedView style={styles.container}>
       <Stack.Screen
         options={{
-          title: 'Buddhist Session',
+          title: prayer.title,
           headerShown: true,
-          headerTransparent: true,
-          headerLeft: () => (
-            <Pressable onPress={() => router.back()} style={styles.headerIcon}>
-              <IconSymbol name="arrow.left" size={20} color={theme.text} />
-            </Pressable>
-          ),
         }}
       />
 
-      <ScrollView
-        ref={scrollRef}
-        contentContainerStyle={styles.content}
-        onScroll={(event) => {
-          scrollOffset.current = event.nativeEvent.contentOffset.y;
-        }}
-        onContentSizeChange={(_, contentHeight) => {
-          maxOffset.current = Math.max(contentHeight - 420, 0);
-        }}
-        scrollEventThrottle={16}
-      >
-        <View style={styles.heroCard}>
+      <View style={styles.content}>
+        <Image source={prayer.albumArt} style={styles.coverArt} />
+        <View style={styles.meta}>
           <ThemedText style={styles.title}>{prayer.title}</ThemedText>
           <ThemedText style={styles.subtitle}>{prayer.subtitle}</ThemedText>
         </View>
 
-        <View style={styles.controlsRow}>
-          <Button
-            title={autoScroll ? 'Pause Scroll' : 'Auto Scroll'}
-            variant={autoScroll ? 'secondary' : 'primary'}
-            onPress={() => setAutoScroll((value) => !value)}
-            style={styles.controlButton}
-          />
-          <Pressable
-            onPress={() => setScrollSpeed((value) => (value >= 40 ? 20 : value + 10))}
-            style={styles.speedPill}
-          >
-            <IconSymbol name="timer" size={16} color="#92400e" />
-            <ThemedText style={styles.speedPillText}>{scrollSpeed}px</ThemedText>
-          </Pressable>
-        </View>
-
-        <View style={styles.audioCard}>
-          <ThemedText style={styles.audioLabel}>Prayer audio</ThemedText>
-          <Pressable onPress={togglePlay} style={styles.audioAction}>
-            <IconSymbol
-              name={status.playing ? 'pause.fill' : 'play.fill'}
-              size={20}
-              color="#ffffff"
+        <View style={styles.progressRow}>
+          <ThemedText style={styles.timeText}>{formatTime(status.currentTime)}</ThemedText>
+          <View style={styles.progressTrack}>
+            <View
+              style={[
+                styles.progressFill,
+                {
+                  width: `${status.duration > 0 ? (status.currentTime / status.duration) * 100 : 0}%`,
+                },
+              ]}
             />
-            <ThemedText style={styles.audioActionText}>
-              {status.playing ? 'Pause audio' : 'Play audio'}
-            </ThemedText>
-          </Pressable>
-          {audioError ? <ThemedText style={styles.errorText}>{audioError}</ThemedText> : null}
+          </View>
+          <ThemedText style={styles.timeText}>{formatTime(status.duration)}</ThemedText>
         </View>
 
-        <View style={styles.textCard}>
-          <ThemedText style={styles.textBody}>{prayer.text}</ThemedText>
+        <View style={styles.transportRow}>
+          <Pressable style={styles.smallControl} onPress={() => void seekBy(-15)}>
+            <ThemedText style={styles.smallControlText}>-15</ThemedText>
+          </Pressable>
+          <Pressable style={styles.playControl} onPress={() => void togglePlay()}>
+            <IconSymbol name={status.playing ? 'pause.fill' : 'play.fill'} size={34} color="#fff" />
+          </Pressable>
+          <Pressable style={styles.smallControl} onPress={() => void seekBy(15)}>
+            <ThemedText style={styles.smallControlText}>+15</ThemedText>
+          </Pressable>
         </View>
-      </ScrollView>
+
+        {audioError ? <ThemedText style={styles.errorText}>{audioError}</ThemedText> : null}
+      </View>
     </ThemedView>
   );
 }
@@ -204,6 +182,7 @@ export default function BuddhistSessionScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#2a1105',
   },
   stateContainer: {
     alignItems: 'center',
@@ -228,93 +207,87 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     opacity: 0.85,
   },
-  headerIcon: {
-    padding: 8,
-    marginLeft: 8,
-  },
   content: {
-    paddingTop: 100,
-    paddingHorizontal: 16,
-    paddingBottom: 44,
-    gap: 14,
+    flex: 1,
+    paddingTop: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 36,
+    justifyContent: 'space-between',
   },
-  heroCard: {
-    borderRadius: 16,
+  coverArt: {
+    width: '100%',
+    aspectRatio: 1,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.3)',
-    backgroundColor: 'rgba(245, 158, 11, 0.08)',
-    padding: 16,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  meta: {
+    marginTop: 18,
     gap: 4,
   },
   title: {
-    fontSize: 24,
+    color: '#fff7ed',
+    fontSize: 26,
     fontWeight: '800',
   },
   subtitle: {
+    color: '#fed7aa',
     fontSize: 14,
-    opacity: 0.7,
   },
-  controlsRow: {
+  progressRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    marginTop: 20,
   },
-  controlButton: {
+  timeText: {
+    color: '#ffedd5',
+    fontSize: 12,
+    minWidth: 38,
+  },
+  progressTrack: {
     flex: 1,
+    height: 4,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255, 237, 213, 0.3)',
+    overflow: 'hidden',
   },
-  speedPill: {
-    minHeight: 46,
-    minWidth: 90,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.4)',
-    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+  progressFill: {
+    height: '100%',
+    borderRadius: 999,
+    backgroundColor: '#fb923c',
+  },
+  transportRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row',
-    gap: 6,
+    gap: 20,
+    marginTop: 18,
   },
-  speedPillText: {
-    color: '#92400e',
-    fontWeight: '700',
-  },
-  audioCard: {
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(15, 23, 42, 0.1)',
-    padding: 14,
-    gap: 10,
-  },
-  audioLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  audioAction: {
-    borderRadius: 12,
-    minHeight: 48,
-    backgroundColor: '#b45309',
+  smallControl: {
+    width: 52,
+    height: 52,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255, 237, 213, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row',
-    gap: 8,
   },
-  audioActionText: {
-    color: '#ffffff',
-    fontWeight: '700',
+  smallControlText: {
+    color: '#fff7ed',
+    fontWeight: '800',
   },
-  textCard: {
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(15, 23, 42, 0.1)',
-    padding: 16,
-  },
-  textBody: {
-    fontSize: 22,
-    lineHeight: 34,
+  playControl: {
+    width: 72,
+    height: 72,
+    borderRadius: 999,
+    backgroundColor: '#ea580c',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   errorText: {
-    color: '#dc2626',
+    color: '#fecaca',
     fontSize: 13,
+    marginTop: 16,
+    textAlign: 'center',
   },
 });

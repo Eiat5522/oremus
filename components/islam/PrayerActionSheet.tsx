@@ -18,6 +18,7 @@ type PrayerActionSheetProps = {
   prayerName: PrayerName;
   prayerLabel: string;
   isCompleted: boolean;
+  isSessionPassed?: boolean;
   onSetNotification: (minutes: number) => void;
   onReschedule: () => void;
   onToggleComplete: () => void;
@@ -25,7 +26,15 @@ type PrayerActionSheetProps = {
 
 export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSheetProps>(
   (
-    { prayerName, prayerLabel, isCompleted, onSetNotification, onReschedule, onToggleComplete },
+    {
+      prayerName,
+      prayerLabel,
+      isCompleted,
+      isSessionPassed = false,
+      onSetNotification,
+      onReschedule,
+      onToggleComplete,
+    },
     ref,
   ) => {
     const bottomSheetRef = React.useRef<BottomSheet>(null);
@@ -75,6 +84,30 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
             </ThemedText>
           </View>
 
+          {/* Mark Complete/Incomplete Section */}
+          <TouchableOpacity
+            disabled={isSessionPassed}
+            style={[
+              styles.optionRow,
+              { borderTopColor: theme.borderLight },
+              isSessionPassed && styles.optionRowDisabled,
+            ]}
+            onPress={() => {
+              onToggleComplete();
+              bottomSheetRef.current?.close();
+            }}
+          >
+            <IconSymbol
+              name={isCompleted ? 'close' : 'checkmark'}
+              size={22}
+              color={isCompleted ? '#ef4444' : '#22c55e'}
+            />
+            <ThemedText style={styles.optionText}>
+              {isCompleted ? 'Mark Incomplete' : 'Mark Complete'}
+            </ThemedText>
+            <IconSymbol name="chevron.right" size={18} color={theme.icon} />
+          </TouchableOpacity>
+
           {/* Set Notification Section */}
           <View style={styles.section}>
             <ThemedText style={styles.sectionTitle}>Set Notification</ThemedText>
@@ -102,6 +135,7 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
               ))}
             </View>
             <TouchableOpacity
+              disabled={isSessionPassed}
               style={[styles.actionButton, { backgroundColor: theme.primary }]}
               onPress={() => {
                 onSetNotification(selectedReminder);
@@ -117,7 +151,12 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
 
           {/* Reschedule Section */}
           <TouchableOpacity
-            style={[styles.optionRow, { borderTopColor: theme.borderLight }]}
+            disabled={isSessionPassed}
+            style={[
+              styles.optionRow,
+              { borderTopColor: theme.borderLight },
+              isSessionPassed && styles.optionRowDisabled,
+            ]}
             onPress={() => {
               onReschedule();
               bottomSheetRef.current?.close();
@@ -128,24 +167,11 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
             <IconSymbol name="chevron.right" size={18} color={theme.icon} />
           </TouchableOpacity>
 
-          {/* Mark Complete/Incomplete Section */}
-          <TouchableOpacity
-            style={[styles.optionRow, { borderTopColor: theme.borderLight }]}
-            onPress={() => {
-              onToggleComplete();
-              bottomSheetRef.current?.close();
-            }}
-          >
-            <IconSymbol
-              name={isCompleted ? 'close' : 'checkmark'}
-              size={22}
-              color={isCompleted ? '#ef4444' : '#22c55e'}
-            />
-            <ThemedText style={styles.optionText}>
-              {isCompleted ? 'Mark Incomplete' : 'Mark Complete'}
+          {isSessionPassed ? (
+            <ThemedText style={styles.lockedHint}>
+              This prayer session has already passed and can no longer be changed.
             </ThemedText>
-            <IconSymbol name="chevron.right" size={18} color={theme.icon} />
-          </TouchableOpacity>
+          ) : null}
 
           {/* Cancel Button */}
           <TouchableOpacity
@@ -244,6 +270,14 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: '500',
+  },
+  optionRowDisabled: {
+    opacity: 0.45,
+  },
+  lockedHint: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 10,
   },
   cancelButton: {
     alignItems: 'center',

@@ -16,6 +16,7 @@ interface AnimatedBellProps {
   size?: number;
   color?: string;
   activeColor?: string;
+  disabled?: boolean;
 }
 
 export function AnimatedBell({
@@ -24,6 +25,7 @@ export function AnimatedBell({
   size = 18,
   color = 'rgba(15,23,42,0.45)',
   activeColor = '#16a34a',
+  disabled = false,
 }: AnimatedBellProps) {
   const rotation = useSharedValue(0);
   const scale = useSharedValue(1);
@@ -55,14 +57,21 @@ export function AnimatedBell({
   };
 
   const handlePress = () => {
+    if (disabled) {
+      return;
+    }
     triggerAnimation();
     onPress();
   };
 
   return (
-    <Pressable onPress={handlePress} hitSlop={12}>
+    <Pressable onPress={handlePress} hitSlop={12} disabled={disabled}>
       <Animated.View style={animatedStyle}>
-        <IconSymbol name="bell.fill" size={size} color={isActive ? activeColor : color} />
+        <IconSymbol
+          name="bell.fill"
+          size={size}
+          color={disabled ? 'rgba(148,163,184,0.8)' : isActive ? activeColor : color}
+        />
       </Animated.View>
     </Pressable>
   );
