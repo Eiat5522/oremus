@@ -628,8 +628,10 @@ const styles = StyleSheet.create({
   },
   timerText: {
     fontSize: 88,
+    lineHeight: 96,
     fontWeight: '200',
-    letterSpacing: -2,
+    letterSpacing: 0,
+    fontVariant: ['tabular-nums'],
   },
   timerControls: {
     alignItems: 'center',

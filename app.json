@@ -28,7 +28,13 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.oremus",
-      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION", "POST_NOTIFICATIONS"]
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "POST_NOTIFICATIONS",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "output": "static",
@@ -57,6 +63,12 @@
         "projectId": "d7a43b83-61d5-4e2e-afdf-499c14c0bbc3"
       }
     },
-    "sdkVersion": "54.0.0"
+    "sdkVersion": "54.0.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/d7a43b83-61d5-4e2e-afdf-499c14c0bbc3"
+    }
   }
 }

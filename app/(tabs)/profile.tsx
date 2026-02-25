@@ -123,6 +123,12 @@ export default function ProfileScreen() {
               isFirst
               onPress={() => router.push('/onboarding')}
             />
+            <SettingItem
+              icon="shield.lock"
+              title="App Blocking"
+              color="#16a34a"
+              onPress={() => router.push('/settings/app-blocking')}
+            />
             <SettingItem icon="bell.fill" title="Notifications" color="#fbbf24" isLast />
           </View>
         </View>

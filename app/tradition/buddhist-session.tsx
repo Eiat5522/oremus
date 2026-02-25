@@ -8,6 +8,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { buddhistPrayers } from '@/constants/religious-content';
+import { recordPrayerCompletion } from '@/lib/focus-gate';
 
 function formatTime(seconds: number) {
   const safeSeconds = Math.max(0, Math.floor(seconds));
@@ -33,7 +34,14 @@ export default function BuddhistSessionScreen() {
   const [audioError, setAudioError] = useState<string | null>(null);
 
   const isReleasedPlayerError = useCallback((error: unknown) => {
-    return error instanceof Error && error.message.includes('NativeSharedObjectNotFoundException');
+    if (!(error instanceof Error)) {
+      return false;
+    }
+    return (
+      error.message.includes('NativeSharedObjectNotFoundException') ||
+      error.message.includes('Cannot use shared object that was already released') ||
+      error.message.includes('cannot be cast to type expo.modules.audio.AudioPlayer')
+    );
   }, []);
 
   const safePause = useCallback(() => {
@@ -140,7 +148,7 @@ export default function BuddhistSessionScreen() {
       />
 
       <View style={styles.content}>
-        <Image source={prayer.albumArt} style={styles.coverArt} />
+        <Image source={prayer.albumArt} style={styles.coverArt} resizeMode="contain" />
         <View style={styles.meta}>
           <ThemedText style={styles.title}>{prayer.title}</ThemedText>
           <ThemedText style={styles.subtitle}>{prayer.subtitle}</ThemedText>
@@ -172,6 +180,14 @@ export default function BuddhistSessionScreen() {
             <ThemedText style={styles.smallControlText}>+15</ThemedText>
           </Pressable>
         </View>
+
+        <Button
+          title="Complete Prayer Session"
+          onPress={() => {
+            void recordPrayerCompletion();
+            router.back();
+          }}
+        />
 
         {audioError ? <ThemedText style={styles.errorText}>{audioError}</ThemedText> : null}
       </View>
@@ -216,10 +232,13 @@ const styles = StyleSheet.create({
   },
   coverArt: {
     width: '100%',
+    maxHeight: 320,
     aspectRatio: 1,
+    alignSelf: 'center',
     borderRadius: 20,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
   },
   meta: {
     marginTop: 18,

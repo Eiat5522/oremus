@@ -9,6 +9,7 @@ import {
   getPrayerTimesForDate,
   type PrayerName,
 } from '@/lib/prayer-times';
+import { recordPrayerCompletion } from '@/lib/focus-gate';
 
 const PRAYER_COMPLETION_STORAGE_KEY = '@oremus/islam-prayer-completion-v1';
 const PRAYER_RESCHEDULE_STORAGE_KEY = '@oremus/islam-prayer-rescheduled-v1';
@@ -264,21 +265,22 @@ export function useIslamPrayerData(referenceDate?: Date) {
 
   const togglePrayerCompletion = useCallback(
     (name: PrayerName) => {
-      setPrayerCompletions((previous) => {
-        const dayState = previous[todayKey] ?? getDefaultCompletionState();
-        const nextDayState: DailyPrayerCompletion = {
-          ...dayState,
-          [name]: !dayState[name],
-        };
-        const nextState: PrayerCompletionStore = {
-          ...previous,
-          [todayKey]: nextDayState,
-        };
-        void AsyncStorage.setItem(PRAYER_COMPLETION_STORAGE_KEY, JSON.stringify(nextState));
-        return nextState;
-      });
+      const dayState = prayerCompletions[todayKey] ?? getDefaultCompletionState();
+      const nextDayState: DailyPrayerCompletion = {
+        ...dayState,
+        [name]: !dayState[name],
+      };
+      const nextState: PrayerCompletionStore = {
+        ...prayerCompletions,
+        [todayKey]: nextDayState,
+      };
+      if (!dayState[name]) {
+        void recordPrayerCompletion();
+      }
+      setPrayerCompletions(() => nextState);
+      void AsyncStorage.setItem(PRAYER_COMPLETION_STORAGE_KEY, JSON.stringify(nextState));
     },
-    [todayKey],
+    [prayerCompletions, todayKey],
   );
 
   const reschedulePrayer = useCallback(

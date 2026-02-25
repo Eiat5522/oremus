@@ -51,7 +51,14 @@ export default function BuddhistScreen() {
   const status = useAudioPlayerStatus(player);
 
   const isReleasedPlayerError = useCallback((error: unknown) => {
-    return error instanceof Error && error.message.includes('NativeSharedObjectNotFoundException');
+    if (!(error instanceof Error)) {
+      return false;
+    }
+    return (
+      error.message.includes('NativeSharedObjectNotFoundException') ||
+      error.message.includes('Cannot use shared object that was already released') ||
+      error.message.includes('cannot be cast to type expo.modules.audio.AudioPlayer')
+    );
   }, []);
 
   const safePause = useCallback(() => {

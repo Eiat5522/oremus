@@ -35,6 +35,7 @@ export default function QiblaScreen() {
   const cumulativeRotation = useRef(0);
 
   const [activeSubtab, setActiveSubtab] = useState<QiblaSubtab>('compass');
+  const activeSubtabRef = useRef<QiblaSubtab>('compass');
   const [locationText, setLocationText] = useState('Location access required');
   const [locationError, setLocationError] = useState<string | null>(null);
   const [locationPermissionStatus, setLocationPermissionStatus] =
@@ -45,6 +46,10 @@ export default function QiblaScreen() {
   const [coords, setCoords] = useState<Location.LocationObjectCoords | null>(null);
   const [heading, setHeading] = useState<number>(0);
   const [savedPrayerLocation, setSavedPrayerLocation] = useState<SavedPrayerLocation | null>(null);
+
+  useEffect(() => {
+    activeSubtabRef.current = activeSubtab;
+  }, [activeSubtab]);
 
   const prayerCoords = useMemo(() => {
     if (coords) {
@@ -242,12 +247,12 @@ export default function QiblaScreen() {
         const bestHeading =
           initialHeading.trueHeading >= 0 ? initialHeading.trueHeading : initialHeading.magHeading;
 
-        if (mounted) {
+        if (mounted && activeSubtabRef.current === 'compass') {
           setHeading(bestHeading);
         }
 
         headingSubscription = await Location.watchHeadingAsync((headingUpdate) => {
-          if (!mounted) {
+          if (!mounted || activeSubtabRef.current !== 'compass') {
             return;
           }
           const liveHeading =

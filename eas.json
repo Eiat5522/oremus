@@ -9,22 +9,37 @@
       "distribution": "internal",
       "node": "20.20.0",
       "env": {
-        "NODE_ENV": "production"
-      }
+        "EXPO_IS_STAGING": "true"
+      },
+      "channel": "development"
     },
     "preview": {
       "distribution": "internal",
       "node": "20.20.0",
       "env": {
-        "NODE_ENV": "production"
-      }
+        "EXPO_IS_STAGING": "true"
+      },
+      "channel": "preview"
     },
     "production": {
       "node": "20.20.0",
       "autoIncrement": true,
       "env": {
-        "NODE_ENV": "production"
-      }
+        "EXPO_IS_STAGING": "false"
+      },
+      "channel": "production"
+    },
+    "development-simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "environment": "development",
+      "env": {
+        "EXPO_IS_STAGING": "true"
+      },
+      "channel": "development-simulator"
     }
   },
   "submit": {

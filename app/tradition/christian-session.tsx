@@ -10,6 +10,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { christianVerses } from '@/constants/religious-content';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { recordPrayerCompletion } from '@/lib/focus-gate';
 
 export default function ChristianSessionScreen() {
   const router = useRouter();
@@ -121,6 +122,13 @@ export default function ChristianSessionScreen() {
               scrollRef.current?.scrollTo({ y: 0, animated: true });
               scrollOffset.current = 0;
               setAutoScroll(false);
+            }}
+          />
+          <Button
+            title="Complete Prayer Session"
+            onPress={() => {
+              void recordPrayerCompletion();
+              router.back();
             }}
           />
         </View>
