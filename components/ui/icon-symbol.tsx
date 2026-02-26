@@ -65,6 +65,7 @@ const MAPPING = {
   'temple.buddhist': 'temple-buddhist',
   checkmark: 'check',
   'arrow.left.ios': 'arrow-back-ios-new',
+  'arrow.clockwise': 'refresh',
   'info.circle': 'info',
   'location.fill': 'location-on',
   kaaba: 'mosque',

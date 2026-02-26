@@ -1,28 +1,23 @@
-import * as Location from 'expo-location';
+import { CameraView } from 'expo-camera';
 import React from 'react';
-import { Animated, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 
-type PrayerLocationPreset = {
-  id: string;
-  label: string;
-  latitude: number;
-  longitude: number;
-};
-
 type QiblaCompassPageProps = {
-  accuracyText: string;
-  locationText: string;
-  locationError: string | null;
-  locationPermissionStatus: Location.PermissionStatus | null;
-  canAskLocationPermission: boolean;
-  isRequestingLocationPermission: boolean;
-  onRequestLocationPermission: () => void;
-  onOpenLocationSettings: () => void;
-  qiblaBearing: number | null;
-  distanceKm: number | null;
+  showLiveCamera: boolean;
+  cameraPermissionStatus: string | null;
+  canAskCameraPermission: boolean;
+  isRequestingCameraPermission: boolean;
+  onRequestCameraPermission: () => void;
+  onOpenCameraSettings: () => void;
+  onClose: () => void;
+  onRecenterCalibration: () => void;
+  onNudgeCalibrationLeft: () => void;
+  onNudgeCalibrationRight: () => void;
+  calibrationOffset: number;
   alignmentDelta: number | null;
   isAligned: boolean;
   needleTransform: {
@@ -30,469 +25,293 @@ type QiblaCompassPageProps = {
       rotate: Animated.AnimatedInterpolation<string | number>;
     }[];
   };
-  prayerLocationLabel: string | null;
-  usingDeviceLocationForPrayers: boolean;
-  prayerLocationPresets: PrayerLocationPreset[];
-  selectedPrayerLocationId: string | null;
-  onSelectPrayerLocation: (locationId: string) => void;
-  onClearSavedPrayerLocation: () => void;
 };
 
-const CARDINAL_LABELS = [
-  { label: 'N', position: 'north' },
-  { label: 'E', position: 'east' },
-  { label: 'S', position: 'south' },
-  { label: 'W', position: 'west' },
-] as const;
-
-const DIAL_TICKS = Array.from({ length: 24 }, (_, index) => index * 15);
-
 export function QiblaCompassPage({
-  accuracyText,
-  locationText,
-  locationError,
-  locationPermissionStatus,
-  canAskLocationPermission,
-  isRequestingLocationPermission,
-  onRequestLocationPermission,
-  onOpenLocationSettings,
-  qiblaBearing,
-  distanceKm,
+  showLiveCamera,
+  cameraPermissionStatus,
+  canAskCameraPermission,
+  isRequestingCameraPermission,
+  onRequestCameraPermission,
+  onOpenCameraSettings,
+  onClose,
+  onRecenterCalibration,
+  onNudgeCalibrationLeft,
+  onNudgeCalibrationRight,
+  calibrationOffset,
   alignmentDelta,
   isAligned,
   needleTransform,
-  prayerLocationLabel,
-  usingDeviceLocationForPrayers,
-  prayerLocationPresets,
-  selectedPrayerLocationId,
-  onSelectPrayerLocation,
-  onClearSavedPrayerLocation,
 }: QiblaCompassPageProps) {
-  const platformLabel = process.env.EXPO_OS === 'ios' ? 'iOS' : 'device';
+  const insets = useSafeAreaInsets();
 
   return (
-    <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.content}
-    >
-      <View style={styles.heroTextBlock}>
-        <ThemedText style={styles.heroTitle}>Accurate Kaaba Direction</ThemedText>
-        <ThemedText style={styles.heroSubtitle}>GPS-verified for peace of mind</ThemedText>
-        <View style={styles.heroChips}>
-          <View style={styles.heroChip}>
-            <IconSymbol name="location.fill" size={12} color="#0f5132" />
-            <ThemedText style={styles.heroChipText}>{accuracyText}</ThemedText>
-          </View>
-          <View style={styles.heroChipSecondary}>
-            <ThemedText style={styles.heroChipSecondaryText}>{locationText}</ThemedText>
-          </View>
-        </View>
-        {locationError ? <ThemedText style={styles.errorText}>{locationError}</ThemedText> : null}
-        {locationPermissionStatus !== 'granted' && canAskLocationPermission ? (
-          <Pressable
-            disabled={isRequestingLocationPermission}
-            onPress={onRequestLocationPermission}
-            style={[
-              styles.locationPermissionButton,
-              isRequestingLocationPermission && styles.locationPermissionButtonDisabled,
-            ]}
-          >
-            <ThemedText style={styles.locationPermissionButtonText}>
-              {isRequestingLocationPermission
-                ? 'Requesting permission...'
-                : 'Allow location access'}
-            </ThemedText>
-          </Pressable>
-        ) : null}
-        {locationPermissionStatus !== 'granted' && !canAskLocationPermission ? (
-          <Pressable onPress={onOpenLocationSettings} style={styles.locationSettingsButton}>
-            <ThemedText style={styles.locationSettingsButtonText}>
-              Open {platformLabel} settings for location
-            </ThemedText>
-          </Pressable>
-        ) : null}
+    <View style={styles.container}>
+      {showLiveCamera ? (
+        <CameraView style={StyleSheet.absoluteFill} facing="back" />
+      ) : (
+        <View style={[StyleSheet.absoluteFill, styles.fallbackBackground]} />
+      )}
+
+      <View style={[StyleSheet.absoluteFill, styles.sceneScrim]} />
+
+      <View style={[styles.topControls, { top: insets.top + 12 }]}>
+        <Pressable onPress={onClose} style={styles.iconButton}>
+          <IconSymbol name="close" size={20} color="#ffffff" />
+        </Pressable>
+
+        <Pressable onPress={onRecenterCalibration} style={styles.iconButton}>
+          <IconSymbol name="arrow.clockwise" size={20} color="#ffffff" />
+        </Pressable>
       </View>
 
-      <View style={styles.compassCard}>
-        <View style={styles.compassDial}>
-          {DIAL_TICKS.map((rotation) => (
-            <View
-              key={rotation}
-              style={[styles.tickMark, { transform: [{ rotate: `${rotation}deg` }] }]}
-            />
-          ))}
-
-          {CARDINAL_LABELS.map(({ label, position }) => (
-            <View key={label} style={[styles.cardinalBase, getCardinalPositionStyle(position)]}>
-              <ThemedText style={styles.cardinalText}>{label}</ThemedText>
-            </View>
-          ))}
-
-          <Animated.View style={[styles.needleLayer, needleTransform]}>
-            <View style={styles.needleTip} />
-            <View style={styles.needleStem} />
-          </Animated.View>
-
-          <View style={styles.centerDot} />
+      <View style={styles.centerZone}>
+        <Animated.View style={[styles.reticleWrap, needleTransform]}>
+          <View style={styles.reticleRingOuter} />
+          <View style={styles.reticleRingInner} />
           <View style={styles.kaabaBadge}>
-            <IconSymbol name="kaaba" size={20} color="#192445" />
+            <IconSymbol name="kaaba" size={22} color="#161616" />
           </View>
-        </View>
+        </Animated.View>
 
-        <View style={styles.compassMetaRow}>
-          <View style={styles.metaPill}>
-            <ThemedText style={styles.metaPillLabel}>Qibla</ThemedText>
-            <ThemedText style={styles.metaPillValue}>
-              {qiblaBearing === null ? '—' : `${Math.round(qiblaBearing)}°`}
-            </ThemedText>
-          </View>
-          <View style={styles.metaPill}>
-            <ThemedText style={styles.metaPillLabel}>Distance</ThemedText>
-            <ThemedText style={styles.metaPillValue}>
-              {distanceKm === null ? '—' : `${distanceKm.toFixed(0)} km`}
-            </ThemedText>
-          </View>
-        </View>
-
-        <ThemedText style={styles.alignmentText}>
-          {alignmentDelta === null
-            ? 'Align your phone to begin'
-            : isAligned
-              ? 'Facing Qibla'
-              : `Turn ${Math.round(alignmentDelta)}° to align with Qibla`}
-        </ThemedText>
+        <View style={styles.dashedGuide} />
+        <View style={styles.directionArrow} />
       </View>
 
-      <View style={styles.prayerLocationCard}>
-        <ThemedText style={styles.prayerLocationTitle}>Prayer Time Location</ThemedText>
-        <ThemedText style={styles.prayerLocationSubtitle}>
-          {usingDeviceLocationForPrayers
-            ? `Using device location: ${prayerLocationLabel ?? 'Current location'}`
-            : prayerLocationLabel
-              ? `Using saved location: ${prayerLocationLabel}`
-              : 'Select a city below to calculate prayer times without location permission.'}
-        </ThemedText>
-        <View style={styles.prayerLocationPresetWrap}>
-          {prayerLocationPresets.map((preset) => (
+      {!showLiveCamera ? (
+        <View style={styles.permissionNoticeWrap}>
+          <ThemedText style={styles.permissionNoticeTitle}>Camera unavailable</ThemedText>
+          <ThemedText style={styles.permissionNoticeBody}>
+            Enable camera access for live Qibla view.
+          </ThemedText>
+          {cameraPermissionStatus !== 'granted' && canAskCameraPermission ? (
             <Pressable
-              key={preset.id}
-              onPress={() => onSelectPrayerLocation(preset.id)}
-              style={[
-                styles.prayerLocationPreset,
-                selectedPrayerLocationId === preset.id && styles.prayerLocationPresetActive,
-              ]}
+              disabled={isRequestingCameraPermission}
+              onPress={onRequestCameraPermission}
+              style={styles.permissionButton}
             >
-              <ThemedText
-                style={[
-                  styles.prayerLocationPresetText,
-                  selectedPrayerLocationId === preset.id && styles.prayerLocationPresetTextActive,
-                ]}
-              >
-                {preset.label}
+              <ThemedText style={styles.permissionButtonText}>
+                {isRequestingCameraPermission ? 'Requesting permission...' : 'Enable camera'}
               </ThemedText>
             </Pressable>
-          ))}
+          ) : null}
+          {cameraPermissionStatus !== 'granted' && !canAskCameraPermission ? (
+            <Pressable onPress={onOpenCameraSettings} style={styles.permissionSettingsButton}>
+              <ThemedText style={styles.permissionSettingsButtonText}>Open settings</ThemedText>
+            </Pressable>
+          ) : null}
         </View>
-        {selectedPrayerLocationId ? (
-          <Pressable onPress={onClearSavedPrayerLocation} style={styles.clearPrayerLocationButton}>
-            <ThemedText style={styles.clearPrayerLocationButtonText}>
-              Clear saved location
-            </ThemedText>
-          </Pressable>
-        ) : null}
+      ) : null}
+
+      <View style={[styles.bottomControls, { bottom: Math.max(insets.bottom + 18, 30) }]}>
+        <Pressable onPress={onNudgeCalibrationLeft} style={styles.arrowButton}>
+          <IconSymbol name="chevron.left" size={24} color="#ffffff" />
+        </Pressable>
+
+        <View style={styles.alignmentPill}>
+          <ThemedText style={styles.alignmentPrimary}>
+            {isAligned
+              ? 'Aligned'
+              : alignmentDelta === null
+                ? 'Aligning...'
+                : `${Math.round(alignmentDelta)}°`}
+          </ThemedText>
+          <ThemedText
+            style={styles.alignmentSecondary}
+          >{`Offset ${Math.round(calibrationOffset)}°`}</ThemedText>
+        </View>
+
+        <Pressable onPress={onNudgeCalibrationRight} style={styles.arrowButton}>
+          <IconSymbol name="chevron.right" size={24} color="#ffffff" />
+        </Pressable>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
-function getCardinalPositionStyle(position: 'north' | 'east' | 'south' | 'west') {
-  switch (position) {
-    case 'north':
-      return styles.cardinalNorth;
-    case 'east':
-      return styles.cardinalEast;
-    case 'south':
-      return styles.cardinalSouth;
-    case 'west':
-      return styles.cardinalWest;
-  }
-}
-
 const styles = StyleSheet.create({
-  content: {
-    paddingTop: 108,
-    paddingBottom: 120,
-    paddingHorizontal: 18,
-    gap: 14,
+  container: {
+    flex: 1,
+    backgroundColor: '#0f172a',
   },
-  heroTextBlock: {
-    gap: 8,
+  fallbackBackground: {
+    backgroundColor: '#0b101f',
   },
-  heroTitle: {
-    color: '#ffffff',
-    fontSize: 30,
-    fontWeight: '800',
-    lineHeight: 35,
+  sceneScrim: {
+    backgroundColor: 'rgba(0, 0, 0, 0.22)',
   },
-  heroSubtitle: {
-    color: 'rgba(255,255,255,0.88)',
-    fontSize: 19,
-    fontWeight: '600',
-    lineHeight: 24,
-  },
-  heroChips: {
+  topControls: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
     flexDirection: 'row',
-    gap: 8,
-    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    zIndex: 5,
   },
-  heroChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    backgroundColor: '#bdfcc9',
-  },
-  heroChipText: {
-    color: '#0f5132',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  heroChipSecondary: {
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    backgroundColor: 'rgba(255,255,255,0.22)',
-    maxWidth: '100%',
-  },
-  heroChipSecondaryText: {
-    color: '#f8f7ff',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  locationPermissionButton: {
-    alignSelf: 'flex-start',
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    backgroundColor: '#fef3c7',
+  iconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0,0,0,0.45)',
     borderWidth: 1,
-    borderColor: 'rgba(180, 83, 9, 0.35)',
-  },
-  locationPermissionButtonDisabled: {
-    opacity: 0.7,
-  },
-  locationPermissionButtonText: {
-    color: '#92400e',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  locationSettingsButton: {
-    alignSelf: 'flex-start',
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    borderWidth: 1,
-    borderColor: 'rgba(248, 247, 255, 0.4)',
-  },
-  locationSettingsButtonText: {
-    color: '#f8f7ff',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  compassCard: {
-    borderRadius: 28,
-    backgroundColor: 'rgba(255,255,255,0.93)',
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 14,
-    gap: 12,
-  },
-  compassDial: {
-    alignSelf: 'center',
-    width: 290,
-    height: 290,
-    borderRadius: 145,
-    backgroundColor: '#f1f8ff',
-    borderWidth: 2,
-    borderColor: 'rgba(24, 40, 82, 0.14)',
+    borderColor: 'rgba(255,255,255,0.26)',
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
   },
-  tickMark: {
-    position: 'absolute',
-    width: 2,
-    height: 18,
-    backgroundColor: 'rgba(23, 37, 84, 0.35)',
-    top: 10,
-  },
-  cardinalBase: {
-    position: 'absolute',
-  },
-  cardinalNorth: {
-    top: 18,
-  },
-  cardinalEast: {
-    right: 22,
-  },
-  cardinalSouth: {
-    bottom: 18,
-  },
-  cardinalWest: {
-    left: 22,
-  },
-  cardinalText: {
-    fontSize: 19,
-    color: '#1f2a44',
-    fontWeight: '700',
-  },
-  needleLayer: {
-    position: 'absolute',
-    width: 240,
-    height: 240,
+  centerZone: {
+    flex: 1,
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
+    zIndex: 3,
   },
-  needleTip: {
-    marginTop: 10,
-    width: 0,
-    height: 0,
-    borderLeftWidth: 12,
-    borderRightWidth: 12,
-    borderBottomWidth: 28,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderBottomColor: '#16a34a',
+  reticleWrap: {
+    width: 188,
+    height: 188,
+    borderRadius: 94,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
   },
-  needleStem: {
-    width: 6,
-    height: 95,
-    marginTop: 10,
-    borderRadius: 3,
-    backgroundColor: 'rgba(15, 23, 42, 0.2)',
-  },
-  centerDot: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#16a34a',
+  reticleRingOuter: {
+    position: 'absolute',
+    width: 188,
+    height: 188,
+    borderRadius: 94,
     borderWidth: 4,
-    borderColor: 'rgba(255,255,255,0.95)',
+    borderColor: 'rgba(255,255,255,0.9)',
+  },
+  reticleRingInner: {
+    position: 'absolute',
+    width: 122,
+    height: 122,
+    borderRadius: 61,
+    borderWidth: 3,
+    borderColor: 'rgba(255,255,255,0.9)',
   },
   kaabaBadge: {
-    position: 'absolute',
-    top: 36,
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#fff4b2',
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: '#fff3bf',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.25)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(25, 36, 69, 0.2)',
   },
-  compassMetaRow: {
-    flexDirection: 'row',
-    gap: 8,
+  dashedGuide: {
+    width: 2,
+    height: 210,
+    borderStyle: 'dashed',
+    borderLeftWidth: 2,
+    borderLeftColor: 'rgba(255,255,255,0.88)',
   },
-  metaPill: {
-    flex: 1,
-    borderRadius: 14,
-    backgroundColor: '#f8fafc',
-    borderWidth: 1,
-    borderColor: 'rgba(148, 163, 184, 0.35)',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    gap: 3,
+  directionArrow: {
+    marginTop: 6,
+    width: 0,
+    height: 0,
+    borderLeftWidth: 16,
+    borderRightWidth: 16,
+    borderTopWidth: 26,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: 'rgba(255,255,255,0.95)',
   },
-  metaPillLabel: {
-    fontSize: 12,
-    color: '#475569',
-    fontWeight: '600',
-  },
-  metaPillValue: {
-    fontSize: 20,
-    lineHeight: 24,
-    color: '#0f172a',
-    fontWeight: '800',
-    fontVariant: ['tabular-nums'],
-  },
-  alignmentText: {
-    color: '#334155',
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  prayerLocationCard: {
+  permissionNoticeWrap: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    top: '22%',
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.92)',
-    borderWidth: 1,
-    borderColor: 'rgba(15, 23, 42, 0.1)',
-    padding: 12,
+    padding: 14,
     gap: 8,
+    backgroundColor: 'rgba(2, 6, 23, 0.7)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
+    zIndex: 6,
   },
-  prayerLocationTitle: {
-    color: '#0f172a',
+  permissionNoticeTitle: {
+    color: '#ffffff',
     fontSize: 16,
     lineHeight: 20,
     fontWeight: '800',
   },
-  prayerLocationSubtitle: {
-    color: '#334155',
+  permissionNoticeBody: {
+    color: 'rgba(255,255,255,0.84)',
     fontSize: 13,
     lineHeight: 18,
     fontWeight: '600',
   },
-  prayerLocationPresetWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  prayerLocationPreset: {
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: 'rgba(15, 23, 42, 0.14)',
-    backgroundColor: '#f8fafc',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  prayerLocationPresetActive: {
-    backgroundColor: '#dcfce7',
-    borderColor: 'rgba(22, 163, 74, 0.45)',
-  },
-  prayerLocationPresetText: {
-    color: '#1e293b',
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: '700',
-  },
-  prayerLocationPresetTextActive: {
-    color: '#166534',
-  },
-  clearPrayerLocationButton: {
+  permissionButton: {
     alignSelf: 'flex-start',
     borderRadius: 999,
-    backgroundColor: 'rgba(15, 23, 42, 0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(15, 23, 42, 0.16)',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    backgroundColor: '#ffffff',
   },
-  clearPrayerLocationButtonText: {
-    color: '#0f172a',
+  permissionButtonText: {
+    color: '#111827',
     fontSize: 12,
     lineHeight: 16,
     fontWeight: '700',
   },
-  errorText: {
-    color: '#fee2e2',
-    fontSize: 13,
+  permissionSettingsButton: {
+    alignSelf: 'flex-start',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.5)',
+  },
+  permissionSettingsButtonText: {
+    color: '#ffffff',
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '700',
+  },
+  bottomControls: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    zIndex: 6,
+    gap: 10,
+  },
+  arrowButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.24)',
+  },
+  alignmentPill: {
+    flex: 1,
+    borderRadius: 999,
+    backgroundColor: 'rgba(2,6,23,0.66)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.26)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+  },
+  alignmentPrimary: {
+    color: '#ffffff',
+    fontSize: 14,
     lineHeight: 18,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
+  },
+  alignmentSecondary: {
+    color: 'rgba(255,255,255,0.82)',
+    fontSize: 11,
+    lineHeight: 14,
     fontWeight: '600',
+    fontVariant: ['tabular-nums'],
   },
 });

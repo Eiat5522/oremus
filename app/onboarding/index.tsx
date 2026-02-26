@@ -6,6 +6,7 @@ import { Colors } from '@/constants/theme';
 import { Tradition, TRADITION_OPTIONS } from '@/constants/traditions';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTradition } from '@/hooks/use-tradition';
+import { useCameraPermissions } from 'expo-camera';
 import { Stack, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -15,6 +16,7 @@ export default function OnboardingScreen() {
   const [selectedTradition, setSelectedTradition] = useState<Tradition>(
     tradition || 'christianity',
   );
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const router = useRouter();
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
@@ -28,6 +30,14 @@ export default function OnboardingScreen() {
   const handleContinue = async () => {
     try {
       await setTradition(selectedTradition);
+
+      if (
+        selectedTradition === 'islam' &&
+        (cameraPermission?.status === 'undetermined' || cameraPermission == null)
+      ) {
+        await requestCameraPermission();
+      }
+
       router.replace('/(tabs)');
     } catch (error) {
       console.error('Failed to save tradition preference:', error);

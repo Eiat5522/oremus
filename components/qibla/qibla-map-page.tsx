@@ -163,8 +163,8 @@ export function QiblaMapPage({
 
 const styles = StyleSheet.create({
   content: {
-    paddingTop: 108,
-    paddingBottom: 120,
+    paddingTop: 20,
+    paddingBottom: 220,
     paddingHorizontal: 18,
     gap: 14,
   },
