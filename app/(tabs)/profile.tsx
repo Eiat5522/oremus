@@ -1,24 +1,47 @@
 import { Stack, useRouter } from 'expo-router';
-import React from 'react';
-import { Alert, Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import type { IconSymbolName } from '@/components/ui/icon-symbol';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
+import { Colors, Fonts } from '@/constants/theme';
+import { getTraditionUiTheme } from '@/constants/tradition-ui';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTradition } from '@/hooks/use-tradition';
 import { useUser } from '@/hooks/use-user';
 import * as ImagePicker from 'expo-image-picker';
 
+type SettingItemProps = {
+  icon: IconSymbolName;
+  title: string;
+  color: string;
+  isLast?: boolean;
+  onPress?: () => void;
+  islamMode: boolean;
+};
+
 export default function ProfileScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
-  const { traditionDetails } = useTradition();
-  const { userProfileImage, setProfileImage } = useUser();
+  const { tradition, traditionDetails } = useTradition();
+  const uiTheme = useMemo(() => getTraditionUiTheme(tradition), [tradition]);
+  const isIslam = tradition === 'islam';
+  const { user, userName, userProfileImage, setProfileImage, setUser } = useUser();
   const router = useRouter();
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState(userName === 'Guest' ? '' : userName);
+
+  useEffect(() => {
+    setNameDraft(userName === 'Guest' ? '' : userName);
+  }, [userName]);
+
+  const trimmedNameDraft = nameDraft.trim();
+  const canSaveName = trimmedNameDraft.length > 0 && trimmedNameDraft !== userName;
 
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -43,163 +66,403 @@ export default function ProfileScreen() {
     }
   };
 
-  return (
-    <ThemedView style={styles.container}>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          headerTransparent: true,
-          headerTitle: '',
-          headerLeft: () => (
-            <View style={styles.headerLeft}>
-              <TouchableOpacity style={styles.backButton}>
-                <IconSymbol name="arrow.left" size={24} color={theme.text} />
-              </TouchableOpacity>
-              <ThemedText style={styles.headerTitleText}>Profile</ThemedText>
-            </View>
-          ),
-          headerRight: () => (
-            <TouchableOpacity style={styles.iconButton}>
-              <IconSymbol name="settings" size={24} color={theme.text} />
-            </TouchableOpacity>
-          ),
-        }}
-      />
+  const saveName = async () => {
+    if (!trimmedNameDraft) {
+      Alert.alert('Name Required', 'Please enter a valid name.');
+      return;
+    }
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Profile Header */}
-        <View style={styles.profileHeader}>
-          <View style={styles.avatarContainer}>
-            {userProfileImage ? (
-              <Image source={{ uri: userProfileImage }} style={styles.avatar} />
-            ) : (
-              <View style={[styles.avatar, styles.avatarPlaceholder]}>
-                <IconSymbol name="person.fill" size={48} color="#9ca3af" />
-              </View>
-            )}
-            <TouchableOpacity
-              style={[
-                styles.editBadge,
-                { backgroundColor: theme.primary, borderColor: theme.background },
-              ]}
-              onPress={pickImage}
-            >
-              <IconSymbol name="pencil" size={12} color="#fff" />
-            </TouchableOpacity>
+    try {
+      await setUser({
+        ...(user ?? {}),
+        name: trimmedNameDraft,
+      });
+      setIsEditingName(false);
+    } catch {
+      Alert.alert('Update Failed', 'Unable to save your name right now. Please try again.');
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      {isIslam ? (
+        <>
+          <Image
+            source={uiTheme.backgroundImage}
+            style={StyleSheet.absoluteFillObject}
+            contentFit="cover"
+          />
+          <LinearGradient colors={uiTheme.overlayGradient} style={StyleSheet.absoluteFillObject} />
+        </>
+      ) : null}
+
+      <ThemedView style={[styles.container, isIslam ? styles.transparentBg : null]}>
+        <Stack.Screen
+          options={{
+            headerShown: true,
+            headerTransparent: true,
+            headerTitle: isIslam ? 'Account' : 'Profile',
+            headerTintColor: isIslam ? uiTheme.textColor : theme.text,
+            headerTitleStyle: isIslam
+              ? {
+                  color: uiTheme.textColor,
+                  fontFamily: Fonts.serif,
+                  fontSize: 28,
+                }
+              : undefined,
+          }}
+        />
+
+        <ScrollView
+          contentContainerStyle={[styles.scrollContent, isIslam ? styles.scrollContentIslam : null]}
+          showsVerticalScrollIndicator={false}
+          contentInsetAdjustmentBehavior="automatic"
+        >
+          <View style={styles.headerActionsRow}>
+            <Pressable style={styles.roundIconButton} onPress={() => router.back()}>
+              <IconSymbol
+                name="arrow.left"
+                size={20}
+                color={isIslam ? uiTheme.actionTextColor : theme.text}
+              />
+            </Pressable>
+            <Pressable style={styles.roundIconButton}>
+              <IconSymbol
+                name="settings"
+                size={20}
+                color={isIslam ? uiTheme.actionTextColor : theme.text}
+              />
+            </Pressable>
           </View>
 
-          <View style={styles.profileInfo}>
-            <ThemedText style={styles.userName}>Gabriel Vance</ThemedText>
-            {traditionDetails && (
-              <View
-                style={[styles.traditionBadge, { backgroundColor: `${traditionDetails.color}1A` }]}
+          <View style={[styles.profileHeader, isIslam ? styles.profileHeaderIslam : null]}>
+            <View style={styles.avatarContainer}>
+              {userProfileImage ? (
+                <Image
+                  source={{ uri: userProfileImage }}
+                  style={styles.avatar}
+                  contentFit="cover"
+                />
+              ) : (
+                <View
+                  style={[
+                    styles.avatar,
+                    styles.avatarPlaceholder,
+                    isIslam ? styles.avatarPlaceholderIslam : null,
+                  ]}
+                >
+                  <IconSymbol
+                    name="person.fill"
+                    size={44}
+                    color={isIslam ? uiTheme.actionTextColor : '#9ca3af'}
+                  />
+                </View>
+              )}
+              <Pressable
+                style={[
+                  styles.editBadge,
+                  isIslam
+                    ? {
+                        backgroundColor: uiTheme.actionCardColor,
+                        borderColor: uiTheme.actionCardBorderColor,
+                      }
+                    : { backgroundColor: theme.primary, borderColor: theme.background },
+                ]}
+                onPress={pickImage}
               >
-                <IconSymbol name={traditionDetails.icon} size={14} color={traditionDetails.color} />
-                <ThemedText style={[styles.traditionText, { color: traditionDetails.color }]}>
-                  {traditionDetails.title}
+                <IconSymbol
+                  name="pencil"
+                  size={12}
+                  color={isIslam ? uiTheme.actionTextColor : '#fff'}
+                />
+              </Pressable>
+            </View>
+
+            <View style={styles.profileInfo}>
+              <ThemedText
+                style={[
+                  styles.userName,
+                  isIslam ? { color: uiTheme.textColor, fontFamily: Fonts.serif } : null,
+                ]}
+              >
+                {userName}
+              </ThemedText>
+              {isEditingName ? (
+                <View style={styles.nameEditor}>
+                  <TextInput
+                    value={nameDraft}
+                    onChangeText={setNameDraft}
+                    placeholder="Enter your name"
+                    placeholderTextColor={isIslam ? 'rgba(232,255,247,0.72)' : '#94a3b8'}
+                    autoCapitalize="words"
+                    returnKeyType="done"
+                    onSubmitEditing={saveName}
+                    style={[
+                      styles.nameInput,
+                      isIslam
+                        ? {
+                            color: uiTheme.actionTextColor,
+                            borderColor: uiTheme.actionCardBorderColor,
+                            backgroundColor: 'rgba(8, 52, 40, 0.4)',
+                          }
+                        : {
+                            color: theme.text,
+                            borderColor: 'rgba(15, 23, 42, 0.12)',
+                            backgroundColor: theme.surface,
+                          },
+                    ]}
+                  />
+                  <View style={styles.nameActions}>
+                    <Pressable
+                      onPress={() => {
+                        setNameDraft(userName === 'Guest' ? '' : userName);
+                        setIsEditingName(false);
+                      }}
+                      style={styles.nameActionSecondary}
+                    >
+                      <ThemedText
+                        style={[
+                          styles.nameActionSecondaryText,
+                          isIslam ? { color: uiTheme.actionTextColor } : null,
+                        ]}
+                      >
+                        Cancel
+                      </ThemedText>
+                    </Pressable>
+                    <Pressable
+                      onPress={saveName}
+                      disabled={!canSaveName}
+                      style={[
+                        styles.nameActionPrimary,
+                        {
+                          backgroundColor: canSaveName
+                            ? isIslam
+                              ? uiTheme.actionIconColor
+                              : theme.primary
+                            : isIslam
+                              ? 'rgba(172, 239, 215, 0.24)'
+                              : 'rgba(100, 116, 139, 0.6)',
+                        },
+                      ]}
+                    >
+                      <ThemedText style={styles.nameActionPrimaryText}>Save</ThemedText>
+                    </Pressable>
+                  </View>
+                </View>
+              ) : (
+                <Pressable
+                  onPress={() => setIsEditingName(true)}
+                  style={[
+                    styles.editNameChip,
+                    isIslam
+                      ? {
+                          backgroundColor: uiTheme.actionCardColor,
+                          borderColor: uiTheme.actionCardBorderColor,
+                        }
+                      : {
+                          backgroundColor: 'rgba(15, 23, 42, 0.04)',
+                          borderColor: 'rgba(15, 23, 42, 0.08)',
+                        },
+                  ]}
+                >
+                  <IconSymbol
+                    name="pencil"
+                    size={12}
+                    color={isIslam ? uiTheme.actionIconColor : theme.primary}
+                  />
+                  <ThemedText
+                    style={[
+                      styles.editNameChipText,
+                      { color: isIslam ? uiTheme.actionTextColor : theme.primary },
+                    ]}
+                  >
+                    Edit Name
+                  </ThemedText>
+                </Pressable>
+              )}
+              {traditionDetails ? (
+                <View
+                  style={[
+                    styles.traditionBadge,
+                    isIslam
+                      ? {
+                          backgroundColor: uiTheme.actionCardColor,
+                          borderColor: uiTheme.actionCardBorderColor,
+                        }
+                      : { backgroundColor: `${traditionDetails.color}1A` },
+                  ]}
+                >
+                  <IconSymbol
+                    name={traditionDetails.icon}
+                    size={14}
+                    color={isIslam ? uiTheme.actionIconColor : traditionDetails.color}
+                  />
+                  <ThemedText
+                    style={[
+                      styles.traditionText,
+                      { color: isIslam ? uiTheme.actionTextColor : traditionDetails.color },
+                    ]}
+                  >
+                    {traditionDetails.title}
+                  </ThemedText>
+                </View>
+              ) : null}
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <ThemedText
+              style={[styles.sectionLabel, isIslam ? { color: uiTheme.actionIconColor } : null]}
+            >
+              PREFERENCES
+            </ThemedText>
+            <View
+              style={[
+                styles.settingsList,
+                isIslam
+                  ? {
+                      backgroundColor: uiTheme.actionCardColor,
+                      borderColor: uiTheme.actionCardBorderColor,
+                    }
+                  : {
+                      backgroundColor: theme.surface,
+                      borderColor:
+                        colorScheme === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)',
+                    },
+              ]}
+            >
+              <SettingItem
+                icon="slider.horizontal.3"
+                title="Change Tradition"
+                color={isIslam ? uiTheme.actionIconColor : theme.primary}
+                onPress={() => router.push('/onboarding')}
+                islamMode={isIslam}
+              />
+              <SettingItem
+                icon="shield.lock"
+                title="App Blocking"
+                color={isIslam ? uiTheme.actionIconColor : '#16a34a'}
+                onPress={() => router.push('/settings/app-blocking')}
+                islamMode={isIslam}
+              />
+              <SettingItem
+                icon="bell.fill"
+                title="Notifications"
+                color={isIslam ? uiTheme.actionIconColor : '#fbbf24'}
+                isLast
+                islamMode={isIslam}
+              />
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <View
+              style={[
+                styles.privacyCard,
+                isIslam
+                  ? {
+                      backgroundColor: uiTheme.actionCardColor,
+                      borderColor: uiTheme.actionCardBorderColor,
+                    }
+                  : null,
+              ]}
+            >
+              <View style={styles.privacyHeader}>
+                <View
+                  style={[
+                    styles.privacyIconContainer,
+                    isIslam
+                      ? { backgroundColor: 'rgba(172, 239, 215, 0.18)' }
+                      : { backgroundColor: `${theme.primary}1A` },
+                  ]}
+                >
+                  <IconSymbol
+                    name="shield.lock"
+                    size={20}
+                    color={isIslam ? uiTheme.actionIconColor : theme.primary}
+                  />
+                </View>
+                <ThemedText
+                  style={[styles.privacyTitle, isIslam ? { color: uiTheme.actionTextColor } : null]}
+                >
+                  Data & Privacy
                 </ThemedText>
               </View>
-            )}
-          </View>
-        </View>
-
-        {/* Preferences Section */}
-        <View style={styles.section}>
-          <ThemedText style={styles.sectionLabel}>PREFERENCES</ThemedText>
-          <View
-            style={[
-              styles.settingsList,
-              {
-                backgroundColor: theme.surface,
-                borderColor:
-                  colorScheme === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)',
-              },
-            ]}
-          >
-            <SettingItem
-              icon="slider.horizontal.3"
-              title="Change Tradition"
-              color={theme.primary}
-              isFirst
-              onPress={() => router.push('/onboarding')}
-            />
-            <SettingItem
-              icon="shield.lock"
-              title="App Blocking"
-              color="#16a34a"
-              onPress={() => router.push('/settings/app-blocking')}
-            />
-            <SettingItem icon="bell.fill" title="Notifications" color="#fbbf24" isLast />
-          </View>
-        </View>
-
-        {/* Data & Privacy Section */}
-        <View style={styles.section}>
-          <Card style={styles.privacyCard}>
-            <View style={styles.privacyHeader}>
-              <View
-                style={[styles.privacyIconContainer, { backgroundColor: `${theme.primary}1A` }]}
+              <ThemedText
+                style={[
+                  styles.privacyDescription,
+                  isIslam ? { color: uiTheme.actionTextColor } : null,
+                ]}
               >
-                <IconSymbol name="shield.lock" size={20} color={theme.primary} />
-              </View>
-              <ThemedText style={styles.privacyTitle}>Data & Privacy</ThemedText>
-            </View>
-            <ThemedText style={styles.privacyDescription}>
-              Your data is private. Sessions, notes, and templates are stored on this device only
-              and{' '}
-              <ThemedText style={{ color: theme.primary, fontWeight: '600' }}>
-                not synced to the cloud
+                Your data is private. Sessions, notes, and templates are stored on this device only
+                and{' '}
+                <ThemedText style={{ color: isIslam ? uiTheme.actionIconColor : theme.primary }}>
+                  not synced to the cloud
+                </ThemedText>
+                .
               </ThemedText>
-              .
-            </ThemedText>
 
-            <View style={styles.privacyActions}>
-              <Button
-                title="Export Data (JSON)"
-                icon={<IconSymbol name="square.and.arrow.up.fill" size={18} color="#fff" />}
-                style={styles.exportBtn}
-              />
-              <TouchableOpacity style={styles.clearBtn}>
-                <IconSymbol name="trash.fill" size={18} color="#ef4444" />
-                <ThemedText style={styles.clearBtnText}>Clear All Local Data</ThemedText>
-              </TouchableOpacity>
+              <View style={styles.privacyActions}>
+                <Button
+                  title="Export Data (JSON)"
+                  icon={
+                    <IconSymbol
+                      name="square.and.arrow.up.fill"
+                      size={18}
+                      color={isIslam ? '#0C4B3A' : '#fff'}
+                    />
+                  }
+                  style={styles.exportBtn}
+                  variant={isIslam ? 'secondary' : 'default'}
+                />
+                <Pressable style={styles.clearBtn}>
+                  <IconSymbol name="trash.fill" size={18} color={isIslam ? '#FEE2E2' : '#ef4444'} />
+                  <ThemedText style={[styles.clearBtnText, isIslam ? { color: '#FEE2E2' } : null]}>
+                    Clear All Local Data
+                  </ThemedText>
+                </Pressable>
+              </View>
             </View>
-          </Card>
-        </View>
+          </View>
 
-        {/* Version Info */}
-        <View style={styles.footer}>
-          <ThemedText style={styles.versionText}>
-            App Version 1.2.0 (Build 45){'\n'}
-            Made for distraction-free practice.
-          </ThemedText>
-        </View>
+          <View style={styles.footer}>
+            <ThemedText
+              style={[styles.versionText, isIslam ? { color: uiTheme.actionIconColor } : null]}
+            >
+              App Version 1.2.0 (Build 45){'\n'}
+              Made for distraction-free practice.
+            </ThemedText>
+          </View>
 
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </ThemedView>
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      </ThemedView>
+    </View>
   );
 }
 
-function SettingItem({ icon, title, color, isFirst, isLast, onPress }: any) {
-  const colorScheme = useColorScheme() ?? 'light';
-  const theme = Colors[colorScheme];
-
+function SettingItem({ icon, title, color, isLast, onPress, islamMode }: SettingItemProps) {
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={onPress}
       style={[
         styles.settingItem,
-        !isLast && styles.borderBottom,
-        !isLast && { borderBottomColor: colorScheme === 'light' ? '#f1f5f9' : '#1e293b' },
+        !isLast ? styles.borderBottom : null,
+        !isLast ? { borderBottomColor: islamMode ? 'rgba(232,255,247,0.24)' : '#f1f5f9' } : null,
       ]}
     >
       <View style={[styles.settingIconContainer, { backgroundColor: `${color}1A` }]}>
         <IconSymbol name={icon} size={20} color={color} />
       </View>
-      <ThemedText style={styles.settingTitle}>{title}</ThemedText>
-      <IconSymbol name="chevron.right" size={20} color={theme.muted} />
-    </TouchableOpacity>
+      <ThemedText style={[styles.settingTitle, islamMode ? { color: '#EBFFF7' } : null]}>
+        {title}
+      </ThemedText>
+      <IconSymbol
+        name="chevron.right"
+        size={20}
+        color={islamMode ? 'rgba(232,255,247,0.72)' : '#64748b'}
+      />
+    </Pressable>
   );
 }
 
@@ -207,34 +470,37 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  transparentBg: {
+    backgroundColor: 'transparent',
+  },
   scrollContent: {
-    paddingTop: 100,
+    paddingTop: 72,
   },
-  headerLeft: {
+  scrollContentIslam: {
+    paddingBottom: 120,
+  },
+  headerActionsRow: {
+    paddingHorizontal: 16,
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingLeft: 16,
+    justifyContent: 'space-between',
   },
-  backButton: {
-    padding: 4,
-  },
-  headerTitleText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  iconButton: {
+  roundIconButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    backgroundColor: 'rgba(8, 52, 40, 0.35)',
+    borderWidth: 1,
+    borderColor: 'rgba(190, 244, 227, 0.25)',
   },
   profileHeader: {
     alignItems: 'center',
     padding: 32,
     gap: 16,
+  },
+  profileHeaderIslam: {
+    paddingTop: 24,
   },
   avatarContainer: {
     position: 'relative',
@@ -243,13 +509,16 @@ const styles = StyleSheet.create({
     width: 112,
     height: 112,
     borderRadius: 56,
-    borderWidth: 4,
-    borderColor: 'rgba(19, 91, 236, 0.2)',
+    borderWidth: 3,
+    borderColor: 'rgba(232,255,247,0.4)',
   },
   avatarPlaceholder: {
     backgroundColor: '#f1f5f9',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  avatarPlaceholderIslam: {
+    backgroundColor: 'rgba(8, 52, 40, 0.45)',
   },
   editBadge: {
     position: 'absolute',
@@ -258,17 +527,66 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    borderWidth: 2,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   profileInfo: {
     alignItems: 'center',
     gap: 8,
+    width: '100%',
   },
   userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 32,
+    fontWeight: '700',
+  },
+  editNameChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  editNameChipText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  nameEditor: {
+    width: '100%',
+    maxWidth: 360,
+    gap: 8,
+  },
+  nameInput: {
+    height: 44,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    fontSize: 16,
+  },
+  nameActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
+  },
+  nameActionSecondary: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+  nameActionSecondaryText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  nameActionPrimary: {
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  nameActionPrimaryText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700',
   },
   traditionBadge: {
     flexDirection: 'row',
@@ -277,6 +595,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   traditionText: {
     fontSize: 14,
@@ -323,8 +643,7 @@ const styles = StyleSheet.create({
   privacyCard: {
     padding: 24,
     borderRadius: 32,
-    borderWidth: 2,
-    borderStyle: 'dashed',
+    borderWidth: 1,
     borderColor: 'rgba(148, 163, 184, 0.2)',
   },
   privacyHeader: {
