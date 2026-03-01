@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
-import { Stack } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Stack } from 'expo-router';
 import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
