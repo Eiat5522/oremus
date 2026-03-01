@@ -1,9 +1,10 @@
+import 'react-native-reanimated';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { TraditionProvider, useTradition } from '@/hooks/use-tradition';
@@ -60,10 +61,12 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-    <UserProvider>
-      <TraditionProvider>
-        <RootLayoutNav />
-      </TraditionProvider>
-    </UserProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <UserProvider>
+        <TraditionProvider>
+          <RootLayoutNav />
+        </TraditionProvider>
+      </UserProvider>
+    </GestureHandlerRootView>
   );
 }

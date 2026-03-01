@@ -1,9 +1,8 @@
 import * as Notifications from 'expo-notifications';
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { PrayerActionSheet, PrayerActionSheetRef } from '@/components/islam/PrayerActionSheet';
 import { PrayerList } from '@/components/islam/PrayerList';
 import { PrayerRescheduleModal } from '@/components/islam/PrayerRescheduleModal';
 import { ThemedText } from '@/components/themed-text';
@@ -15,14 +14,13 @@ import { isPrayerSessionPassed } from '@/lib/prayer-session';
 export function IslamPrayerListSection() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [reminderStatusMessage, setReminderStatusMessage] = useState<string | null>(null);
-  const [activeReminders, setActiveReminders] = React.useState<Set<string>>(new Set());
+  const [activeReminders, setActiveReminders] = useState<Set<string>>(new Set());
   const [selectedPrayer, setSelectedPrayer] = useState<{
     name: PrayerName;
     label: string;
     time: Date;
   } | null>(null);
   const [isRescheduleModalVisible, setIsRescheduleModalVisible] = useState(false);
-  const actionSheetRef = useRef<PrayerActionSheetRef>(null);
 
   const {
     now,
@@ -40,7 +38,7 @@ export function IslamPrayerListSection() {
 
   const isToday = selectedDate.toDateString() === new Date().toDateString();
 
-  const fetchActiveReminders = React.useCallback(async () => {
+  const fetchActiveReminders = useCallback(async () => {
     try {
       const pending = await Notifications.getAllScheduledNotificationsAsync();
       const reminderIds = new Set(
@@ -55,12 +53,12 @@ export function IslamPrayerListSection() {
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     void fetchActiveReminders();
   }, [fetchActiveReminders]);
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       void refreshPrayerData();
       void fetchActiveReminders();
     }, [fetchActiveReminders, refreshPrayerData]),
@@ -152,7 +150,7 @@ export function IslamPrayerListSection() {
     }
   };
 
-  const isPrayerLocked = React.useCallback(
+  const isPrayerLocked = useCallback(
     (prayer: { name: PrayerName; time: Date }) => {
       const index = todayPrayers.findIndex((entry) => entry.name === prayer.name);
       if (index < 0) {
@@ -171,41 +169,39 @@ export function IslamPrayerListSection() {
     [isToday, now, todayCompletion, todayPrayers, todayRescheduled],
   );
 
-  const selectedPrayerIsLocked = useMemo(() => {
-    if (!selectedPrayer) {
-      return false;
-    }
-    return isPrayerLocked(selectedPrayer);
-  }, [isPrayerLocked, selectedPrayer]);
-
-  const handleOpenActionSheet = (prayer: { name: PrayerName; label: string; time: Date }) => {
-    if (isPrayerLocked(prayer)) {
-      return;
-    }
-    setSelectedPrayer(prayer);
-    actionSheetRef.current?.open();
-  };
-
-  const handleSetNotification = (minutes: number) => {
-    if (selectedPrayer && !selectedPrayerIsLocked) {
-      void schedulePrayerReminder(selectedPrayer, minutes);
+  const handleSetNotification = (
+    prayer: { name: PrayerName; label: string; time: Date },
+    minutes: number,
+  ) => {
+    if (!isPrayerLocked(prayer)) {
+      void schedulePrayerReminder(prayer, minutes);
     }
   };
 
-  const handleReschedule = () => {
-    if (selectedPrayer && !selectedPrayerIsLocked) {
+  const handleToggleReminder = (
+    prayer: { name: PrayerName; label: string; time: Date },
+    minutes: number,
+  ) => {
+    if (!isPrayerLocked(prayer)) {
+      void schedulePrayerReminder(prayer, minutes);
+    }
+  };
+
+  const handleReschedule = (prayer: { name: PrayerName; label: string; time: Date }) => {
+    if (!isPrayerLocked(prayer)) {
+      setSelectedPrayer(prayer);
       setIsRescheduleModalVisible(true);
     }
   };
 
-  const handleToggleComplete = () => {
-    if (selectedPrayer && !selectedPrayerIsLocked) {
-      togglePrayerCompletion(selectedPrayer.name);
+  const handleToggleComplete = (prayer: { name: PrayerName; label: string; time: Date }) => {
+    if (!isPrayerLocked(prayer)) {
+      togglePrayerCompletion(prayer.name);
     }
   };
 
   const handleSaveReschedule = (newTime: Date, withReminder: boolean, reminderMinutes: number) => {
-    if (selectedPrayer && !selectedPrayerIsLocked) {
+    if (selectedPrayer && !isPrayerLocked(selectedPrayer)) {
       reschedulePrayer(selectedPrayer.name, newTime, withReminder, reminderMinutes);
       if (withReminder) {
         void schedulePrayerReminder({ ...selectedPrayer, time: newTime }, reminderMinutes);
@@ -239,9 +235,11 @@ export function IslamPrayerListSection() {
         nextPrayerName={nextPrayer?.name ?? null}
         now={now}
         rescheduledPrayers={todayRescheduled}
-        onOpenActionSheet={handleOpenActionSheet}
+        onSetNotification={handleSetNotification}
+        onReschedule={handleReschedule}
+        onToggleComplete={handleToggleComplete}
         activeReminders={activeReminders}
-        onToggleReminder={schedulePrayerReminder}
+        onToggleReminder={handleToggleReminder}
       />
 
       {reminderStatusMessage ? (
@@ -262,26 +260,16 @@ export function IslamPrayerListSection() {
       <View style={styles.bottomSpacer} />
 
       {selectedPrayer ? (
-        <PrayerActionSheet
-          ref={actionSheetRef}
-          prayerName={selectedPrayer.name}
-          prayerLabel={selectedPrayer.label}
-          isCompleted={todayCompletion[selectedPrayer.name] ?? false}
-          isSessionPassed={selectedPrayerIsLocked}
-          onSetNotification={handleSetNotification}
-          onReschedule={handleReschedule}
-          onToggleComplete={handleToggleComplete}
-        />
-      ) : null}
-
-      {selectedPrayer ? (
         <PrayerRescheduleModal
           visible={isRescheduleModalVisible}
           prayerName={selectedPrayer.name}
           prayerLabel={selectedPrayer.label}
           originalTime={selectedPrayer.time}
           nextPrayerTime={getNextPrayerTime()}
-          onClose={() => setIsRescheduleModalVisible(false)}
+          onClose={() => {
+            setIsRescheduleModalVisible(false);
+            setSelectedPrayer(null);
+          }}
           onSave={handleSaveReschedule}
         />
       ) : null}

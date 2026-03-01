@@ -1,10 +1,16 @@
-import { CameraView } from 'expo-camera';
 import React from 'react';
-import { Animated, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Animated, Pressable, StyleSheet, View, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+
+type CameraViewProps = {
+  style?: ViewStyle | ViewStyle[];
+  facing?: 'front' | 'back';
+};
+
+type CameraViewComponentType = React.ComponentType<CameraViewProps>;
 
 type QiblaCompassPageProps = {
   showLiveCamera: boolean;
@@ -44,11 +50,47 @@ export function QiblaCompassPage({
   needleTransform,
 }: QiblaCompassPageProps) {
   const insets = useSafeAreaInsets();
+  const [safeCameraView, setSafeCameraView] = React.useState<CameraViewComponentType | null>(null);
+  const isCameraLoading = showLiveCamera && safeCameraView === null;
+
+  React.useEffect(() => {
+    let isMounted = true;
+
+    import('expo-camera')
+      .then((cameraModule) => {
+        if (!isMounted) {
+          return;
+        }
+        setSafeCameraView(
+          typeof cameraModule.CameraView === 'function' ? cameraModule.CameraView : null,
+        );
+      })
+      .catch(() => {
+        console.warn('expo-camera could not be loaded');
+        if (isMounted) {
+          setSafeCameraView(null);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <View style={styles.container}>
-      {showLiveCamera ? (
-        <CameraView style={StyleSheet.absoluteFill} facing="back" />
+      {showLiveCamera && safeCameraView ? (
+        <View style={StyleSheet.absoluteFill}>
+          {React.createElement(safeCameraView, {
+            style: StyleSheet.absoluteFillObject,
+            facing: 'back',
+          })}
+        </View>
+      ) : isCameraLoading ? (
+        <View style={[StyleSheet.absoluteFill, styles.cameraLoadingState]}>
+          <ActivityIndicator color="#ffffff" size="small" />
+          <ThemedText style={styles.cameraLoadingText}>Loading camera…</ThemedText>
+        </View>
       ) : (
         <View style={[StyleSheet.absoluteFill, styles.fallbackBackground]} />
       )}
@@ -136,6 +178,16 @@ const styles = StyleSheet.create({
   },
   fallbackBackground: {
     backgroundColor: '#0b101f',
+  },
+  cameraLoadingState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    backgroundColor: '#0b101f',
+  },
+  cameraLoadingText: {
+    color: '#f8fafc',
+    fontSize: 14,
   },
   sceneScrim: {
     backgroundColor: 'rgba(0, 0, 0, 0.22)',
@@ -227,7 +279,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(2, 6, 23, 0.7)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.25)',
-    zIndex: 6,
+    zIndex: 1,
   },
   permissionNoticeTitle: {
     color: '#ffffff',

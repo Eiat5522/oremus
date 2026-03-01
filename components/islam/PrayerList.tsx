@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -16,6 +16,8 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import type { PrayerName } from '@/lib/prayer-times';
 import { isPrayerSessionPassed } from '@/lib/prayer-session';
+
+const REMINDER_OPTIONS = [5, 10, 15, 20, 25, 30];
 
 function getPrayerIcon(prayerName: PrayerName): string {
   switch (prayerName) {
@@ -72,7 +74,12 @@ type PrayerListProps = {
     PrayerName,
     { time: string; hasReminder: boolean; reminderMinutes: number }
   >;
-  onOpenActionSheet: (prayer: { name: PrayerName; label: string; time: Date }) => void;
+  onSetNotification: (
+    prayer: { name: PrayerName; label: string; time: Date },
+    minutes: number,
+  ) => void;
+  onReschedule: (prayer: { name: PrayerName; label: string; time: Date }) => void;
+  onToggleComplete: (prayer: { name: PrayerName; label: string; time: Date }) => void;
   activeReminders: Set<string>;
   onToggleReminder: (prayer: { name: string; label: string; time: Date }) => void;
 };
@@ -87,7 +94,9 @@ export function PrayerList({
   nextPrayerName,
   now,
   rescheduledPrayers,
-  onOpenActionSheet,
+  onSetNotification,
+  onReschedule,
+  onToggleComplete,
   activeReminders,
   onToggleReminder,
 }: PrayerListProps) {
@@ -125,6 +134,51 @@ export function PrayerList({
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value * 0.3 }],
   }));
+
+  const showReminderOptions = (prayer: { name: PrayerName; label: string; time: Date }) => {
+    Alert.alert(
+      'Set Reminder',
+      `Choose reminder timing for ${prayer.label}`,
+      [
+        ...REMINDER_OPTIONS.map((minutes) => ({
+          text: `${minutes} minutes`,
+          onPress: () => onSetNotification(prayer, minutes),
+        })),
+        { text: 'Cancel', style: 'cancel' as const },
+      ],
+      { cancelable: true },
+    );
+  };
+
+  const showPrayerActions = (
+    prayer: { name: PrayerName; label: string; time: Date },
+    isComplete: boolean,
+    isMissed: boolean,
+  ) => {
+    if (isMissed) {
+      return;
+    }
+    Alert.alert(
+      prayer.label,
+      'Choose an action',
+      [
+        {
+          text: isComplete ? 'Mark Incomplete' : 'Mark Complete',
+          onPress: () => onToggleComplete(prayer),
+        },
+        {
+          text: 'Set Reminder',
+          onPress: () => showReminderOptions(prayer),
+        },
+        {
+          text: 'Reschedule Prayer',
+          onPress: () => onReschedule(prayer),
+        },
+        { text: 'Cancel', style: 'cancel' as const },
+      ],
+      { cancelable: true },
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -179,8 +233,10 @@ export function PrayerList({
                 isComplete && styles.completeRow,
                 isMissed && styles.missedRow,
               ]}
-              onPress={isMissed ? undefined : () => onOpenActionSheet(prayer)}
-              activeOpacity={isMissed ? 1 : 0.7}
+              activeOpacity={1}
+              disabled={isMissed}
+              onLongPress={() => showPrayerActions(prayer, isComplete, isMissed)}
+              delayLongPress={300}
             >
               <View style={styles.leftContent}>
                 <ThemedText style={[styles.prayerName, isCurrent && styles.currentText]}>
@@ -227,7 +283,7 @@ export function PrayerList({
                   isActive={isReminderActive}
                   activeColor="#fbbf24"
                   color={isCurrent ? '#ffffff' : theme.icon}
-                  onPress={isMissed ? () => {} : () => onToggleReminder(prayer)}
+                  onPress={() => onToggleReminder(prayer)}
                   disabled={isMissed}
                 />
               </View>

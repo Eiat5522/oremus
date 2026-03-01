@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { TRADITION_OPTIONS, type Tradition } from '@/constants/traditions';
 import { syncFocusGateNative } from '@/lib/focus-gate-native';
 
 export const FOCUS_GATE_STORAGE_KEY = '@oremus/focus-gate-v1';
@@ -17,6 +18,7 @@ export type FocusGateSettings = {
   enabled: boolean;
   unlockWindowMinutes: UnlockWindowMinutes;
   blockedPackages: string[];
+  tradition: Tradition | null;
   unlockUntilMs: number | null;
   lastPrayerCompletedAtMs: number | null;
 };
@@ -25,6 +27,7 @@ const DEFAULT_FOCUS_GATE_SETTINGS: FocusGateSettings = {
   enabled: false,
   unlockWindowMinutes: 30,
   blockedPackages: [...DEFAULT_SOCIAL_PACKAGES],
+  tradition: null,
   unlockUntilMs: null,
   lastPrayerCompletedAtMs: null,
 };
@@ -36,12 +39,17 @@ function normalizeSettings(data: Partial<FocusGateSettings> | null): FocusGateSe
     ? (data?.unlockWindowMinutes as UnlockWindowMinutes)
     : DEFAULT_FOCUS_GATE_SETTINGS.unlockWindowMinutes;
 
+  const tradition = TRADITION_OPTIONS.some((option) => option.id === data?.tradition)
+    ? (data?.tradition as Tradition)
+    : null;
+
   return {
     enabled: data?.enabled ?? DEFAULT_FOCUS_GATE_SETTINGS.enabled,
     unlockWindowMinutes,
-    blockedPackages:
-      data?.blockedPackages?.filter((item): item is string => typeof item === 'string') ??
-      [...DEFAULT_FOCUS_GATE_SETTINGS.blockedPackages],
+    blockedPackages: data?.blockedPackages?.filter(
+      (item): item is string => typeof item === 'string',
+    ) ?? [...DEFAULT_FOCUS_GATE_SETTINGS.blockedPackages],
+    tradition,
     unlockUntilMs: typeof data?.unlockUntilMs === 'number' ? data.unlockUntilMs : null,
     lastPrayerCompletedAtMs:
       typeof data?.lastPrayerCompletedAtMs === 'number' ? data.lastPrayerCompletedAtMs : null,
@@ -93,4 +101,3 @@ export function getUnlockRemainingMs(settings: FocusGateSettings): number {
   if (!settings.unlockUntilMs) return 0;
   return Math.max(0, settings.unlockUntilMs - Date.now());
 }
-

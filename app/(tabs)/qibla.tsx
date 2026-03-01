@@ -1,6 +1,5 @@
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import * as Location from 'expo-location';
 import { Stack, useRouter } from 'expo-router';
@@ -10,6 +9,7 @@ import { Animated, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { QiblaCompassPage } from '@/components/qibla/qibla-compass-page';
 import { QiblaMapPage } from '@/components/qibla/qibla-map-page';
 import { ThemedText } from '@/components/themed-text';
+import { useSafeCameraPermissions } from '@/hooks/use-safe-camera-permissions';
 import { getDistanceToKaabaKm, getQiblaBearing } from '@/lib/qibla';
 
 const PRAYER_LOCATION_STORAGE_KEY = '@oremus/islam-prayer-location-v1';
@@ -40,7 +40,7 @@ export default function QiblaScreen() {
   const cumulativeRotation = useRef(0);
   const hasAutoRequestedCamera = useRef(false);
 
-  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+  const [cameraPermission, requestCameraPermission] = useSafeCameraPermissions();
   const [isRequestingCameraPermission, setIsRequestingCameraPermission] = useState(false);
 
   const [activeSubtab, setActiveSubtab] = useState<QiblaSubtab>('compass');

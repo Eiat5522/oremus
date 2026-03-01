@@ -18,6 +18,21 @@ import {
 } from '@/lib/focus-gate';
 
 const ISLAM_BLOCKING_BACKGROUND = require('../../assets/images/background/islam-blocking.png');
+const BUDDHIST_BLOCKING_BACKGROUND = require('../../assets/images/background/buddhism-waterpaint.png');
+const CHRISTIAN_BLOCKING_BACKGROUND = require('../../assets/images/background/christianity-waterpaint.png');
+
+// Gradient overlays for each tradition's blocking screen
+const BLOCKING_GRADIENTS = {
+  islam: ['rgba(4, 14, 18, 0.58)', 'rgba(4, 14, 18, 0.9)'] as [string, string],
+  buddhism: ['rgba(105, 59, 27, 0.3)', 'rgba(105, 59, 27, 0.85)'] as [string, string],
+  christianity: ['rgba(52, 30, 18, 0.3)', 'rgba(52, 30, 18, 0.85)'] as [string, string],
+} as const;
+
+const HERO_ACCENT_COLORS = {
+  buddhism: { one: 'rgba(184, 118, 62, 0.45)', two: 'rgba(255, 212, 160, 0.28)' },
+  christianity: { one: 'rgba(122, 83, 59, 0.45)', two: 'rgba(240, 209, 160, 0.28)' },
+  islam: { one: 'rgba(22, 163, 74, 0.45)', two: 'rgba(56, 189, 248, 0.28)' },
+} as const;
 
 const APP_VISUALS: Record<string, { glyph: string; tint: string; background: string }> = {
   'com.facebook.katana': { glyph: 'f', tint: '#ffffff', background: '#1877f2' },
@@ -51,6 +66,22 @@ export default function AppBlockingSettingsScreen() {
   const { tradition } = useTradition();
   const uiTheme = useMemo(() => getTraditionUiTheme(tradition), [tradition]);
   const isIslam = tradition === 'islam';
+  const isBuddhism = tradition === 'buddhism';
+  const isChristianity = tradition === 'christianity';
+  const hasBlockingBackground = isIslam || isBuddhism || isChristianity;
+  const heroAccentColors = isBuddhism
+    ? HERO_ACCENT_COLORS.buddhism
+    : isChristianity
+      ? HERO_ACCENT_COLORS.christianity
+      : isIslam
+        ? HERO_ACCENT_COLORS.islam
+        : undefined;
+  const heroAccentOneStyle = heroAccentColors
+    ? { backgroundColor: heroAccentColors.one }
+    : undefined;
+  const heroAccentTwoStyle = heroAccentColors
+    ? { backgroundColor: heroAccentColors.two }
+    : undefined;
 
   const {
     settings,
@@ -86,32 +117,41 @@ export default function AppBlockingSettingsScreen() {
     );
   }
 
+  const blockingBackground = useMemo(() => {
+    if (isIslam) return { image: ISLAM_BLOCKING_BACKGROUND, gradient: BLOCKING_GRADIENTS.islam };
+    if (isBuddhism)
+      return { image: BUDDHIST_BLOCKING_BACKGROUND, gradient: BLOCKING_GRADIENTS.buddhism };
+    if (isChristianity)
+      return { image: CHRISTIAN_BLOCKING_BACKGROUND, gradient: BLOCKING_GRADIENTS.christianity };
+    return null;
+  }, [isIslam, isBuddhism, isChristianity]);
+
   const remainingMs = getUnlockRemainingMs(settings);
   const remainingMinutes = Math.ceil(remainingMs / 60000);
 
   return (
     <View style={styles.container}>
-      {isIslam ? (
+      {blockingBackground ? (
         <>
           <Image
-            source={ISLAM_BLOCKING_BACKGROUND}
+            source={blockingBackground.image}
             style={StyleSheet.absoluteFillObject}
             contentFit="cover"
           />
           <LinearGradient
-            colors={['rgba(4, 14, 18, 0.58)', 'rgba(4, 14, 18, 0.9)']}
+            colors={blockingBackground.gradient}
             style={StyleSheet.absoluteFillObject}
           />
         </>
       ) : null}
-      <ThemedView style={[styles.container, isIslam ? styles.transparentBg : null]}>
+      <ThemedView style={[styles.container, hasBlockingBackground ? styles.transparentBg : null]}>
         <Stack.Screen
           options={{
             title: 'App Blocking',
             headerShown: true,
-            headerTransparent: true,
-            headerTintColor: isIslam ? uiTheme.textColor : undefined,
-            headerTitleStyle: isIslam
+            headerTransparent: hasBlockingBackground,
+            headerTintColor: hasBlockingBackground ? uiTheme.textColor : undefined,
+            headerTitleStyle: hasBlockingBackground
               ? {
                   color: uiTheme.textColor,
                   fontFamily: Fonts.serif,
@@ -120,13 +160,16 @@ export default function AppBlockingSettingsScreen() {
           }}
         />
         <ScrollView
-          contentContainerStyle={[styles.content, isIslam ? styles.contentIslam : null]}
+          contentContainerStyle={[
+            styles.content,
+            hasBlockingBackground ? styles.contentIslam : null,
+          ]}
           contentInsetAdjustmentBehavior="automatic"
         >
           <View
             style={[
               styles.heroCard,
-              isIslam
+              hasBlockingBackground
                 ? {
                     borderColor: uiTheme.actionCardBorderColor,
                     backgroundColor: uiTheme.actionCardColor,
@@ -137,40 +180,38 @@ export default function AppBlockingSettingsScreen() {
                 : null,
             ]}
           >
-            <View
+            <View style={[styles.heroAccentOne, heroAccentOneStyle]} />
+            <View style={[styles.heroAccentTwo, heroAccentTwoStyle]} />
+            <ThemedText
               style={[
-                styles.heroAccentOne,
-                isIslam ? { backgroundColor: 'rgba(22, 163, 74, 0.45)' } : null,
+                styles.heroTitle,
+                hasBlockingBackground ? { color: uiTheme.textColor } : null,
               ]}
-            />
-            <View
-              style={[
-                styles.heroAccentTwo,
-                isIslam ? { backgroundColor: 'rgba(56, 189, 248, 0.28)' } : null,
-              ]}
-            />
-            <ThemedText style={[styles.heroTitle, isIslam ? { color: uiTheme.textColor } : null]}>
+            >
               Block distracting apps
             </ThemedText>
             <ThemedText
               style={[
                 styles.heroSubtitle,
-                isIslam
+                hasBlockingBackground
                   ? { color: uiTheme.subtitleColor, textAlign: 'center', paddingRight: 0 }
                   : null,
               ]}
             >
               Start your focus window and keep social apps locked while you pray.
             </ThemedText>
-            {isIslam ? (
+            {hasBlockingBackground ? (
               <Button
                 title={settings.enabled ? 'Session Active' : 'Begin Session'}
                 onPress={() => void setEnabled(true)}
               />
             ) : null}
-            <View style={[styles.heroRow, isIslam ? styles.heroRowIslam : null]}>
+            <View style={[styles.heroRow, hasBlockingBackground ? styles.heroRowIslam : null]}>
               <ThemedText
-                style={[styles.heroLabel, isIslam ? { color: uiTheme.actionTextColor } : null]}
+                style={[
+                  styles.heroLabel,
+                  hasBlockingBackground ? { color: uiTheme.actionTextColor } : null,
+                ]}
               >
                 Emergency unlock
               </ThemedText>
@@ -179,7 +220,7 @@ export default function AppBlockingSettingsScreen() {
             <View
               style={[
                 styles.statusPill,
-                isIslam ? { backgroundColor: 'rgba(229,255,245,0.9)' } : null,
+                hasBlockingBackground ? { backgroundColor: 'rgba(229,255,245,0.9)' } : null,
               ]}
             >
               <ThemedText style={styles.statusPillText}>
@@ -191,7 +232,7 @@ export default function AppBlockingSettingsScreen() {
           <View
             style={[
               styles.card,
-              isIslam
+              hasBlockingBackground
                 ? {
                     borderColor: uiTheme.actionCardBorderColor,
                     backgroundColor: uiTheme.actionCardColor,
@@ -200,7 +241,10 @@ export default function AppBlockingSettingsScreen() {
             ]}
           >
             <ThemedText
-              style={[styles.sectionTitle, isIslam ? { color: uiTheme.actionTextColor } : null]}
+              style={[
+                styles.sectionTitle,
+                hasBlockingBackground ? { color: uiTheme.actionTextColor } : null,
+              ]}
             >
               Unlock window
             </ThemedText>
@@ -227,7 +271,7 @@ export default function AppBlockingSettingsScreen() {
           <View
             style={[
               styles.card,
-              isIslam
+              hasBlockingBackground
                 ? {
                     borderColor: uiTheme.actionCardBorderColor,
                     backgroundColor: uiTheme.actionCardColor,
@@ -236,26 +280,39 @@ export default function AppBlockingSettingsScreen() {
             ]}
           >
             <ThemedText
-              style={[styles.sectionTitle, isIslam ? { color: uiTheme.actionTextColor } : null]}
+              style={[
+                styles.sectionTitle,
+                hasBlockingBackground ? { color: uiTheme.actionTextColor } : null,
+              ]}
             >
               Permissions
             </ThemedText>
             <View style={styles.permissionPillRow}>
-              <View style={[styles.permissionPill, isIslam ? styles.permissionPillIslam : null]}>
+              <View
+                style={[
+                  styles.permissionPill,
+                  hasBlockingBackground ? styles.permissionPillIslam : null,
+                ]}
+              >
                 <ThemedText
                   style={[
                     styles.permissionPillText,
-                    isIslam ? styles.permissionPillTextIslam : null,
+                    hasBlockingBackground ? styles.permissionPillTextIslam : null,
                   ]}
                 >
                   Accessibility: {permissionStatus?.accessibilityEnabled ? 'On' : 'Off'}
                 </ThemedText>
               </View>
-              <View style={[styles.permissionPill, isIslam ? styles.permissionPillIslam : null]}>
+              <View
+                style={[
+                  styles.permissionPill,
+                  hasBlockingBackground ? styles.permissionPillIslam : null,
+                ]}
+              >
                 <ThemedText
                   style={[
                     styles.permissionPillText,
-                    isIslam ? styles.permissionPillTextIslam : null,
+                    hasBlockingBackground ? styles.permissionPillTextIslam : null,
                   ]}
                 >
                   Usage Access: {permissionStatus?.usageAccessGranted ? 'On' : 'Off'}
@@ -275,7 +332,7 @@ export default function AppBlockingSettingsScreen() {
           <View
             style={[
               styles.card,
-              isIslam
+              hasBlockingBackground
                 ? {
                     borderColor: uiTheme.actionCardBorderColor,
                     backgroundColor: uiTheme.actionCardColor,
@@ -284,18 +341,27 @@ export default function AppBlockingSettingsScreen() {
             ]}
           >
             <ThemedText
-              style={[styles.sectionTitle, isIslam ? { color: uiTheme.actionTextColor } : null]}
+              style={[
+                styles.sectionTitle,
+                hasBlockingBackground ? { color: uiTheme.actionTextColor } : null,
+              ]}
             >
               Blocked apps
             </ThemedText>
             <ThemedText
-              style={[styles.subtitle, isIslam ? { color: uiTheme.actionTextColor } : null]}
+              style={[
+                styles.subtitle,
+                hasBlockingBackground ? { color: uiTheme.actionTextColor } : null,
+              ]}
             >
               Choose apps to lock behind prayer. Tap card or toggle.
             </ThemedText>
             {visibleApps.length === 0 ? (
               <ThemedText
-                style={[styles.subtitle, isIslam ? { color: uiTheme.actionTextColor } : null]}
+                style={[
+                  styles.subtitle,
+                  hasBlockingBackground ? { color: uiTheme.actionTextColor } : null,
+                ]}
               >
                 No launchable blocked apps found on this device.
               </ThemedText>
@@ -315,7 +381,7 @@ export default function AppBlockingSettingsScreen() {
                     style={[
                       styles.appRow,
                       isSelected ? styles.appRowSelected : null,
-                      isIslam ? styles.appRowIslam : null,
+                      hasBlockingBackground ? styles.appRowIslam : null,
                     ]}
                   >
                     <View style={styles.appIdentity}>
@@ -328,7 +394,7 @@ export default function AppBlockingSettingsScreen() {
                         <ThemedText
                           style={[
                             styles.rowLabel,
-                            isIslam ? { color: uiTheme.actionTextColor } : null,
+                            hasBlockingBackground ? { color: uiTheme.actionTextColor } : null,
                           ]}
                         >
                           {app.label}
@@ -336,7 +402,7 @@ export default function AppBlockingSettingsScreen() {
                         <ThemedText
                           style={[
                             styles.appPackage,
-                            isIslam ? { color: uiTheme.actionIconColor } : null,
+                            hasBlockingBackground ? { color: uiTheme.actionIconColor } : null,
                           ]}
                         >
                           {app.packageName}

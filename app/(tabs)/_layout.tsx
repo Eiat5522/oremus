@@ -16,7 +16,6 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarButton: HapticTab,
         tabBarShowLabel: false,
         tabBarActiveTintColor: uiTheme.tabActiveTint,
         tabBarInactiveTintColor: uiTheme.tabInactiveTint,
@@ -58,7 +57,6 @@ export default function TabLayout() {
       <Tabs.Screen
         name="start-prayer"
         options={{
-          href: tradition === 'islam' ? undefined : null,
           title: 'Start',
           tabBarButton: (props) => (
             <HapticTab
@@ -124,6 +122,12 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0 8px 18px rgba(0, 0, 0, 0.22)',
+    // iOS shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.22,
+    shadowRadius: 9,
+    // Android shadow
+    elevation: 8,
   },
 });

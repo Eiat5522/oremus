@@ -14,6 +14,9 @@
       "connectionId": "eiat5522",
       "projectKey": "Eiat5522_oremus"
     },
-    "emulator.emulatorPathLinux": "/mnt/d/Android/Sdk"
+    "emulator.emulatorPathLinux": "/mnt/d/Android/Sdk",
+    "cSpell.words": [
+      "oremus"
+    ]
   },
 }

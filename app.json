@@ -16,13 +16,14 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "Oremus uses your camera for live Qibla compass guidance.",
-        "NSLocationWhenInUseUsageDescription": "Oremus uses your location to calculate the Qibla direction and prayer reminders."
+        "NSLocationWhenInUseUsageDescription": "Oremus uses your location to calculate the Qibla direction and prayer reminders.",
+        "NSMicrophoneUsageDescription": "Oremus uses your microphone for audio features."
       }
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "foregroundImage": "./assets/images/icon.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
@@ -34,13 +35,13 @@
         "ACCESS_FINE_LOCATION",
         "CAMERA",
         "POST_NOTIFICATIONS",
-        "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS"
+        "RECORD_AUDIO",
+        "MODIFY_AUDIO_SETTINGS"
       ]
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/icon.png"
     },
     "plugins": [
       "expo-router",

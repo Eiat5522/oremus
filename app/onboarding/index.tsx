@@ -5,8 +5,8 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { Tradition, TRADITION_OPTIONS } from '@/constants/traditions';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useSafeCameraPermissions } from '@/hooks/use-safe-camera-permissions';
 import { useTradition } from '@/hooks/use-tradition';
-import { useCameraPermissions } from 'expo-camera';
 import { Stack, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -16,7 +16,7 @@ export default function OnboardingScreen() {
   const [selectedTradition, setSelectedTradition] = useState<Tradition>(
     tradition || 'christianity',
   );
-  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+  const [cameraPermission, requestCameraPermission] = useSafeCameraPermissions();
   const router = useRouter();
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
@@ -41,7 +41,8 @@ export default function OnboardingScreen() {
       router.replace('/(tabs)');
     } catch (error) {
       console.error('Failed to save tradition preference:', error);
-      // Optionally show a toast/alert to the user
+      // Consider showing user feedback, e.g.:
+      // Toast.show({ type: 'error', text1: 'Could not save preference' });
       router.replace('/(tabs)'); // Navigate anyway or handle differently
     }
   };
@@ -70,23 +71,23 @@ export default function OnboardingScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.traditionList}>
-          {TRADITION_OPTIONS.map((tradition) => (
+          {TRADITION_OPTIONS.map((option) => (
             <TouchableOpacity
-              key={tradition.id}
-              onPress={() => setSelectedTradition(tradition.id)}
+              key={option.id}
+              onPress={() => setSelectedTradition(option.id)}
               activeOpacity={0.7}
               style={[
                 styles.traditionCard,
                 {
                   backgroundColor: theme.surface,
                   borderColor:
-                    selectedTradition === tradition.id
+                    selectedTradition === option.id
                       ? theme.primary
                       : colorScheme === 'light'
                         ? '#e2e8f0'
                         : '#1e293b',
                 },
-                selectedTradition === tradition.id && { backgroundColor: `${theme.primary}0D` },
+                selectedTradition === option.id && { backgroundColor: `${theme.primary}0D` },
               ]}
             >
               <View
@@ -94,16 +95,16 @@ export default function OnboardingScreen() {
                   styles.iconContainer,
                   {
                     backgroundColor:
-                      colorScheme === 'light' ? tradition.bgColor.light : tradition.bgColor.dark,
+                      colorScheme === 'light' ? option.bgColor.light : option.bgColor.dark,
                   },
                 ]}
               >
-                <IconSymbol name={tradition.icon} size={28} color={tradition.color} />
+                <IconSymbol name={option.icon} size={28} color={option.color} />
               </View>
 
               <View style={styles.cardContent}>
-                <ThemedText style={styles.cardTitle}>{tradition.title}</ThemedText>
-                <ThemedText style={styles.cardDescription}>{tradition.description}</ThemedText>
+                <ThemedText style={styles.cardTitle}>{option.title}</ThemedText>
+                <ThemedText style={styles.cardDescription}>{option.description}</ThemedText>
               </View>
 
               <View
@@ -111,16 +112,16 @@ export default function OnboardingScreen() {
                   styles.checkCircle,
                   {
                     borderColor:
-                      selectedTradition === tradition.id
+                      selectedTradition === option.id
                         ? theme.primary
                         : colorScheme === 'light'
                           ? '#cbd5e1'
                           : '#334155',
                   },
-                  selectedTradition === tradition.id && { backgroundColor: theme.primary },
+                  selectedTradition === option.id && { backgroundColor: theme.primary },
                 ]}
               >
-                {selectedTradition === tradition.id && (
+                {selectedTradition === option.id && (
                   <IconSymbol name="checkmark" size={14} color={theme.surface} />
                 )}
               </View>
