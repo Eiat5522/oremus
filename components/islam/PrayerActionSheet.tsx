@@ -1,9 +1,10 @@
 import React, { forwardRef, useCallback, useMemo } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
+
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
+import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import type { PrayerName } from '@/lib/prayer-times';
 
@@ -74,10 +75,11 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
         onChange={handleSheetChanges}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
-        handleStyle={[styles.handle, { backgroundColor: theme.surface }]}
-        handleIndicatorStyle={{ backgroundColor: theme.icon }}
+        backgroundStyle={styles.sheetBackground}
+        handleStyle={styles.handle}
+        handleIndicatorStyle={styles.handleIndicator}
       >
-        <BottomSheetView style={[styles.container, { backgroundColor: theme.surface }]}>
+        <BottomSheetView style={styles.container}>
           <View style={styles.header}>
             <ThemedText type="subtitle" style={styles.title}>
               {prayerLabel}
@@ -89,7 +91,7 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
             disabled={isSessionPassed}
             style={[
               styles.optionRow,
-              { borderTopColor: theme.borderLight },
+              { borderTopColor: 'rgba(244, 200, 107, 0.14)' },
               isSessionPassed && styles.optionRowDisabled,
             ]}
             onPress={() => {
@@ -119,7 +121,7 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
                   style={[
                     styles.reminderButton,
                     selectedReminder === minutes && styles.reminderButtonActive,
-                    { borderColor: theme.borderLight },
+                    { borderColor: 'rgba(244, 200, 107, 0.18)' },
                   ]}
                   onPress={() => setSelectedReminder(minutes)}
                 >
@@ -136,7 +138,7 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
             </View>
             <TouchableOpacity
               disabled={isSessionPassed}
-              style={[styles.actionButton, { backgroundColor: theme.primary }]}
+              style={styles.actionButton}
               onPress={() => {
                 onSetNotification(selectedReminder);
                 bottomSheetRef.current?.close();
@@ -154,7 +156,7 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
             disabled={isSessionPassed}
             style={[
               styles.optionRow,
-              { borderTopColor: theme.borderLight },
+              { borderTopColor: 'rgba(244, 200, 107, 0.14)' },
               isSessionPassed && styles.optionRowDisabled,
             ]}
             onPress={() => {
@@ -178,7 +180,7 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
             style={styles.cancelButton}
             onPress={() => bottomSheetRef.current?.close()}
           >
-            <ThemedText style={[styles.cancelText, { color: theme.primary }]}>Cancel</ThemedText>
+            <ThemedText style={styles.cancelText}>Cancel</ThemedText>
           </TouchableOpacity>
         </BottomSheetView>
       </BottomSheet>
@@ -189,14 +191,26 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
 PrayerActionSheet.displayName = 'PrayerActionSheet';
 
 const styles = StyleSheet.create({
+  sheetBackground: {
+    backgroundColor: '#0D2019',
+    borderTopLeftRadius: 26,
+    borderTopRightRadius: 26,
+    borderWidth: 1,
+    borderColor: 'rgba(244, 200, 107, 0.16)',
+  },
   handle: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    backgroundColor: '#0D2019',
+  },
+  handleIndicator: {
+    backgroundColor: 'rgba(247, 233, 192, 0.52)',
   },
   container: {
     flex: 1,
     paddingHorizontal: 20,
     paddingBottom: 30,
+    backgroundColor: '#0D2019',
   },
   header: {
     alignItems: 'center',
@@ -204,8 +218,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: '600',
+    fontFamily: Fonts.serif,
+    color: '#F6E7BB',
   },
   section: {
     marginBottom: 20,
@@ -214,10 +231,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 4,
+    color: '#F8F0DE',
   },
   sectionSubtitle: {
     fontSize: 14,
-    color: '#64748b',
+    color: 'rgba(245, 238, 218, 0.64)',
     marginBottom: 12,
   },
   reminderOptions: {
@@ -235,15 +253,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   reminderButtonActive: {
-    backgroundColor: '#1e4e3c',
-    borderColor: '#1e4e3c',
+    backgroundColor: 'rgba(244, 200, 107, 0.18)',
+    borderColor: 'rgba(244, 200, 107, 0.52)',
   },
   reminderText: {
     fontSize: 14,
     fontWeight: '500',
+    color: '#F7EFD9',
   },
   reminderTextActive: {
-    color: '#ffffff',
+    color: '#F8E7B4',
   },
   actionButton: {
     flexDirection: 'row',
@@ -251,11 +270,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 16,
     marginTop: 8,
+    backgroundColor: 'rgba(244, 200, 107, 0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(244, 200, 107, 0.24)',
   },
   actionButtonText: {
-    color: '#ffffff',
+    color: '#F7E9C0',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -270,13 +292,14 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: '500',
+    color: '#F8F0DE',
   },
   optionRowDisabled: {
     opacity: 0.45,
   },
   lockedHint: {
     fontSize: 12,
-    color: '#64748b',
+    color: 'rgba(245, 238, 218, 0.58)',
     marginTop: 10,
   },
   cancelButton: {
@@ -287,5 +310,6 @@ const styles = StyleSheet.create({
   cancelText: {
     fontSize: 16,
     fontWeight: '600',
+    color: '#F7E9C0',
   },
 });

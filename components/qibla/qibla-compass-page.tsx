@@ -61,9 +61,11 @@ export function QiblaCompassPage({
         if (!isMounted) {
           return;
         }
-        setSafeCameraView(
-          typeof cameraModule.CameraView === 'function' ? cameraModule.CameraView : null,
-        );
+        if (typeof cameraModule.CameraView === 'function') {
+          setSafeCameraView(() => cameraModule.CameraView);
+        } else {
+          setSafeCameraView(null);
+        }
       })
       .catch(() => {
         console.warn('expo-camera could not be loaded');
@@ -95,9 +97,9 @@ export function QiblaCompassPage({
         <View style={[StyleSheet.absoluteFill, styles.fallbackBackground]} />
       )}
 
-      <View style={[StyleSheet.absoluteFill, styles.sceneScrim]} />
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.sceneScrim]} />
 
-      <View style={[styles.topControls, { top: insets.top + 12 }]}>
+      <View pointerEvents="box-none" style={[styles.topControls, { top: insets.top + 12 }]}>
         <Pressable onPress={onClose} style={styles.iconButton}>
           <IconSymbol name="close" size={20} color="#ffffff" />
         </Pressable>
@@ -107,7 +109,7 @@ export function QiblaCompassPage({
         </Pressable>
       </View>
 
-      <View style={styles.centerZone}>
+      <View pointerEvents="none" style={styles.centerZone}>
         <Animated.View style={[styles.reticleWrap, needleTransform]}>
           <View style={styles.reticleRingOuter} />
           <View style={styles.reticleRingInner} />
@@ -121,7 +123,7 @@ export function QiblaCompassPage({
       </View>
 
       {!showLiveCamera ? (
-        <View style={styles.permissionNoticeWrap}>
+        <View style={[styles.permissionNoticeWrap, { top: insets.top + 76 }]}>
           <ThemedText style={styles.permissionNoticeTitle}>Camera unavailable</ThemedText>
           <ThemedText style={styles.permissionNoticeBody}>
             Enable camera access for live Qibla view.
@@ -145,12 +147,15 @@ export function QiblaCompassPage({
         </View>
       ) : null}
 
-      <View style={[styles.bottomControls, { bottom: Math.max(insets.bottom + 18, 30) }]}>
+      <View
+        pointerEvents="box-none"
+        style={[styles.bottomControls, { bottom: Math.max(insets.bottom + 136, 148) }]}
+      >
         <Pressable onPress={onNudgeCalibrationLeft} style={styles.arrowButton}>
           <IconSymbol name="chevron.left" size={24} color="#ffffff" />
         </Pressable>
 
-        <View style={styles.alignmentPill}>
+        <View pointerEvents="none" style={styles.alignmentPill}>
           <ThemedText style={styles.alignmentPrimary}>
             {isAligned
               ? 'Aligned'
@@ -272,7 +277,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 16,
     right: 16,
-    top: '22%',
     borderRadius: 20,
     padding: 14,
     gap: 8,

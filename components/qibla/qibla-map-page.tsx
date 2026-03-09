@@ -11,6 +11,7 @@ type QiblaMapPageProps = {
   originLabel: string | null;
   locationError: string | null;
   locationPermissionStatus: Location.PermissionStatus | null;
+  areLocationServicesEnabled: boolean | null;
   canAskLocationPermission: boolean;
   isRequestingLocationPermission: boolean;
   onRequestLocationPermission: () => void;
@@ -23,6 +24,7 @@ export function QiblaMapPage({
   originLabel,
   locationError,
   locationPermissionStatus,
+  areLocationServicesEnabled,
   canAskLocationPermission,
   isRequestingLocationPermission,
   onRequestLocationPermission,
@@ -78,6 +80,11 @@ export function QiblaMapPage({
         </ThemedText>
 
         {locationError ? <ThemedText style={styles.errorText}>{locationError}</ThemedText> : null}
+        {locationPermissionStatus === 'granted' && areLocationServicesEnabled === false ? (
+          <Pressable onPress={onOpenLocationSettings} style={styles.settingsButton}>
+            <ThemedText style={styles.settingsButtonText}>Allow location services</ThemedText>
+          </Pressable>
+        ) : null}
         {locationPermissionStatus !== 'granted' && canAskLocationPermission ? (
           <Pressable
             disabled={isRequestingLocationPermission}

@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router';
 import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { IslamPrayerListSection } from '@/components/islam/islam-prayer-list-section';
@@ -8,15 +8,8 @@ import { IslamPrayerListSection } from '@/components/islam/islam-prayer-list-sec
 export default function PrayersScreen() {
   return (
     <GestureHandlerRootView style={styles.container}>
-      <Stack.Screen options={{ title: 'Prayers', headerShown: true }} />
-
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        contentInsetAdjustmentBehavior="automatic"
-      >
-        <IslamPrayerListSection />
-      </ScrollView>
+      <Stack.Screen options={{ title: 'Prayers', headerShown: false }} />
+      <IslamPrayerListSection />
     </GestureHandlerRootView>
   );
 }
@@ -24,8 +17,5 @@ export default function PrayersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 24,
   },
 });

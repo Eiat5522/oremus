@@ -49,6 +49,9 @@ export default function QiblaScreen() {
   const [locationError, setLocationError] = useState<string | null>(null);
   const [locationPermissionStatus, setLocationPermissionStatus] =
     useState<Location.PermissionStatus | null>(null);
+  const [areLocationServicesEnabled, setAreLocationServicesEnabled] = useState<boolean | null>(
+    null,
+  );
   const [canAskLocationPermission, setCanAskLocationPermission] = useState(true);
   const [locationPermissionRequestCount, setLocationPermissionRequestCount] = useState(0);
   const [isRequestingLocationPermission, setIsRequestingLocationPermission] = useState(false);
@@ -212,6 +215,7 @@ export default function QiblaScreen() {
         setCanAskLocationPermission(permission.canAskAgain);
 
         if (permission.status !== 'granted') {
+          setAreLocationServicesEnabled(null);
           setCoords(null);
           setLocationError(
             permission.canAskAgain
@@ -224,6 +228,20 @@ export default function QiblaScreen() {
 
         setLocationError(null);
         setLocationText('Locating...');
+
+        const servicesEnabled = await Location.hasServicesEnabledAsync();
+        if (!mounted) {
+          return;
+        }
+
+        setAreLocationServicesEnabled(servicesEnabled);
+
+        if (!servicesEnabled) {
+          setCoords(null);
+          setLocationError('Location services are disabled. Enable location in device settings.');
+          setLocationText('Location services off');
+          return;
+        }
 
         let current;
         try {
@@ -446,6 +464,7 @@ export default function QiblaScreen() {
           originLabel={prayerLocationLabel}
           locationError={locationError}
           locationPermissionStatus={locationPermissionStatus}
+          areLocationServicesEnabled={areLocationServicesEnabled}
           canAskLocationPermission={canAskLocationPermission}
           isRequestingLocationPermission={isRequestingLocationPermission}
           onRequestLocationPermission={() =>
@@ -572,6 +591,17 @@ export default function QiblaScreen() {
 
             {locationError ? (
               <ThemedText style={styles.errorText}>{locationError}</ThemedText>
+            ) : null}
+
+            {locationPermissionStatus === 'granted' && areLocationServicesEnabled === false ? (
+              <Pressable
+                onPress={() => {
+                  void Linking.openSettings();
+                }}
+                style={styles.ctaButton}
+              >
+                <ThemedText style={styles.ctaButtonText}>Allow location services</ThemedText>
+              </Pressable>
             ) : null}
 
             {locationPermissionStatus !== 'granted' && canAskLocationPermission ? (

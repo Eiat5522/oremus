@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Modal, StyleSheet, TouchableOpacity, View, Platform } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
+import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import type { PrayerName } from '@/lib/prayer-times';
 
@@ -88,7 +89,7 @@ export function PrayerRescheduleModal({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={[styles.modal, { backgroundColor: theme.surface }]}>
+        <View style={styles.modal}>
           <View style={styles.header}>
             <ThemedText type="subtitle" style={styles.title}>
               Reschedule {prayerLabel}
@@ -118,10 +119,7 @@ export function PrayerRescheduleModal({
                 />
               </View>
             ) : (
-              <TouchableOpacity
-                style={[styles.timeButton, { borderColor: theme.borderLight }]}
-                onPress={showAndroidTimePicker}
-              >
+              <TouchableOpacity style={styles.timeButton} onPress={showAndroidTimePicker}>
                 <IconSymbol name="timer" size={20} color={theme.primary} />
                 <ThemedText style={styles.timeButtonText}>
                   {selectedTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
@@ -166,7 +164,7 @@ export function PrayerRescheduleModal({
                       style={[
                         styles.reminderButton,
                         reminderMinutes === minutes && styles.reminderButtonActive,
-                        { borderColor: theme.borderLight },
+                        { borderColor: 'rgba(244, 200, 107, 0.18)' },
                       ]}
                       onPress={() => setReminderMinutes(minutes)}
                     >
@@ -186,16 +184,10 @@ export function PrayerRescheduleModal({
 
             {/* Action Buttons */}
             <View style={styles.buttonRow}>
-              <TouchableOpacity
-                style={[styles.button, styles.cancelButton, { borderColor: theme.borderLight }]}
-                onPress={onClose}
-              >
+              <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onClose}>
                 <ThemedText style={styles.cancelButtonText}>Cancel</ThemedText>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, styles.saveButton, { backgroundColor: theme.primary }]}
-                onPress={handleSave}
-              >
+              <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={handleSave}>
                 <ThemedText style={styles.saveButtonText}>Save</ThemedText>
               </TouchableOpacity>
             </View>
@@ -209,7 +201,7 @@ export function PrayerRescheduleModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.56)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -217,8 +209,11 @@ const styles = StyleSheet.create({
   modal: {
     width: '100%',
     maxWidth: 400,
-    borderRadius: 20,
+    borderRadius: 24,
     padding: 20,
+    backgroundColor: '#0D2019',
+    borderWidth: 1,
+    borderColor: 'rgba(244, 200, 107, 0.16)',
   },
   header: {
     flexDirection: 'row',
@@ -227,8 +222,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: '600',
+    fontFamily: Fonts.serif,
+    color: '#F6E7BB',
   },
   closeButton: {
     padding: 4,
@@ -239,10 +237,11 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
+    color: '#F8F0DE',
   },
   subLabel: {
     fontSize: 13,
-    color: '#64748b',
+    color: 'rgba(245, 238, 218, 0.64)',
   },
   pickerContainer: {
     alignItems: 'center',
@@ -253,23 +252,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 1,
     marginVertical: 8,
+    borderColor: 'rgba(244, 200, 107, 0.18)',
+    backgroundColor: 'rgba(244, 200, 107, 0.08)',
   },
   timeButtonText: {
     fontSize: 18,
     fontWeight: '600',
     flex: 1,
     marginLeft: 12,
+    color: '#F8F0DE',
   },
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#fef2f2',
+    backgroundColor: 'rgba(125, 37, 37, 0.24)',
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 12,
   },
   errorText: {
     color: '#ef4444',
@@ -290,17 +292,18 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: '#64748b',
+    borderColor: 'rgba(245, 238, 218, 0.5)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkboxActive: {
-    backgroundColor: '#22c55e',
-    borderColor: '#22c55e',
+    backgroundColor: 'rgba(244, 200, 107, 0.88)',
+    borderColor: 'rgba(244, 200, 107, 0.88)',
   },
   reminderLabel: {
     fontSize: 15,
     fontWeight: '500',
+    color: '#F8F0DE',
   },
   reminderOptions: {
     flexDirection: 'row',
@@ -317,15 +320,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   reminderButtonActive: {
-    backgroundColor: '#1e4e3c',
-    borderColor: '#1e4e3c',
+    backgroundColor: 'rgba(244, 200, 107, 0.18)',
+    borderColor: 'rgba(244, 200, 107, 0.5)',
   },
   reminderText: {
     fontSize: 13,
     fontWeight: '500',
+    color: '#F8F0DE',
   },
   reminderTextActive: {
-    color: '#ffffff',
+    color: '#F8E7B4',
   },
   buttonRow: {
     flexDirection: 'row',
@@ -340,14 +344,21 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     borderWidth: 1,
+    borderColor: 'rgba(244, 200, 107, 0.18)',
+    backgroundColor: 'rgba(255,255,255,0.03)',
   },
   cancelButtonText: {
     fontSize: 16,
     fontWeight: '600',
+    color: '#F8F0DE',
   },
-  saveButton: {},
+  saveButton: {
+    backgroundColor: 'rgba(244, 200, 107, 0.16)',
+    borderWidth: 1,
+    borderColor: 'rgba(244, 200, 107, 0.32)',
+  },
   saveButtonText: {
-    color: '#ffffff',
+    color: '#F7E9C0',
     fontSize: 16,
     fontWeight: '600',
   },
