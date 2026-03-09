@@ -13,6 +13,11 @@ import { Stack, useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
+const UNSELECTED_CARD_BACKGROUND = {
+  light: 'rgba(255, 255, 255, 0.16)',
+  dark: 'rgba(15, 23, 42, 0.42)',
+} as const;
+
 export default function OnboardingScreen() {
   const { tradition, setTradition } = useTradition();
   const [selectedTradition, setSelectedTradition] = useState<Tradition>(
@@ -107,8 +112,8 @@ export default function OnboardingScreen() {
                       selectedTradition === option.id
                         ? uiTheme.actionCardColor
                         : colorScheme === 'light'
-                          ? 'rgba(255, 255, 255, 0.16)'
-                          : 'rgba(15, 23, 42, 0.42)',
+                          ? UNSELECTED_CARD_BACKGROUND.light
+                          : UNSELECTED_CARD_BACKGROUND.dark,
                     borderColor:
                       selectedTradition === option.id
                         ? uiTheme.tabActiveTint
@@ -150,7 +155,7 @@ export default function OnboardingScreen() {
                   ]}
                 >
                   {selectedTradition === option.id ? (
-                    <IconSymbol name="checkmark" size={14} color="#FFFFFF" />
+                    <IconSymbol name="checkmark" size={14} color={uiTheme.actionCardColor} />
                   ) : null}
                 </View>
               </TouchableOpacity>
@@ -165,7 +170,9 @@ export default function OnboardingScreen() {
               colors={uiTheme.ctaGradient}
               style={styles.ctaButton}
             >
-              <ThemedText style={styles.ctaLabel}>Continue</ThemedText>
+              <ThemedText style={[styles.ctaLabel, { color: uiTheme.actionTextColor }]}>
+                Continue
+              </ThemedText>
             </LinearGradient>
           </Pressable>
           <ThemedText style={[styles.footerNote, { color: uiTheme.subtitleColor }]}>
@@ -260,7 +267,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   ctaLabel: {
-    color: '#FFFFFF',
     fontSize: 18,
     lineHeight: 24,
     fontWeight: '700',
