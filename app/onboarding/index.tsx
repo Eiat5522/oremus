@@ -1,15 +1,17 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
+import { Fonts } from '@/constants/theme';
+import { getTraditionUiTheme } from '@/constants/tradition-ui';
 import { Tradition, TRADITION_OPTIONS } from '@/constants/traditions';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeCameraPermissions } from '@/hooks/use-safe-camera-permissions';
 import { useTradition } from '@/hooks/use-tradition';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function OnboardingScreen() {
   const { tradition, setTradition } = useTradition();
@@ -19,7 +21,7 @@ export default function OnboardingScreen() {
   const [cameraPermission, requestCameraPermission] = useSafeCameraPermissions();
   const router = useRouter();
   const colorScheme = useColorScheme() ?? 'light';
-  const theme = Colors[colorScheme];
+  const uiTheme = useMemo(() => getTraditionUiTheme(selectedTradition), [selectedTradition]);
 
   useEffect(() => {
     if (tradition) {
@@ -48,93 +50,130 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <Stack.Screen options={{ headerShown: false }} />
+    <View style={styles.container}>
+      <Image
+        testID="tradition-preview-background"
+        source={uiTheme.backgroundImage}
+        style={StyleSheet.absoluteFillObject}
+        contentFit="cover"
+      />
+      <LinearGradient colors={uiTheme.overlayGradient} style={StyleSheet.absoluteFillObject} />
 
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={[styles.backButton, { backgroundColor: theme.surface }]}
-          onPress={() => router.back()}
-        >
-          <IconSymbol name="arrow.left.ios" size={20} color={theme.text} />
-        </TouchableOpacity>
+      <ThemedView lightColor="transparent" darkColor="transparent" style={styles.container}>
+        <Stack.Screen options={{ headerShown: false }} />
 
-        <View style={styles.headerText}>
-          <ThemedText type="title" style={styles.headline}>
-            Choose your path
-          </ThemedText>
-          <ThemedText style={styles.subheadline}>
-            We will customize your tools and prayer focus based on your selected tradition.
-          </ThemedText>
-        </View>
-      </View>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={[
+              styles.backButton,
+              {
+                backgroundColor: uiTheme.actionCardColor,
+                borderColor: uiTheme.actionCardBorderColor,
+              },
+            ]}
+            onPress={() => router.back()}
+          >
+            <IconSymbol name="arrow.left.ios" size={20} color={uiTheme.actionTextColor} />
+          </TouchableOpacity>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.traditionList}>
-          {TRADITION_OPTIONS.map((option) => (
-            <TouchableOpacity
-              key={option.id}
-              onPress={() => setSelectedTradition(option.id)}
-              activeOpacity={0.7}
-              style={[
-                styles.traditionCard,
-                {
-                  backgroundColor: theme.surface,
-                  borderColor:
-                    selectedTradition === option.id
-                      ? theme.primary
-                      : colorScheme === 'light'
-                        ? '#e2e8f0'
-                        : '#1e293b',
-                },
-                selectedTradition === option.id && { backgroundColor: `${theme.primary}0D` },
-              ]}
+          <View style={styles.headerText}>
+            <ThemedText
+              type="title"
+              style={[styles.headline, { color: uiTheme.textColor, fontFamily: Fonts.serif }]}
             >
-              <View
+              Choose your path
+            </ThemedText>
+            <ThemedText style={[styles.subheadline, { color: uiTheme.subtitleColor }]}>
+              We will customize your tools and prayer focus based on your selected tradition.
+            </ThemedText>
+          </View>
+        </View>
+
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.traditionList}>
+            {TRADITION_OPTIONS.map((option) => (
+              <TouchableOpacity
+                key={option.id}
+                testID={`tradition-option-${option.id}`}
+                onPress={() => setSelectedTradition(option.id)}
+                activeOpacity={0.7}
                 style={[
-                  styles.iconContainer,
+                  styles.traditionCard,
                   {
                     backgroundColor:
-                      colorScheme === 'light' ? option.bgColor.light : option.bgColor.dark,
-                  },
-                ]}
-              >
-                <IconSymbol name={option.icon} size={28} color={option.color} />
-              </View>
-
-              <View style={styles.cardContent}>
-                <ThemedText style={styles.cardTitle}>{option.title}</ThemedText>
-                <ThemedText style={styles.cardDescription}>{option.description}</ThemedText>
-              </View>
-
-              <View
-                style={[
-                  styles.checkCircle,
-                  {
+                      selectedTradition === option.id
+                        ? uiTheme.actionCardColor
+                        : colorScheme === 'light'
+                          ? 'rgba(255, 255, 255, 0.16)'
+                          : 'rgba(15, 23, 42, 0.42)',
                     borderColor:
                       selectedTradition === option.id
-                        ? theme.primary
-                        : colorScheme === 'light'
-                          ? '#cbd5e1'
-                          : '#334155',
+                        ? uiTheme.tabActiveTint
+                        : uiTheme.actionCardBorderColor,
                   },
-                  selectedTradition === option.id && { backgroundColor: theme.primary },
                 ]}
               >
-                {selectedTradition === option.id && (
-                  <IconSymbol name="checkmark" size={14} color={theme.surface} />
-                )}
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    {
+                      backgroundColor:
+                        colorScheme === 'light' ? option.bgColor.light : option.bgColor.dark,
+                    },
+                  ]}
+                >
+                  <IconSymbol name={option.icon} size={28} color={option.color} />
+                </View>
 
-      <View style={styles.footer}>
-        <Button title="Continue" size="lg" onPress={handleContinue} />
-        <ThemedText style={styles.footerNote}>You can change this later in settings</ThemedText>
-      </View>
-    </ThemedView>
+                <View style={styles.cardContent}>
+                  <ThemedText style={[styles.cardTitle, { color: uiTheme.actionTextColor }]}>
+                    {option.title}
+                  </ThemedText>
+                  <ThemedText style={[styles.cardDescription, { color: uiTheme.subtitleColor }]}>
+                    {option.description}
+                  </ThemedText>
+                </View>
+
+                <View
+                  style={[
+                    styles.checkCircle,
+                    {
+                      borderColor:
+                        selectedTradition === option.id
+                          ? uiTheme.tabActiveTint
+                          : uiTheme.actionCardBorderColor,
+                    },
+                    selectedTradition === option.id && { backgroundColor: uiTheme.tabActiveTint },
+                  ]}
+                >
+                  {selectedTradition === option.id ? (
+                    <IconSymbol name="checkmark" size={14} color="#FFFFFF" />
+                  ) : null}
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
+
+        <View style={styles.footer}>
+          <Pressable onPress={handleContinue} style={styles.ctaButtonWrap}>
+            <LinearGradient
+              testID="tradition-preview-cta"
+              colors={uiTheme.ctaGradient}
+              style={styles.ctaButton}
+            >
+              <ThemedText style={styles.ctaLabel}>Continue</ThemedText>
+            </LinearGradient>
+          </Pressable>
+          <ThemedText style={[styles.footerNote, { color: uiTheme.subtitleColor }]}>
+            You can change this later in settings
+          </ThemedText>
+        </View>
+      </ThemedView>
+    </View>
   );
 }
 
@@ -154,6 +193,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
+    borderWidth: 1,
   },
   headerText: {
     gap: 8,
@@ -209,6 +249,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  ctaButtonWrap: {
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  ctaButton: {
+    minHeight: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+  },
+  ctaLabel: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    lineHeight: 24,
+    fontWeight: '700',
+  },
   footer: {
     position: 'absolute',
     bottom: 0,
@@ -222,6 +278,5 @@ const styles = StyleSheet.create({
   footerNote: {
     textAlign: 'center',
     fontSize: 12,
-    color: '#94a3b8',
   },
 });
