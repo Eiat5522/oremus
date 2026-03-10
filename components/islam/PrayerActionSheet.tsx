@@ -1,6 +1,6 @@
 import React, { forwardRef, useCallback, useMemo } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -16,13 +16,14 @@ export interface PrayerActionSheetRef {
 }
 
 type PrayerActionSheetProps = {
-  prayerName: PrayerName;
-  prayerLabel: string;
+  prayerName?: PrayerName;
+  prayerLabel?: string;
   isCompleted: boolean;
   isSessionPassed?: boolean;
   onSetNotification: (minutes: number) => void;
   onReschedule: () => void;
   onToggleComplete: () => void;
+  onClose?: () => void;
 };
 
 export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSheetProps>(
@@ -35,6 +36,7 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
       onSetNotification,
       onReschedule,
       onToggleComplete,
+      onClose,
     },
     ref,
   ) => {
@@ -54,17 +56,13 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
 
     const snapPoints = useMemo(() => ['50%'], []);
 
-    const handleSheetChanges = useCallback((index: number) => {
-      if (index === -1) {
-        // Sheet closed
-      }
-    }, []);
-
-    const renderBackdrop = useCallback(
-      (props: any) => (
-        <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
-      ),
-      [],
+    const handleSheetChanges = useCallback(
+      (index: number) => {
+        if (index === -1) {
+          onClose?.();
+        }
+      },
+      [onClose],
     );
 
     return (
@@ -74,7 +72,6 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
         snapPoints={snapPoints}
         onChange={handleSheetChanges}
         enablePanDownToClose
-        backdropComponent={renderBackdrop}
         backgroundStyle={styles.sheetBackground}
         handleStyle={styles.handle}
         handleIndicatorStyle={styles.handleIndicator}
@@ -82,7 +79,7 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
         <BottomSheetView style={styles.container}>
           <View style={styles.header}>
             <ThemedText type="subtitle" style={styles.title}>
-              {prayerLabel}
+              {prayerLabel ?? 'Prayer'}
             </ThemedText>
           </View>
 
@@ -90,24 +87,38 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
           <TouchableOpacity
             disabled={isSessionPassed}
             style={[
-              styles.optionRow,
-              { borderTopColor: 'rgba(244, 200, 107, 0.14)' },
-              isSessionPassed && styles.optionRowDisabled,
+              styles.primaryActionButton,
+              isCompleted ? styles.primaryActionButtonDanger : styles.primaryActionButtonSuccess,
+              isSessionPassed && styles.primaryActionButtonDisabled,
             ]}
             onPress={() => {
               onToggleComplete();
               bottomSheetRef.current?.close();
             }}
           >
-            <IconSymbol
-              name={isCompleted ? 'close' : 'checkmark'}
-              size={22}
-              color={isCompleted ? '#ef4444' : '#22c55e'}
-            />
-            <ThemedText style={styles.optionText}>
-              {isCompleted ? 'Mark Incomplete' : 'Mark Complete'}
-            </ThemedText>
-            <IconSymbol name="chevron.right" size={18} color={theme.icon} />
+            <View style={styles.primaryActionCopy}>
+              <View
+                style={[
+                  styles.primaryActionIconWrap,
+                  isCompleted
+                    ? styles.primaryActionIconWrapDanger
+                    : styles.primaryActionIconWrapSuccess,
+                ]}
+              >
+                <IconSymbol name={isCompleted ? 'close' : 'checkmark'} size={18} color="#FFF8E8" />
+              </View>
+              <View style={styles.primaryActionTextWrap}>
+                <ThemedText style={styles.primaryActionTitle}>
+                  {isCompleted ? 'Mark Incomplete' : 'Mark Complete'}
+                </ThemedText>
+                <ThemedText style={styles.primaryActionSubtitle}>
+                  {isCompleted
+                    ? 'Move this prayer back to pending.'
+                    : 'Count this prayer as completed.'}
+                </ThemedText>
+              </View>
+            </View>
+            <IconSymbol name="chevron.right" size={18} color="#FFF2CC" />
           </TouchableOpacity>
 
           {/* Set Notification Section */}
@@ -223,6 +234,62 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: Fonts.serif,
     color: '#F6E7BB',
+  },
+  primaryActionButton: {
+    minHeight: 74,
+    borderRadius: 22,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+  },
+  primaryActionButtonSuccess: {
+    backgroundColor: 'rgba(32, 88, 58, 0.44)',
+    borderColor: 'rgba(104, 211, 145, 0.32)',
+  },
+  primaryActionButtonDanger: {
+    backgroundColor: 'rgba(110, 34, 34, 0.36)',
+    borderColor: 'rgba(248, 113, 113, 0.28)',
+  },
+  primaryActionButtonDisabled: {
+    opacity: 0.5,
+  },
+  primaryActionCopy: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  primaryActionIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryActionIconWrapSuccess: {
+    backgroundColor: 'rgba(74, 222, 128, 0.22)',
+  },
+  primaryActionIconWrapDanger: {
+    backgroundColor: 'rgba(248, 113, 113, 0.2)',
+  },
+  primaryActionTextWrap: {
+    flex: 1,
+    gap: 2,
+  },
+  primaryActionTitle: {
+    color: '#FFF5D8',
+    fontSize: 17,
+    lineHeight: 22,
+    fontWeight: '700',
+  },
+  primaryActionSubtitle: {
+    color: 'rgba(255, 245, 216, 0.72)',
+    fontSize: 13,
+    lineHeight: 18,
   },
   section: {
     marginBottom: 20,

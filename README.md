@@ -13,7 +13,13 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 2. Start the app
 
    ```bash
-   npx expo start
+   npm run start
+   ```
+
+   If you're developing from WSL2 and the Android emulator cannot reach the dev server, use:
+
+   ```bash
+   npm run start:tunnel
    ```
 
 In the output, you'll find options to open the app in a
@@ -24,6 +30,37 @@ In the output, you'll find options to open the app in a
 - [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+
+## WSL troubleshooting
+
+If the Android emulator shows a timeout while connecting to a `172.x.x.x` address, the Expo dev server is usually advertising a WSL2 NAT IP that the emulator cannot reach.
+
+Quick recovery:
+
+```bash
+npm run start:tunnel
+```
+
+If you want to keep using LAN mode from WSL2, enable mirrored networking in `C:\Users\<you>\.wslconfig`:
+
+```ini
+[wsl2]
+networkingMode=mirrored
+```
+
+Then restart WSL:
+
+```bash
+wsl --shutdown
+```
+
+If the emulator still cannot connect, forward the common Expo ports:
+
+```bash
+adb reverse tcp:8081 tcp:8081
+adb reverse tcp:19000 tcp:19000
+adb reverse tcp:19001 tcp:19001
+```
 
 ## Get a fresh project
 

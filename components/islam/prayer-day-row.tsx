@@ -1,6 +1,5 @@
-import { BlurView } from 'expo-blur';
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -22,7 +21,8 @@ export type PrayerRowModel = {
 
 type PrayerDayRowProps = {
   prayer: PrayerRowModel;
-  onPress: () => void;
+  onActionPress: () => void;
+  onStatusPress: () => void;
   onLongPress: () => void;
 };
 
@@ -87,73 +87,87 @@ function getStatusStyles(status: PrayerRowStatus) {
   }
 }
 
-export function PrayerDayRow({ prayer, onPress, onLongPress }: PrayerDayRowProps) {
+export function PrayerDayRow({
+  prayer,
+  onActionPress,
+  onStatusPress,
+  onLongPress,
+}: PrayerDayRowProps) {
   const palette = getStatusStyles(prayer.status);
   const showCheck = prayer.status === 'completed';
 
   return (
-    <Pressable
-      onPress={onPress}
+    <TouchableOpacity
+      accessibilityRole="button"
+      activeOpacity={0.94}
+      onPress={onActionPress}
       onLongPress={onLongPress}
-      disabled={prayer.isLocked}
-      style={({ pressed }) => [styles.pressable, pressed ? styles.pressed : null]}
+      style={styles.pressable}
     >
-      <BlurView intensity={24} tint="dark" style={styles.blur}>
-        <View
-          style={[
-            styles.card,
-            {
-              borderColor: palette.borderColor,
-              backgroundColor: palette.backgroundColor,
-            },
-          ]}
-        >
-          <View style={styles.leading}>
-            <View style={styles.iconWrap}>
-              <ThemedText style={styles.icon}>{getPrayerIcon(prayer.name)}</ThemedText>
-            </View>
-            <View style={styles.copy}>
-              <ThemedText style={[styles.name, { color: palette.titleColor }]}>
-                {prayer.label}
-              </ThemedText>
-              <ThemedText style={[styles.secondary, { color: palette.secondaryColor }]}>
-                {prayer.secondaryLabel}
-              </ThemedText>
-            </View>
+      <View
+        style={[
+          styles.card,
+          {
+            borderColor: palette.borderColor,
+            backgroundColor: palette.backgroundColor,
+          },
+        ]}
+      >
+        <View style={styles.leading}>
+          <View style={styles.iconWrap}>
+            <ThemedText style={styles.icon}>{getPrayerIcon(prayer.name)}</ThemedText>
           </View>
-
-          <View style={styles.trailing}>
-            <ThemedText style={[styles.time, { color: palette.timeColor }]}>
-              {prayer.formattedTime}
+          <View style={styles.copy}>
+            <ThemedText style={[styles.name, { color: palette.titleColor }]}>
+              {prayer.label}
             </ThemedText>
-            <View style={styles.metaRow}>
-              {prayer.isReminderActive ? (
-                <View style={styles.metaBadge}>
-                  <IconSymbol name="bell.fill" size={12} color="#F4C86B" />
-                </View>
-              ) : null}
-              {prayer.isRescheduled ? (
-                <View style={styles.metaBadge}>
-                  <IconSymbol name="timer" size={12} color="#F4C86B" />
-                </View>
-              ) : null}
-              <View
-                style={[
-                  styles.statusCircle,
-                  showCheck ? styles.statusCircleDone : null,
-                  prayer.status === 'current' || prayer.status === 'next'
-                    ? styles.statusCircleActive
-                    : null,
-                  prayer.status === 'missed' ? styles.statusCircleMissed : null,
-                ]}
-              >
-                {showCheck ? <IconSymbol name="checkmark" size={15} color="#FFF8E8" /> : null}
-              </View>
-            </View>
+            <ThemedText style={[styles.secondary, { color: palette.secondaryColor }]}>
+              {prayer.secondaryLabel}
+            </ThemedText>
           </View>
         </View>
-      </BlurView>
-    </Pressable>
+
+        <View style={styles.trailing}>
+          <ThemedText style={[styles.time, { color: palette.timeColor }]}>
+            {prayer.formattedTime}
+          </ThemedText>
+          <View style={styles.metaRow}>
+            {prayer.isReminderActive ? (
+              <View style={styles.metaBadge}>
+                <IconSymbol name="bell.fill" size={12} color="#F4C86B" />
+              </View>
+            ) : null}
+            {prayer.isRescheduled ? (
+              <View style={styles.metaBadge}>
+                <IconSymbol name="timer" size={12} color="#F4C86B" />
+              </View>
+            ) : null}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                prayer.status === 'completed'
+                  ? `Mark ${prayer.label} incomplete`
+                  : `Mark ${prayer.label} complete`
+              }
+              disabled={prayer.isLocked}
+              hitSlop={8}
+              onPress={onStatusPress}
+              style={[
+                styles.statusCircle,
+                showCheck ? styles.statusCircleDone : null,
+                prayer.status === 'current' || prayer.status === 'next'
+                  ? styles.statusCircleActive
+                  : null,
+                prayer.status === 'missed' ? styles.statusCircleMissed : null,
+                prayer.isLocked ? styles.statusCircleDisabled : null,
+              ]}
+            >
+              {showCheck ? <IconSymbol name="checkmark" size={15} color="#FFF8E8" /> : null}
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
   );
 }
 
@@ -161,13 +175,6 @@ const styles = StyleSheet.create({
   pressable: {
     borderRadius: 22,
     overflow: 'hidden',
-  },
-  pressed: {
-    opacity: 0.94,
-    transform: [{ scale: 0.995 }],
-  },
-  blur: {
-    borderRadius: 22,
   },
   card: {
     minHeight: 88,
@@ -252,5 +259,8 @@ const styles = StyleSheet.create({
   },
   statusCircleMissed: {
     borderColor: 'rgba(255,255,255,0.2)',
+  },
+  statusCircleDisabled: {
+    opacity: 0.45,
   },
 });

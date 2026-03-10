@@ -5,7 +5,7 @@ import {
   type UnlockWindowMinutes,
   loadFocusGateSettings,
   recordPrayerCompletion,
-  saveFocusGateSettings,
+  updateFocusGateSettings,
 } from '@/lib/focus-gate';
 import {
   getFocusGateNativeStatus,
@@ -22,6 +22,7 @@ type FocusGatePermissionStatus = {
 type InstalledApp = {
   packageName: string;
   label: string;
+  iconUri?: string;
 };
 
 export function useFocusGate() {
@@ -32,10 +33,10 @@ export function useFocusGate() {
 
   const reload = useCallback(async () => {
     try {
-      const [storedSettings, nativeStatus, apps] = await Promise.all([
-        loadFocusGateSettings(),
+      const storedSettings = await loadFocusGateSettings();
+      const [nativeStatus, apps] = await Promise.all([
         getFocusGateNativeStatus(),
-        listFocusGateInstalledApps(),
+        listFocusGateInstalledApps(storedSettings.blockedPackages),
       ]);
       setSettings(storedSettings);
       setPermissionStatus(nativeStatus);
@@ -50,21 +51,24 @@ export function useFocusGate() {
     void reload();
   }, [reload]);
 
-  const persist = useCallback(async (next: FocusGateSettings) => {
-    try {
-      setError(null);
-      await saveFocusGateSettings(next);
-      setSettings(next);
-    } catch (err) {
-      setError(err);
-      throw err;
-    }
-  }, []);
+  const persist = useCallback(
+    async (updater: (previous: FocusGateSettings) => FocusGateSettings) => {
+      try {
+        setError(null);
+        const next = await updateFocusGateSettings(updater);
+        setSettings(next);
+      } catch (err) {
+        setError(err);
+        throw err;
+      }
+    },
+    [],
+  );
 
   const setEnabled = useCallback(
     async (enabled: boolean) => {
       if (!settings) return;
-      await persist({ ...settings, enabled });
+      await persist((previous) => ({ ...previous, enabled }));
     },
     [persist, settings],
   );
@@ -72,7 +76,7 @@ export function useFocusGate() {
   const setUnlockWindowMinutes = useCallback(
     async (unlockWindowMinutes: UnlockWindowMinutes) => {
       if (!settings) return;
-      await persist({ ...settings, unlockWindowMinutes });
+      await persist((previous) => ({ ...previous, unlockWindowMinutes }));
     },
     [persist, settings],
   );
@@ -80,7 +84,7 @@ export function useFocusGate() {
   const setBlockedPackages = useCallback(
     async (blockedPackages: string[]) => {
       if (!settings) return;
-      await persist({ ...settings, blockedPackages });
+      await persist((previous) => ({ ...previous, blockedPackages }));
     },
     [persist, settings],
   );

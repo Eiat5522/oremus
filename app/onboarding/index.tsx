@@ -1,13 +1,14 @@
+import { Image } from 'expo-image';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
+import { Fonts } from '@/constants/theme';
+import { getTraditionUiTheme } from '@/constants/tradition-ui';
 import { Tradition, TRADITION_OPTIONS } from '@/constants/traditions';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSafeCameraPermissions } from '@/hooks/use-safe-camera-permissions';
 import { useTradition } from '@/hooks/use-tradition';
 import { Stack, useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
@@ -18,8 +19,7 @@ export default function OnboardingScreen() {
   );
   const [cameraPermission, requestCameraPermission] = useSafeCameraPermissions();
   const router = useRouter();
-  const colorScheme = useColorScheme() ?? 'light';
-  const theme = Colors[colorScheme];
+  const previewTheme = getTraditionUiTheme(selectedTradition);
 
   useEffect(() => {
     if (tradition) {
@@ -48,22 +48,48 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
+
+      <Image
+        source={previewTheme.backgroundImage}
+        style={styles.backgroundImage}
+        contentFit="cover"
+      />
+      <LinearGradient colors={previewTheme.overlayGradient} style={StyleSheet.absoluteFillObject} />
+      <LinearGradient
+        colors={['rgba(6, 12, 18, 0.18)', 'rgba(6, 12, 18, 0.5)', 'rgba(6, 12, 18, 0.82)']}
+        style={StyleSheet.absoluteFillObject}
+      />
 
       <View style={styles.header}>
         <TouchableOpacity
-          style={[styles.backButton, { backgroundColor: theme.surface }]}
+          style={[
+            styles.backButton,
+            {
+              backgroundColor: previewTheme.actionCardColor,
+              borderColor: previewTheme.actionCardBorderColor,
+            },
+          ]}
           onPress={() => router.back()}
         >
-          <IconSymbol name="arrow.left.ios" size={20} color={theme.text} />
+          <IconSymbol name="arrow.left.ios" size={20} color={previewTheme.actionTextColor} />
         </TouchableOpacity>
 
         <View style={styles.headerText}>
-          <ThemedText type="title" style={styles.headline}>
+          <ThemedText
+            type="title"
+            style={[
+              styles.headline,
+              {
+                color: previewTheme.textColor,
+                fontFamily: selectedTradition === 'islam' ? Fonts.serif : undefined,
+              },
+            ]}
+          >
             Choose your path
           </ThemedText>
-          <ThemedText style={styles.subheadline}>
+          <ThemedText style={[styles.subheadline, { color: previewTheme.subtitleColor }]}>
             We will customize your tools and prayer focus based on your selected tradition.
           </ThemedText>
         </View>
@@ -79,15 +105,13 @@ export default function OnboardingScreen() {
               style={[
                 styles.traditionCard,
                 {
-                  backgroundColor: theme.surface,
+                  backgroundColor: previewTheme.actionCardColor,
                   borderColor:
                     selectedTradition === option.id
-                      ? theme.primary
-                      : colorScheme === 'light'
-                        ? '#e2e8f0'
-                        : '#1e293b',
+                      ? previewTheme.actionIconColor
+                      : previewTheme.actionCardBorderColor,
                 },
-                selectedTradition === option.id && { backgroundColor: `${theme.primary}0D` },
+                selectedTradition === option.id ? styles.traditionCardSelected : null,
               ]}
             >
               <View
@@ -95,7 +119,9 @@ export default function OnboardingScreen() {
                   styles.iconContainer,
                   {
                     backgroundColor:
-                      colorScheme === 'light' ? option.bgColor.light : option.bgColor.dark,
+                      selectedTradition === option.id
+                        ? 'rgba(255,255,255,0.16)'
+                        : 'rgba(255,255,255,0.1)',
                   },
                 ]}
               >
@@ -103,8 +129,14 @@ export default function OnboardingScreen() {
               </View>
 
               <View style={styles.cardContent}>
-                <ThemedText style={styles.cardTitle}>{option.title}</ThemedText>
-                <ThemedText style={styles.cardDescription}>{option.description}</ThemedText>
+                <ThemedText style={[styles.cardTitle, { color: previewTheme.actionTextColor }]}>
+                  {option.title}
+                </ThemedText>
+                <ThemedText
+                  style={[styles.cardDescription, { color: 'rgba(235, 255, 247, 0.78)' }]}
+                >
+                  {option.description}
+                </ThemedText>
               </View>
 
               <View
@@ -113,16 +145,16 @@ export default function OnboardingScreen() {
                   {
                     borderColor:
                       selectedTradition === option.id
-                        ? theme.primary
-                        : colorScheme === 'light'
-                          ? '#cbd5e1'
-                          : '#334155',
+                        ? previewTheme.actionIconColor
+                        : 'rgba(255,255,255,0.3)',
                   },
-                  selectedTradition === option.id && { backgroundColor: theme.primary },
+                  selectedTradition === option.id
+                    ? { backgroundColor: previewTheme.actionIconColor }
+                    : null,
                 ]}
               >
                 {selectedTradition === option.id && (
-                  <IconSymbol name="checkmark" size={14} color={theme.surface} />
+                  <IconSymbol name="checkmark" size={14} color="#06261D" />
                 )}
               </View>
             </TouchableOpacity>
@@ -131,16 +163,28 @@ export default function OnboardingScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <Button title="Continue" size="lg" onPress={handleContinue} />
-        <ThemedText style={styles.footerNote}>You can change this later in settings</ThemedText>
+        <Button
+          title="Continue"
+          size="lg"
+          onPress={handleContinue}
+          style={[styles.continueButton, { backgroundColor: previewTheme.actionIconColor }]}
+          textStyle={styles.continueButtonText}
+        />
+        <ThemedText style={[styles.footerNote, { color: previewTheme.subtitleColor }]}>
+          You can change this later in settings
+        </ThemedText>
       </View>
-    </ThemedView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  backgroundImage: {
+    ...StyleSheet.absoluteFillObject,
+    top: -28,
   },
   header: {
     paddingTop: 60,
@@ -154,6 +198,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
+    borderWidth: 1,
   },
   headerText: {
     gap: 8,
@@ -179,8 +224,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderRadius: 20,
-    borderWidth: 2,
+    borderWidth: 1,
     gap: 16,
+  },
+  traditionCardSelected: {
+    transform: [{ scale: 1.01 }],
   },
   iconContainer: {
     width: 56,
@@ -219,9 +267,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     gap: 16,
   },
+  continueButton: {
+    borderRadius: 18,
+  },
+  continueButtonText: {
+    color: '#06261D',
+    fontWeight: '700',
+  },
   footerNote: {
     textAlign: 'center',
     fontSize: 12,
-    color: '#94a3b8',
   },
 });

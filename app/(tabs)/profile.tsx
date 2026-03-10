@@ -31,6 +31,10 @@ export default function ProfileScreen() {
   const { tradition, traditionDetails } = useTradition();
   const uiTheme = useMemo(() => getTraditionUiTheme(tradition), [tradition]);
   const isIslam = tradition === 'islam';
+  const backgroundImageStyle = useMemo(
+    () => [StyleSheet.absoluteFillObject, isIslam ? styles.islamBackgroundShift : null],
+    [isIslam],
+  );
   const { user, userName, userProfileImage, setProfileImage, setUser } = useUser();
   const router = useRouter();
   const [isEditingName, setIsEditingName] = useState(false);
@@ -87,11 +91,7 @@ export default function ProfileScreen() {
     <View style={styles.container}>
       {isIslam ? (
         <>
-          <Image
-            source={uiTheme.backgroundImage}
-            style={StyleSheet.absoluteFillObject}
-            contentFit="cover"
-          />
+          <Image source={uiTheme.backgroundImage} style={backgroundImageStyle} contentFit="cover" />
           <LinearGradient colors={uiTheme.overlayGradient} style={StyleSheet.absoluteFillObject} />
         </>
       ) : null}
@@ -469,6 +469,9 @@ function SettingItem({ icon, title, color, isLast, onPress, islamMode }: Setting
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  islamBackgroundShift: {
+    top: -28,
   },
   transparentBg: {
     backgroundColor: 'transparent',

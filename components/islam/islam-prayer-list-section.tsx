@@ -80,6 +80,7 @@ export function IslamPrayerListSection() {
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const actionSheetRef = useRef<PrayerActionSheetRef>(null);
+  const shouldOpenActionSheetRef = useRef(false);
 
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [reminderStatusMessage, setReminderStatusMessage] = useState<string | null>(null);
@@ -239,11 +240,18 @@ export function IslamPrayerListSection() {
   );
 
   const handleOpenActions = useCallback((prayer: SelectedPrayer) => {
+    shouldOpenActionSheetRef.current = true;
     setSelectedPrayer(prayer);
-    requestAnimationFrame(() => {
-      actionSheetRef.current?.open();
-    });
   }, []);
+
+  useEffect(() => {
+    if (!selectedPrayer || !shouldOpenActionSheetRef.current) {
+      return;
+    }
+
+    shouldOpenActionSheetRef.current = false;
+    actionSheetRef.current?.open();
+  }, [selectedPrayer]);
 
   const handleSaveReschedule = (newTime: Date, withReminder: boolean, reminderMinutes: number) => {
     if (!selectedPrayer || isPrayerLocked(selectedPrayer)) {
@@ -357,7 +365,10 @@ export function IslamPrayerListSection() {
               <PrayerDayRow
                 key={row.name}
                 prayer={row}
-                onPress={() =>
+                onActionPress={() =>
+                  handleOpenActions({ name: row.name, label: row.label, time: selectedTime })
+                }
+                onStatusPress={() =>
                   handlePrimaryPress({ name: row.name, label: row.label, time: selectedTime })
                 }
                 onLongPress={() =>
@@ -424,28 +435,42 @@ export function IslamPrayerListSection() {
         )
       ) : null}
 
+      <PrayerActionSheet
+        ref={actionSheetRef}
+        prayerName={selectedPrayer?.name}
+        prayerLabel={selectedPrayer?.label}
+        isCompleted={selectedPrayer ? (todayCompletion[selectedPrayer.name] ?? false) : false}
+        isSessionPassed={selectedPrayer ? isPrayerLocked(selectedPrayer) : false}
+        onSetNotification={(minutes) => {
+          if (selectedPrayer) {
+            void schedulePrayerReminder(selectedPrayer, minutes);
+          }
+        }}
+        onReschedule={() => {
+          if (selectedPrayer) {
+            setIsRescheduleModalVisible(true);
+          }
+        }}
+        onToggleComplete={() => {
+          if (selectedPrayer) {
+            handlePrimaryPress(selectedPrayer);
+          }
+        }}
+        onClose={() => {
+          setIsRescheduleModalVisible(false);
+          setSelectedPrayer(null);
+        }}
+      />
       {selectedPrayer ? (
-        <>
-          <PrayerActionSheet
-            ref={actionSheetRef}
-            prayerName={selectedPrayer.name}
-            prayerLabel={selectedPrayer.label}
-            isCompleted={todayCompletion[selectedPrayer.name] ?? false}
-            isSessionPassed={isPrayerLocked(selectedPrayer)}
-            onSetNotification={(minutes) => void schedulePrayerReminder(selectedPrayer, minutes)}
-            onReschedule={() => setIsRescheduleModalVisible(true)}
-            onToggleComplete={() => handlePrimaryPress(selectedPrayer)}
-          />
-          <PrayerRescheduleModal
-            visible={isRescheduleModalVisible}
-            prayerName={selectedPrayer.name}
-            prayerLabel={selectedPrayer.label}
-            originalTime={selectedPrayer.time}
-            nextPrayerTime={getNextPrayerTime()}
-            onClose={() => setIsRescheduleModalVisible(false)}
-            onSave={handleSaveReschedule}
-          />
-        </>
+        <PrayerRescheduleModal
+          visible={isRescheduleModalVisible}
+          prayerName={selectedPrayer.name}
+          prayerLabel={selectedPrayer.label}
+          originalTime={selectedPrayer.time}
+          nextPrayerTime={getNextPrayerTime()}
+          onClose={() => setIsRescheduleModalVisible(false)}
+          onSave={handleSaveReschedule}
+        />
       ) : null}
     </PrayerAtmosphere>
   );

@@ -46,7 +46,7 @@ export function PrayerProgressRing({ completed, total }: PrayerProgressRingProps
 
   return (
     <View style={styles.container}>
-      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} pointerEvents="none">
         <Circle
           cx={size / 2}
           cy={size / 2}
@@ -89,7 +89,7 @@ export function PrayerProgressRing({ completed, total }: PrayerProgressRingProps
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />
       </Svg>
-      <View style={styles.center}>
+      <View style={styles.center} pointerEvents="none">
         <ThemedText style={styles.moon}>☾</ThemedText>
         <ThemedText style={styles.count}>
           {completed}/{total}

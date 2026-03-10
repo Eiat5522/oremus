@@ -8,6 +8,7 @@ type FocusGateNativeStatus = {
 type InstalledApp = {
   packageName: string;
   label: string;
+  iconUri?: string;
 };
 
 type FocusGateNativeModule = {
@@ -15,7 +16,7 @@ type FocusGateNativeModule = {
   getServiceStatus: () => Promise<FocusGateNativeStatus>;
   openAccessibilitySettings: () => void;
   openUsageAccessSettings: () => void;
-  listInstalledApps: () => Promise<InstalledApp[]>;
+  listInstalledApps: (blockedPackages?: string[]) => Promise<InstalledApp[]>;
 };
 
 function getNativeModule(): FocusGateNativeModule | null {
@@ -49,10 +50,12 @@ export function openFocusGateUsageAccessSettings(): void {
   module.openUsageAccessSettings();
 }
 
-export async function listFocusGateInstalledApps(): Promise<InstalledApp[]> {
+export async function listFocusGateInstalledApps(
+  blockedPackages: string[] = [],
+): Promise<InstalledApp[]> {
   const module = getNativeModule();
   if (!module) {
     return [];
   }
-  return module.listInstalledApps();
+  return module.listInstalledApps(blockedPackages);
 }

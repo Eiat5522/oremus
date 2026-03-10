@@ -1,4 +1,3 @@
-import { BlurView } from 'expo-blur';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -13,12 +12,10 @@ type QiblaPillProps = {
 export function QiblaPill({ onPress }: QiblaPillProps) {
   return (
     <Pressable onPress={onPress} style={styles.pressable}>
-      <BlurView intensity={18} tint="dark" style={styles.blur}>
-        <View style={styles.inner}>
-          <IconSymbol name="location.fill" size={16} color="#F4C86B" />
-          <ThemedText style={styles.label}>Qibla</ThemedText>
-        </View>
-      </BlurView>
+      <View style={styles.inner}>
+        <IconSymbol name="location.fill" size={16} color="#F4C86B" />
+        <ThemedText style={styles.label}>Qibla</ThemedText>
+      </View>
     </Pressable>
   );
 }
@@ -28,9 +25,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderRadius: 999,
     overflow: 'hidden',
-  },
-  blur: {
-    borderRadius: 999,
   },
   inner: {
     flexDirection: 'row',

@@ -12,6 +12,16 @@ const FOCUS_PACKAGE = 'focus';
 const FOCUS_GATE_SERVICE_DESCRIPTION_KEY = 'focus_gate_service_description';
 const FOCUS_GATE_SERVICE_DESCRIPTION =
   'Focus Gate monitors when selected apps are opened so it can block distractions until you complete a prayer session.';
+const FOCUS_GATE_BACKGROUND_ASSETS = {
+  focus_gate_block_islam: ['docs', 'Oremus', 'App Blocking', 'Islam - Blocking BG.jpg'],
+  focus_gate_block_christianity: [
+    'docs',
+    'Oremus',
+    'App Blocking',
+    'Christainity - Blocking BG.jpg',
+  ],
+  focus_gate_block_buddhism: ['docs', 'Oremus', 'App Blocking', 'Buddhist - Blocking BG.jpg'],
+} as const;
 
 const focusFiles: Record<string, string> = {
   'FocusGatePrefs.kt': `package __PACKAGE__.focus
@@ -25,6 +35,7 @@ object FocusGatePrefs {
   private const val KEY_UNLOCK_WINDOW_MINUTES = "unlockWindowMinutes"
   private const val KEY_UNLOCK_UNTIL_MS = "unlockUntilMs"
   private const val KEY_BLOCKED_PACKAGES = "blockedPackages"
+  private const val KEY_TRADITION = "tradition"
 
   private fun prefs(context: Context) =
     context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -51,6 +62,12 @@ object FocusGatePrefs {
       }
     }
     editor.putStringSet(KEY_BLOCKED_PACKAGES, packages)
+    if (data.has(KEY_TRADITION) && !data.isNull(KEY_TRADITION)) {
+      val tradition = data.optString(KEY_TRADITION, "").takeIf { it.isNotBlank() }
+      editor.putString(KEY_TRADITION, tradition)
+    } else {
+      editor.remove(KEY_TRADITION)
+    }
     return editor.commit()
   }
 
@@ -66,6 +83,9 @@ object FocusGatePrefs {
   fun getBlockedPackages(context: Context): Set<String> =
     prefs(context).getStringSet(KEY_BLOCKED_PACKAGES, emptySet()) ?: emptySet()
 
+  fun getTradition(context: Context): String? =
+    prefs(context).getString(KEY_TRADITION, null)?.takeIf { it.isNotBlank() }
+
   fun shouldBlockPackage(context: Context, packageName: String): Boolean {
     if (!isEnabled(context)) return false
     if (packageName.isBlank()) return false
@@ -79,15 +99,24 @@ object FocusGatePrefs {
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.os.Build
 import android.provider.Settings
+import android.util.Base64
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.WritableArray
+import java.io.ByteArrayOutputStream
 import java.util.TreeMap
+
+data class InstalledAppRow(
+  val label: String,
+  val iconUri: String?,
+)
 
 class FocusGateModule(private val reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -140,23 +169,48 @@ class FocusGateModule(private val reactContext: ReactApplicationContext) :
         addCategory(Intent.CATEGORY_LAUNCHER)
       }
       val resolved = pm.queryIntentActivities(launcherIntent, 0)
-      val byPackage = TreeMap<String, String>()
+      val byPackage = TreeMap<String, InstalledAppRow>()
       for (item in resolved) {
         val packageName = item.activityInfo?.packageName ?: continue
         if (packageName == reactContext.packageName) continue
         val label = item.loadLabel(pm)?.toString() ?: packageName
-        byPackage[packageName] = label
+        val iconUri = drawableToDataUri(item.loadIcon(pm))
+        byPackage[packageName] = InstalledAppRow(label = label, iconUri = iconUri)
       }
       val array: WritableArray = Arguments.createArray()
-      for ((packageName, label) in byPackage) {
+      for ((packageName, app) in byPackage) {
         val row = Arguments.createMap()
         row.putString("packageName", packageName)
-        row.putString("label", label)
+        row.putString("label", app.label)
+        if (app.iconUri != null) {
+          row.putString("iconUri", app.iconUri)
+        }
         array.pushMap(row)
       }
       promise.resolve(array)
     } catch (error: Exception) {
       promise.reject("FOCUS_GATE_APPS_FAILED", error)
+    }
+  }
+
+  private fun drawableToDataUri(drawable: android.graphics.drawable.Drawable?): String? {
+    if (drawable == null) return null
+    return try {
+      val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 144
+      val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 144
+      val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+      val canvas = Canvas(bitmap)
+      drawable.setBounds(0, 0, canvas.width, canvas.height)
+      drawable.draw(canvas)
+
+      val stream = ByteArrayOutputStream()
+      bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+      val encoded = Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP)
+      stream.close()
+      bitmap.recycle()
+      "data:image/png;base64,$encoded"
+    } catch (_: Exception) {
+      null
     }
   }
 
@@ -266,17 +320,37 @@ class SocialAppBlockerAccessibilityService : AccessibilityService() {
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import __PACKAGE__.MainActivity
+import __PACKAGE__.R
+import kotlin.math.roundToInt
 
 class SocialBlockerActivity : Activity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      window.statusBarColor = Color.TRANSPARENT
+      window.navigationBarColor = Color.TRANSPARENT
+    }
+    @Suppress("DEPRECATION")
+    window.decorView.systemUiVisibility =
+      View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
 
     val blockedPackage = intent.getStringExtra("blockedPackage").orEmpty()
     val blockedAppLabel = intent.getStringExtra("blockedAppLabel")
@@ -285,32 +359,104 @@ class SocialBlockerActivity : Activity() {
         ?: resolveAppLabel(blockedPackage)
         ?: blockedPackage.takeIf { it.isNotBlank() }
         ?: "this app"
+    val content = getBlockerContent(FocusGatePrefs.getTradition(this), appName)
 
-    val root = LinearLayout(this).apply {
+    val root = FrameLayout(this).apply {
+      layoutParams =
+        ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+    }
+
+    val background = ImageView(this).apply {
+      setImageResource(content.backgroundDrawableRes)
+      scaleType = ImageView.ScaleType.CENTER_CROP
+      layoutParams =
+        FrameLayout.LayoutParams(
+          ViewGroup.LayoutParams.MATCH_PARENT,
+          ViewGroup.LayoutParams.MATCH_PARENT,
+        )
+    }
+
+    val overlay = View(this).apply {
+      this.background =
+        GradientDrawable(
+          GradientDrawable.Orientation.TOP_BOTTOM,
+          intArrayOf(content.topOverlayColor, content.bottomOverlayColor),
+        )
+      layoutParams =
+        FrameLayout.LayoutParams(
+          ViewGroup.LayoutParams.MATCH_PARENT,
+          ViewGroup.LayoutParams.MATCH_PARENT,
+        )
+    }
+
+    val contentLayout = LinearLayout(this).apply {
       orientation = LinearLayout.VERTICAL
+      gravity = Gravity.CENTER_HORIZONTAL
+      setPadding(dp(24), dp(56), dp(24), dp(40))
+      layoutParams =
+        FrameLayout.LayoutParams(
+          ViewGroup.LayoutParams.MATCH_PARENT,
+          ViewGroup.LayoutParams.MATCH_PARENT,
+        )
+    }
+
+    val spacer = View(this).apply {
+      layoutParams =
+        LinearLayout.LayoutParams(
+          ViewGroup.LayoutParams.MATCH_PARENT,
+          0,
+          1f,
+        )
+    }
+
+    val badge = TextView(this).apply {
+      text = content.badgeLabel
       gravity = Gravity.CENTER
-      setPadding(48, 48, 48, 48)
-      setBackgroundColor(0xFF022C22.toInt())
+      setTextColor(content.badgeTextColor)
+      setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+      setPadding(dp(14), dp(8), dp(14), dp(8))
+      this.background =
+        GradientDrawable().apply {
+          shape = GradientDrawable.RECTANGLE
+          cornerRadius = dp(999).toFloat()
+          setColor(content.badgeBackgroundColor)
+          setStroke(dp(1), content.badgeStrokeColor)
+        }
     }
 
     val title = TextView(this).apply {
-      text = "Take a prayer break"
-      textSize = 24f
-      setTextColor(0xFFFFFFFF.toInt())
-      setTypeface(null, Typeface.BOLD)
+      text = content.title
+      setTextSize(TypedValue.COMPLEX_UNIT_SP, 29f)
+      setTextColor(content.titleColor)
+      typeface = Typeface.create(Typeface.SERIF, Typeface.BOLD)
       gravity = Gravity.CENTER
     }
 
     val message = TextView(this).apply {
-      text = "\${appName} is blocked until you complete one prayer session in Oremus."
-      textSize = 16f
-      setTextColor(0xFFE2E8F0.toInt())
+      text = content.message
+      setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+      setTextColor(content.bodyColor)
       gravity = Gravity.CENTER
-      setPadding(0, 24, 0, 24)
+      setLineSpacing(0f, 1.35f)
     }
 
     val openPrayerButton = Button(this).apply {
-      text = "Open Oremus"
+      text = content.buttonLabel
+      setTextColor(content.buttonTextColor)
+      setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+      typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+      textAlignment = View.TEXT_ALIGNMENT_CENTER
+      stateListAnimator = null
+      elevation = 0f
+      minHeight = dp(58)
+      minimumHeight = dp(58)
+      this.background =
+        GradientDrawable().apply {
+          shape = GradientDrawable.RECTANGLE
+          cornerRadius = dp(16).toFloat()
+          setColor(content.buttonBackgroundColor)
+          setStroke(dp(1), content.buttonStrokeColor)
+        }
       setOnClickListener {
         val openAppIntent =
           Intent(this@SocialBlockerActivity, MainActivity::class.java).apply {
@@ -321,11 +467,149 @@ class SocialBlockerActivity : Activity() {
       }
     }
 
-    root.addView(title)
-    root.addView(message)
-    root.addView(openPrayerButton)
+    val footer = TextView(this).apply {
+      text = content.footerLabel
+      gravity = Gravity.CENTER
+      setTextColor(content.footerColor)
+      setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+    }
+
+    contentLayout.addView(spacer)
+    contentLayout.addView(
+      badge,
+      LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+      ).apply {
+        bottomMargin = dp(22)
+      },
+    )
+    contentLayout.addView(
+      title,
+      LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+      ).apply {
+        bottomMargin = dp(14)
+      },
+    )
+    contentLayout.addView(
+      message,
+      LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+      ).apply {
+        bottomMargin = dp(24)
+      },
+    )
+    contentLayout.addView(
+      openPrayerButton,
+      LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+      ).apply {
+        bottomMargin = dp(16)
+      },
+    )
+    contentLayout.addView(
+      footer,
+      LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+      ),
+    )
+
+    root.addView(background)
+    root.addView(overlay)
+    root.addView(contentLayout)
     setContentView(root)
   }
+
+  private fun getBlockerContent(tradition: String?, appName: String): BlockerContent =
+    when (tradition) {
+      "islam" ->
+        BlockerContent(
+          badgeLabel = "$appName is paused",
+          title = "Pause. Realign.",
+          message = "You've chosen to protect your focus.\nComplete a session in Oremus to continue.",
+          buttonLabel = "Begin Session",
+          footerLabel = "Open Oremus to continue",
+          backgroundDrawableRes = R.drawable.focus_gate_block_islam,
+          topOverlayColor = 0x22000000,
+          bottomOverlayColor = 0xCC041712.toInt(),
+          badgeBackgroundColor = 0x263A7A67,
+          badgeStrokeColor = 0x668DD8C2,
+          badgeTextColor = 0xFFF2F8F4.toInt(),
+          titleColor = 0xFFFFFFFF.toInt(),
+          bodyColor = 0xE6EAF8F1.toInt(),
+          buttonBackgroundColor = 0x995D826F.toInt(),
+          buttonStrokeColor = 0xCCADCDBF.toInt(),
+          buttonTextColor = 0xFFF4F5EF.toInt(),
+          footerColor = 0xCCDEE9E2.toInt(),
+        )
+      "christianity" ->
+        BlockerContent(
+          badgeLabel = "$appName is paused",
+          title = "Pause. Realign.",
+          message = "You've chosen to protect your focus.\nComplete a session in Oremus to continue.",
+          buttonLabel = "Begin Prayer",
+          footerLabel = "Open Oremus to continue",
+          backgroundDrawableRes = R.drawable.focus_gate_block_christianity,
+          topOverlayColor = 0x12000000,
+          bottomOverlayColor = 0xD93B1917.toInt(),
+          badgeBackgroundColor = 0x26E0AA69,
+          badgeStrokeColor = 0x66F3CC95,
+          badgeTextColor = 0xFFFFF4E8.toInt(),
+          titleColor = 0xFFF9E1C4.toInt(),
+          bodyColor = 0xE6F6E7D6.toInt(),
+          buttonBackgroundColor = 0xCCB86A38.toInt(),
+          buttonStrokeColor = 0xFFE2A56A.toInt(),
+          buttonTextColor = 0xFFFFF0DE.toInt(),
+          footerColor = 0xCCF7DAB8.toInt(),
+        )
+      "buddhism" ->
+        BlockerContent(
+          badgeLabel = "$appName is paused",
+          title = "Pause. Realign.",
+          message = "You've chosen to protect your focus.\nComplete a session in Oremus to continue.",
+          buttonLabel = "Begin Meditation",
+          footerLabel = "Open Oremus to continue",
+          backgroundDrawableRes = R.drawable.focus_gate_block_buddhism,
+          topOverlayColor = 0x18000000,
+          bottomOverlayColor = 0xCC4F2312.toInt(),
+          badgeBackgroundColor = 0x26E5B678,
+          badgeStrokeColor = 0x66F3CF9A,
+          badgeTextColor = 0xFFFFF0E2.toInt(),
+          titleColor = 0xFFF7DEC0.toInt(),
+          bodyColor = 0xE6F8E8D5.toInt(),
+          buttonBackgroundColor = 0xCCB8722F.toInt(),
+          buttonStrokeColor = 0xFFE1B36E.toInt(),
+          buttonTextColor = 0xFFFFF0DE.toInt(),
+          footerColor = 0xCCF4DBBD.toInt(),
+        )
+      else ->
+        BlockerContent(
+          badgeLabel = "$appName is paused",
+          title = "Pause. Realign.",
+          message = "You've chosen to protect your focus.\nComplete a session in Oremus to continue.",
+          buttonLabel = "Begin Session",
+          footerLabel = "Open Oremus to continue",
+          backgroundDrawableRes = R.drawable.focus_gate_block_islam,
+          topOverlayColor = 0x22000000,
+          bottomOverlayColor = 0xCC041712.toInt(),
+          badgeBackgroundColor = 0x263A7A67,
+          badgeStrokeColor = 0x668DD8C2,
+          badgeTextColor = 0xFFF2F8F4.toInt(),
+          titleColor = 0xFFFFFFFF.toInt(),
+          bodyColor = 0xE6EAF8F1.toInt(),
+          buttonBackgroundColor = 0x995D826F.toInt(),
+          buttonStrokeColor = 0xCCADCDBF.toInt(),
+          buttonTextColor = 0xFFF4F5EF.toInt(),
+          footerColor = 0xCCDEE9E2.toInt(),
+        )
+    }
+
+  private fun dp(value: Int): Int = (value * resources.displayMetrics.density).roundToInt()
 
   private fun resolveAppLabel(packageName: String): String? {
     if (packageName.isBlank()) return null
@@ -336,6 +620,26 @@ class SocialBlockerActivity : Activity() {
       null
     }
   }
+
+  private data class BlockerContent(
+    val badgeLabel: String,
+    val title: String,
+    val message: String,
+    val buttonLabel: String,
+    val footerLabel: String,
+    val backgroundDrawableRes: Int,
+    val topOverlayColor: Int,
+    val bottomOverlayColor: Int,
+    val badgeBackgroundColor: Int,
+    val badgeStrokeColor: Int,
+    val badgeTextColor: Int,
+    val titleColor: Int,
+    val bodyColor: Int,
+    val buttonBackgroundColor: Int,
+    val buttonTextColor: Int,
+    val buttonStrokeColor: Int,
+    val footerColor: Int,
+  )
 }
 `,
 };
@@ -416,6 +720,25 @@ const writeIfChanged = async (filePath: string, content: string) => {
     // ignore missing files
   }
   await fs.writeFile(filePath, content, 'utf8');
+};
+
+const copyBinaryIfChanged = async (sourcePath: string, targetPath: string) => {
+  const [source, current] = await Promise.all([
+    fs.readFile(sourcePath),
+    fs.readFile(targetPath).catch(() => null),
+  ]);
+  if (current && Buffer.compare(source, current) === 0) {
+    return;
+  }
+  await fs.copyFile(sourcePath, targetPath);
+};
+
+const removeConflictingDrawables = async (resourceBasePath: string) => {
+  await Promise.all(
+    ['.png', '.jpg', '.jpeg', '.webp'].map(async (extension) => {
+      await fs.rm(`${resourceBasePath}${extension}`, { force: true }).catch(() => {});
+    }),
+  );
 };
 
 const withFocusGateAndroid: ConfigPlugin = (config) => {
@@ -544,14 +867,34 @@ const withFocusGateAndroid: ConfigPlugin = (config) => {
         'res',
         'xml',
       );
+      const drawableDir = path.join(
+        mod.modRequest.platformProjectRoot,
+        'app',
+        'src',
+        'main',
+        'res',
+        'drawable-nodpi',
+      );
 
       await fs.mkdir(javaDir, { recursive: true });
       await fs.mkdir(xmlDir, { recursive: true });
+      await fs.mkdir(drawableDir, { recursive: true });
 
       await Promise.all(
         Object.entries(focusFiles).map(async ([filename, template]) => {
           const content = template.replaceAll('__PACKAGE__', androidPackage);
           await writeIfChanged(path.join(javaDir, filename), content);
+        }),
+      );
+
+      await Promise.all(
+        Object.entries(FOCUS_GATE_BACKGROUND_ASSETS).map(async ([resourceName, sourceParts]) => {
+          const sourcePath = path.join(mod.modRequest.projectRoot, ...sourceParts);
+          const targetExtension = path.extname(sourcePath) || '.png';
+          const targetBasePath = path.join(drawableDir, resourceName);
+          const targetPath = `${targetBasePath}${targetExtension}`;
+          await removeConflictingDrawables(targetBasePath);
+          await copyBinaryIfChanged(sourcePath, targetPath);
         }),
       );
 

@@ -47,7 +47,7 @@ const THEMES: Record<TraditionThemeKey, TraditionUiTheme> = {
     actionCardBorderColor: 'rgba(223, 230, 255, 0.25)',
     actionTextColor: '#F5F7FF',
     actionIconColor: '#D8E3FF',
-    backgroundImage: require('@/assets/images/background/general-waterpaint.png'),
+    backgroundImage: require('@/assets/images/background/general-waterpaint.jpg'),
     overlayGradient: ['rgba(14, 20, 42, 0.08)', 'rgba(12, 17, 40, 0.55)', 'rgba(8, 11, 24, 0.88)'],
     tabBarColor: 'rgba(20, 29, 58, 0.8)',
     tabBarBorderColor: 'rgba(228, 233, 255, 0.2)',
@@ -83,7 +83,6 @@ const THEMES: Record<TraditionThemeKey, TraditionUiTheme> = {
     tabActiveTint: '#E9FFF7',
     tabInactiveTint: 'rgba(181, 234, 216, 0.7)',
     actions: [
-      { id: 'quran', label: 'Quran', icon: 'auto.stories', route: '/tradition/general' },
       { id: 'prayer-times', label: 'Prayer Times', icon: 'timer', route: '/prayers' },
       { id: 'qibla', label: 'Qibla', icon: 'location.fill', route: '/qibla' },
     ],
