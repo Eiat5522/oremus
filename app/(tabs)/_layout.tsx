@@ -63,7 +63,9 @@ export default function TabLayout() {
               {...props}
               style={[props.style, styles.centerTabButton]}
               onPress={() => {
-                router.push('/active-session');
+                const sessionRoute =
+                  tradition === 'islam' ? '/tradition/islam-session' : '/active-session';
+                router.push(sessionRoute);
               }}
             />
           ),
