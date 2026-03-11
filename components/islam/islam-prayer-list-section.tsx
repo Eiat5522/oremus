@@ -460,6 +460,14 @@ export function IslamPrayerListSection() {
           setIsRescheduleModalVisible(false);
           setSelectedPrayer(null);
         }}
+        onBeginSession={() => {
+          if (selectedPrayer) {
+            router.push({
+              pathname: '/tradition/islam-session',
+              params: { prayerName: selectedPrayer.name },
+            });
+          }
+        }}
       />
       {selectedPrayer ? (
         <PrayerRescheduleModal

@@ -68,7 +68,7 @@ const THEMES: Record<TraditionThemeKey, TraditionUiTheme> = {
     greeting: 'Assalamu Alaikum',
     subtitle: 'Take a moment for prayer.',
     ctaLabel: 'Begin Session',
-    ctaRoute: '/active-session',
+    ctaRoute: '/tradition/islam-session',
     textColor: '#F4FFFC',
     subtitleColor: 'rgba(229, 255, 245, 0.9)',
     ctaGradient: ['#1D7A63', '#0C4B3A'],
