@@ -1,4 +1,5 @@
 import * as Location from 'expo-location';
+import Constants from 'expo-constants';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
@@ -35,6 +36,7 @@ export function QiblaMapPage({
   const [isMapReady, setIsMapReady] = useState(false);
   const [mapLoadFailed, setMapLoadFailed] = useState(false);
   const platformLabel = process.env.EXPO_OS === 'ios' ? 'iOS' : 'device';
+  const hasGoogleMapsApiKey = Constants.expoConfig?.extra?.hasGoogleMapsApiKey === true;
 
   const hasOrigin = Boolean(originCoords);
 
@@ -111,7 +113,17 @@ export function QiblaMapPage({
       </View>
 
       <View style={styles.mapCard}>
-        {mapLoadFailed ? (
+        {!hasGoogleMapsApiKey ? (
+          <View style={styles.mapSetupNotice}>
+            <ThemedText style={styles.mapSetupNoticeTitle}>Map unavailable</ThemedText>
+            <ThemedText style={styles.mapSetupNoticeBody}>
+              This build does not include a Google Maps API key, so the map view is disabled.
+            </ThemedText>
+            <ThemedText style={styles.mapSetupNoticeBody}>
+              Set GOOGLE_MAPS_API_KEY in your Expo environment and rebuild the native app.
+            </ThemedText>
+          </View>
+        ) : mapLoadFailed ? (
           <View style={styles.mapSetupNotice}>
             <ThemedText style={styles.mapSetupNoticeTitle}>Map unavailable</ThemedText>
             <ThemedText style={styles.mapSetupNoticeBody}>

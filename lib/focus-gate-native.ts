@@ -16,7 +16,11 @@ type FocusGateNativeModule = {
   getServiceStatus: () => Promise<FocusGateNativeStatus>;
   openAccessibilitySettings: () => void;
   openUsageAccessSettings: () => void;
-  listInstalledApps: (blockedPackages?: string[]) => Promise<InstalledApp[]>;
+  listInstalledApps?: (blockedPackages?: string[]) => Promise<InstalledApp[]>;
+  triggerBlockNow?: (
+    blockedPackage?: string | null,
+    blockedAppLabel?: string | null,
+  ) => Promise<boolean>;
 };
 
 function getNativeModule(): FocusGateNativeModule | null {
@@ -54,8 +58,24 @@ export async function listFocusGateInstalledApps(
   blockedPackages: string[] = [],
 ): Promise<InstalledApp[]> {
   const module = getNativeModule();
-  if (!module) {
+  if (!module?.listInstalledApps) {
     return [];
   }
   return module.listInstalledApps(blockedPackages);
+}
+
+export async function triggerFocusGateBlockNow(
+  blockedPackage?: string | null,
+  blockedAppLabel?: string | null,
+): Promise<boolean> {
+  const module = getNativeModule();
+  if (!module?.triggerBlockNow) {
+    if (module) {
+      console.warn(
+        '[focus-gate] Native module is missing triggerBlockNow. Rebuild the Android dev client.',
+      );
+    }
+    return false;
+  }
+  return module.triggerBlockNow(blockedPackage, blockedAppLabel);
 }

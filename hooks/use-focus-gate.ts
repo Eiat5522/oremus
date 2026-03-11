@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   type FocusGateSettings,
   type UnlockWindowMinutes,
+  lockFocusGateNow,
   loadFocusGateSettings,
   recordPrayerCompletion,
   updateFocusGateSettings,
@@ -94,6 +95,14 @@ export function useFocusGate() {
     setSettings(next);
   }, []);
 
+  const lockNow = useCallback(
+    async (blockedPackage?: string | null, blockedAppLabel?: string | null) => {
+      const next = await lockFocusGateNow(blockedPackage, blockedAppLabel);
+      setSettings(next);
+    },
+    [],
+  );
+
   return {
     settings,
     permissionStatus,
@@ -104,6 +113,7 @@ export function useFocusGate() {
     setUnlockWindowMinutes,
     setBlockedPackages,
     completePrayerAndUnlock,
+    lockNow,
     openAccessibilitySettings: openFocusGateAccessibilitySettings,
     openUsageAccessSettings: openFocusGateUsageAccessSettings,
   };

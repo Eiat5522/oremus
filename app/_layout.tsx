@@ -40,6 +40,7 @@ function RootLayoutNav() {
         <Stack.Screen name="onboarding/index" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="active-session/index" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="focus-gate/block" options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen name="tradition/qibla" />
         <Stack.Screen name="tradition/buddhist" options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen

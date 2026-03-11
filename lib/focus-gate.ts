@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { TRADITION_OPTIONS, type Tradition } from '@/constants/traditions';
-import { syncFocusGateNative } from '@/lib/focus-gate-native';
+import { syncFocusGateNative, triggerFocusGateBlockNow } from '@/lib/focus-gate-native';
 
 export const FOCUS_GATE_STORAGE_KEY = '@oremus/focus-gate-v1';
 
@@ -95,6 +95,19 @@ export async function recordPrayerCompletion(): Promise<FocusGateSettings> {
       lastPrayerCompletedAtMs: now,
     };
   });
+}
+
+export async function lockFocusGateNow(
+  blockedPackage?: string | null,
+  blockedAppLabel?: string | null,
+): Promise<FocusGateSettings> {
+  const next = await updateFocusGateSettings((previous) => ({
+    ...previous,
+    enabled: true,
+    unlockUntilMs: null,
+  }));
+  await triggerFocusGateBlockNow(blockedPackage, blockedAppLabel);
+  return next;
 }
 
 export function getUnlockRemainingMs(settings: FocusGateSettings): number {

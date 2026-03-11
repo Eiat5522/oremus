@@ -13,6 +13,14 @@ import { recordPrayerCompletion } from '@/lib/focus-gate';
 
 const PRAYER_COMPLETION_STORAGE_KEY = '@oremus/islam-prayer-completion-v1';
 const PRAYER_RESCHEDULE_STORAGE_KEY = '@oremus/islam-prayer-rescheduled-v1';
+const PRAYER_LOCATION_STORAGE_KEY = '@oremus/islam-prayer-location-v1';
+
+type SavedPrayerLocation = {
+  id: string;
+  label: string;
+  latitude: number;
+  longitude: number;
+};
 
 type DailyPrayerCompletion = Record<PrayerName, boolean>;
 type PrayerCompletionStore = Record<string, DailyPrayerCompletion>;
@@ -75,15 +83,33 @@ export function useIslamPrayerData(referenceDate?: Date) {
     useState<Location.PermissionStatus | null>(null);
   const [canAskLocationPermission, setCanAskLocationPermission] = useState(true);
   const [isRequestingLocationPermission, setIsRequestingLocationPermission] = useState(false);
+  const [savedPrayerLocation, setSavedPrayerLocation] = useState<SavedPrayerLocation | null>(null);
   const [prayerCompletions, setPrayerCompletions] = useState<PrayerCompletionStore>({});
   const [rescheduledPrayers, setRescheduledPrayers] = useState<PrayerRescheduleStore>({});
 
   const todayKey = useMemo(() => getLocalDateKey(effectiveDate), [effectiveDate]);
 
+  const effectiveCoords = useMemo(() => {
+    if (coords) {
+      return coords;
+    }
+    if (savedPrayerLocation) {
+      return {
+        latitude: savedPrayerLocation.latitude,
+        longitude: savedPrayerLocation.longitude,
+      };
+    }
+    return null;
+  }, [coords, savedPrayerLocation]);
+
   const todayPrayers = useMemo(() => {
-    if (!coords) return [];
-    return getPrayerTimesForDate(coords.latitude, coords.longitude, effectiveDate);
-  }, [coords, effectiveDate]);
+    if (!effectiveCoords) return [];
+    return getPrayerTimesForDate(
+      effectiveCoords.latitude,
+      effectiveCoords.longitude,
+      effectiveDate,
+    );
+  }, [effectiveCoords, effectiveDate]);
 
   const comparisonNow = useMemo(
     () => getComparisonTimeForDate(effectiveDate, now),
@@ -120,6 +146,39 @@ export function useIslamPrayerData(referenceDate?: Date) {
   const countdownText = nextPrayer
     ? formatCountdown(nextPrayer.time, comparisonNow)
     : 'No more prayers today';
+
+  const loadSavedPrayerLocation = useCallback(async () => {
+    try {
+      const stored = await AsyncStorage.getItem(PRAYER_LOCATION_STORAGE_KEY);
+      if (!mountedRef.current) return;
+      if (!stored) {
+        setSavedPrayerLocation(null);
+        return;
+      }
+
+      const parsed = JSON.parse(stored) as Partial<SavedPrayerLocation>;
+      if (
+        typeof parsed.id !== 'string' ||
+        typeof parsed.label !== 'string' ||
+        typeof parsed.latitude !== 'number' ||
+        typeof parsed.longitude !== 'number'
+      ) {
+        setSavedPrayerLocation(null);
+        return;
+      }
+
+      setSavedPrayerLocation({
+        id: parsed.id,
+        label: parsed.label,
+        latitude: parsed.latitude,
+        longitude: parsed.longitude,
+      });
+    } catch {
+      if (mountedRef.current) {
+        setSavedPrayerLocation(null);
+      }
+    }
+  }, []);
 
   const requestLocationPermission = useCallback(async () => {
     try {
@@ -237,6 +296,33 @@ export function useIslamPrayerData(referenceDate?: Date) {
     let mounted = true;
 
     const loadInitialPermission = async () => {
+      let loadedSavedLocation: SavedPrayerLocation | null = null;
+
+      try {
+        const stored = await AsyncStorage.getItem(PRAYER_LOCATION_STORAGE_KEY);
+        if (!mounted) return;
+
+        if (stored) {
+          const parsed = JSON.parse(stored) as Partial<SavedPrayerLocation>;
+          if (
+            typeof parsed.id === 'string' &&
+            typeof parsed.label === 'string' &&
+            typeof parsed.latitude === 'number' &&
+            typeof parsed.longitude === 'number'
+          ) {
+            loadedSavedLocation = {
+              id: parsed.id,
+              label: parsed.label,
+              latitude: parsed.latitude,
+              longitude: parsed.longitude,
+            };
+            setSavedPrayerLocation(loadedSavedLocation);
+          }
+        }
+      } catch {
+        // ignore storage errors
+      }
+
       try {
         const permission = await Location.getForegroundPermissionsAsync();
         if (!mounted) return;
@@ -245,13 +331,19 @@ export function useIslamPrayerData(referenceDate?: Date) {
 
         if (permission.status === 'granted') {
           await requestLocationPermission();
+        } else if (loadedSavedLocation) {
+          setLocationText(loadedSavedLocation.label);
         } else {
           setLocationText('Location access required');
         }
       } catch {
         if (!mounted) return;
-        setLocationText('Unavailable');
-        setLocationError('Unable to read location permission on this device.');
+        if (loadedSavedLocation) {
+          setLocationText(loadedSavedLocation.label);
+        } else {
+          setLocationText('Unavailable');
+          setLocationError('Unable to read location permission on this device.');
+        }
       }
     };
 

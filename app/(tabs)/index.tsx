@@ -14,7 +14,7 @@ import { useUser } from '@/hooks/use-user';
 export default function HomeScreen() {
   const router = useRouter();
   const { tradition } = useTradition();
-  const { userName } = useUser();
+  const { user } = useUser();
 
   const uiTheme = useMemo(() => getTraditionUiTheme(tradition), [tradition]);
   const backgroundImageStyle = useMemo(
@@ -24,7 +24,8 @@ export default function HomeScreen() {
     ],
     [tradition],
   );
-  const displayName = userName.trim().length > 0 && userName !== 'Guest' ? userName : 'Sarah';
+  const displayName = user?.name.trim() ?? '';
+  const greetingText = displayName ? `${uiTheme.greeting},\n${displayName}.` : uiTheme.greeting;
 
   return (
     <View style={styles.container}>
@@ -48,8 +49,7 @@ export default function HomeScreen() {
               },
             ]}
           >
-            {uiTheme.greeting},{'\n'}
-            {displayName}.
+            {greetingText}
           </ThemedText>
           <ThemedText style={[styles.subtitle, { color: uiTheme.subtitleColor }]}>
             {uiTheme.subtitle}

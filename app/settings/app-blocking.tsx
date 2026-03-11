@@ -172,6 +172,7 @@ export default function AppBlockingSettingsScreen() {
     setEnabled,
     setUnlockWindowMinutes,
     setBlockedPackages,
+    lockNow,
     openAccessibilitySettings,
     openUsageAccessSettings,
   } = useFocusGate();
@@ -193,6 +194,15 @@ export default function AppBlockingSettingsScreen() {
     if (isChristianity) return BLOCKING_VARIANTS.christianity;
     return null;
   }, [isIslam, isBuddhism, isChristianity]);
+  const immediateLockTarget = useMemo(() => {
+    const packageName = settings?.blockedPackages[0] ?? null;
+    if (!packageName) return null;
+    const match = visibleApps.find((app) => app.packageName === packageName);
+    return {
+      packageName,
+      label: match?.label ?? packageName,
+    };
+  }, [settings?.blockedPackages, visibleApps]);
   const blockerPreview = blockingBackground ?? BLOCKING_VARIANTS.islam;
   const loadingBackgroundImage = blockingBackground?.image ?? uiTheme.backgroundImage;
   const loadingGradient = blockingBackground?.gradient ?? uiTheme.overlayGradient;
@@ -358,8 +368,10 @@ export default function AppBlockingSettingsScreen() {
               </ThemedText>
               {hasBlockingBackground ? (
                 <Button
-                  title={blockerPreview.buttonLabel}
-                  onPress={() => void setEnabled(true)}
+                  title="Lock now"
+                  onPress={() =>
+                    void lockNow(immediateLockTarget?.packageName, immediateLockTarget?.label)
+                  }
                   style={[
                     styles.previewButton,
                     {
