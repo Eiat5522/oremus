@@ -135,6 +135,8 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>((set) => ({
       currentVerseIndex: Math.max(state.currentVerseIndex - 1, 0),
     })),
 
+  // No-op state update; consumed by screens that subscribe to verse changes
+  // to re-trigger audio playback from the beginning of the current verse.
   replayVerse: () => set((state) => ({ currentVerseIndex: state.currentVerseIndex })),
 
   toggleMeaning: () => set((state) => ({ showMeaning: !state.showMeaning })),

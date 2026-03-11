@@ -3,15 +3,9 @@ import { useCallback, useEffect } from 'react';
 
 import { useBuddhistPrayerStore } from './use-buddhist-prayer-store';
 
-// Audio asset placeholders - replace with actual files when available
-// TODO: Add actual audio assets to assets/sounds/
-const AUDIO_ASSETS = {
-  // These will fall back gracefully if files don't exist
-  namo_tassa: null as number | null, // require('@/assets/sounds/namo_tassa.mp3')
-  temple_bell: null as number | null, // require('@/assets/sounds/temple_bell.mp3')
-} as const;
-
-void AUDIO_ASSETS;
+// TODO: Add actual audio assets to assets/sounds/ and replace placeholders:
+//   namo_tassa: require('@/assets/sounds/namo_tassa.mp3')
+//   temple_bell: require('@/assets/sounds/temple_bell.mp3')
 
 export function useAudioPrayer() {
   const { isAudioEnabled, templeBellEnabled } = useBuddhistPrayerStore();
