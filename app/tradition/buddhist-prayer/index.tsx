@@ -22,7 +22,8 @@ const QUICK_ACTIONS = [
   { id: 'learn', icon: 'book.fill' as const, label: 'Learn', route: 'library' },
 ] as const;
 
-const featuredChants = getFeaturedChants().length > 0 ? getFeaturedChants() : CHANTS.slice(0, 3);
+const _featuredChants = getFeaturedChants();
+const featuredChants = _featuredChants.length > 0 ? _featuredChants : CHANTS.slice(0, 3);
 
 export default function BuddhistPrayerHomeScreen() {
   const router = useRouter();

@@ -34,13 +34,13 @@ export function useAltarExperience(callbacks?: AltarExperienceCallbacks) {
 
   // In immersive3D mode, simulate surface detection with a timer
   // TODO: [NATIVE AR SWAP-IN] Replace this simulation with real AR plane detection callback
-  const simulateScanTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scanSimulationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const beginScan = useCallback(() => {
     startScan();
     if (altarExperienceMode === 'immersive3D') {
       // Simulate finding a surface after ~2.5 seconds
-      simulateScanTimeout.current = setTimeout(() => {
+      scanSimulationTimeoutRef.current = setTimeout(() => {
         surfaceDetected();
         callbacksRef.current?.onSurfaceDetected?.();
       }, 2500);
@@ -75,8 +75,8 @@ export function useAltarExperience(callbacks?: AltarExperienceCallbacks) {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (simulateScanTimeout.current) {
-        clearTimeout(simulateScanTimeout.current);
+      if (scanSimulationTimeoutRef.current) {
+        clearTimeout(scanSimulationTimeoutRef.current);
       }
     };
   }, []);

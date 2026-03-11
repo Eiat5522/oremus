@@ -16,7 +16,7 @@ interface GoldButtonProps {
   variant?: 'primary' | 'outline' | 'ghost';
 }
 
-const HEIGHT: Record<NonNullable<GoldButtonProps['size']>, number> = {
+const BUTTON_HEIGHTS: Record<NonNullable<GoldButtonProps['size']>, number> = {
   sm: 40,
   md: 52,
   lg: 60,
@@ -29,7 +29,7 @@ export function GoldButton({
   size = 'md',
   variant = 'primary',
 }: GoldButtonProps) {
-  const height = HEIGHT[size];
+  const height = BUTTON_HEIGHTS[size];
   const fontSize = size === 'sm' ? 14 : size === 'lg' ? 18 : 16;
 
   return (
