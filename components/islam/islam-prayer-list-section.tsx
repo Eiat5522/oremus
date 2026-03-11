@@ -4,6 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Linking,
   Modal,
   Platform,
   Pressable,
@@ -25,6 +26,7 @@ import { PrayerAtmosphere } from '@/components/visual/prayer-atmosphere';
 import { Starfield } from '@/components/visual/starfield';
 import { Fonts } from '@/constants/theme';
 import { useIslamPrayerData } from '@/hooks/use-islam-prayer-data';
+import { PRAYER_LOCATION_PRESETS } from '@/lib/islam-prayer-location';
 import type { PrayerName } from '@/lib/prayer-times';
 import { formatTime } from '@/lib/prayer-times';
 import { isPrayerSessionPassed } from '@/lib/prayer-session';
@@ -98,7 +100,15 @@ export function IslamPrayerListSection() {
     completedCount,
     countdownText,
     locationText,
+    locationError,
+    locationPermissionStatus,
+    canAskLocationPermission,
+    isRequestingLocationPermission,
     requestLocationPermission,
+    savedPrayerLocation,
+    selectSavedPrayerLocation,
+    clearSavedPrayerLocation,
+    isUsingDeviceLocation,
     togglePrayerCompletion,
     todayRescheduled,
     reschedulePrayer,
@@ -323,7 +333,16 @@ export function IslamPrayerListSection() {
   ]);
 
   const showLocationAction =
-    locationText === 'Permission required' || locationText === 'Location access required';
+    locationPermissionStatus !== 'granted' &&
+    !savedPrayerLocation &&
+    (locationText === 'Permission required' || locationText === 'Location access required');
+
+  const visibleLocationError = savedPrayerLocation ? null : locationError;
+  const locationCopy = isUsingDeviceLocation
+    ? `Using device location: ${locationText}`
+    : savedPrayerLocation
+      ? `Using saved location: ${savedPrayerLocation.label}`
+      : 'Select a city below to calculate prayer times without location permission.';
 
   return (
     <PrayerAtmosphere>
@@ -351,6 +370,73 @@ export function IslamPrayerListSection() {
         />
 
         <PrayerProgressRing completed={completedCount} total={5} />
+
+        <View style={styles.locationCard}>
+          <ThemedText style={styles.locationTitle}>Prayer time location</ThemedText>
+          <ThemedText style={styles.locationBody}>{locationCopy}</ThemedText>
+
+          {visibleLocationError ? (
+            <ThemedText style={styles.locationError}>{visibleLocationError}</ThemedText>
+          ) : null}
+
+          {locationPermissionStatus !== 'granted' && canAskLocationPermission ? (
+            <Pressable
+              disabled={isRequestingLocationPermission}
+              onPress={() => void requestLocationPermission()}
+              style={styles.locationCta}
+            >
+              <ThemedText style={styles.locationCtaText}>
+                {isRequestingLocationPermission ? 'Requesting permission...' : 'Enable location'}
+              </ThemedText>
+            </Pressable>
+          ) : null}
+
+          {locationPermissionStatus !== 'granted' && !canAskLocationPermission ? (
+            <Pressable
+              onPress={() => {
+                void Linking.openSettings();
+              }}
+              style={styles.locationSecondary}
+            >
+              <ThemedText style={styles.locationSecondaryText}>Open location settings</ThemedText>
+            </Pressable>
+          ) : null}
+
+          <View style={styles.presetWrap}>
+            {PRAYER_LOCATION_PRESETS.map((preset) => (
+              <Pressable
+                key={preset.id}
+                onPress={() => {
+                  void selectSavedPrayerLocation(preset.id);
+                }}
+                style={[
+                  styles.presetChip,
+                  savedPrayerLocation?.id === preset.id && styles.presetChipActive,
+                ]}
+              >
+                <ThemedText
+                  style={[
+                    styles.presetChipText,
+                    savedPrayerLocation?.id === preset.id && styles.presetChipTextActive,
+                  ]}
+                >
+                  {preset.label}
+                </ThemedText>
+              </Pressable>
+            ))}
+          </View>
+
+          {savedPrayerLocation ? (
+            <Pressable
+              onPress={() => {
+                void clearSavedPrayerLocation();
+              }}
+              style={styles.locationSecondary}
+            >
+              <ThemedText style={styles.locationSecondaryText}>Clear saved location</ThemedText>
+            </Pressable>
+          ) : null}
+        </View>
 
         <View style={styles.list}>
           {rows.map((row) => {
@@ -491,6 +577,86 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: 12,
+  },
+  locationCard: {
+    borderRadius: 18,
+    padding: 14,
+    gap: 10,
+    backgroundColor: 'rgba(8, 30, 23, 0.55)',
+    borderWidth: 1,
+    borderColor: 'rgba(244, 200, 107, 0.22)',
+  },
+  locationTitle: {
+    color: '#F8EFD7',
+    fontSize: 16,
+    lineHeight: 22,
+    fontWeight: '700',
+  },
+  locationBody: {
+    color: 'rgba(243, 234, 208, 0.86)',
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  locationError: {
+    color: '#F7B1A8',
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '600',
+  },
+  locationCta: {
+    alignSelf: 'flex-start',
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(244, 200, 107, 0.45)',
+    backgroundColor: 'rgba(11, 35, 28, 0.6)',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  locationCtaText: {
+    color: '#F6E7BB',
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '700',
+  },
+  locationSecondary: {
+    alignSelf: 'flex-start',
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(248, 222, 162, 0.22)',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  locationSecondaryText: {
+    color: '#F8EFD7',
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '700',
+  },
+  presetWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  presetChip: {
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(248, 222, 162, 0.28)',
+    backgroundColor: 'rgba(8, 30, 23, 0.5)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  presetChipActive: {
+    borderColor: 'rgba(22,163,74,0.55)',
+    backgroundColor: 'rgba(22,163,74,0.18)',
+  },
+  presetChipText: {
+    color: '#F3E6C6',
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '700',
+  },
+  presetChipTextActive: {
+    color: '#BBF7D0',
   },
   messageWrap: {
     marginTop: 10,

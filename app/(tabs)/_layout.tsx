@@ -1,4 +1,5 @@
 import { Tabs, useRouter } from 'expo-router';
+import { Image } from 'expo-image';
 import React, { useMemo } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 
@@ -67,9 +68,13 @@ export default function TabLayout() {
               }}
             />
           ),
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: () => (
             <View style={[styles.centerIconWrap, { backgroundColor: uiTheme.tabActiveTint }]}>
-              <IconSymbol size={30} name="play.fill" color={color} />
+              <Image
+                source={require('@/assets/images/app-icon.png')}
+                style={styles.centerLogoIcon}
+                contentFit="contain"
+              />
             </View>
           ),
           tabBarActiveTintColor: '#ffffff',
@@ -129,5 +134,9 @@ const styles = StyleSheet.create({
     shadowRadius: 9,
     // Android shadow
     elevation: 8,
+  },
+  centerLogoIcon: {
+    width: 30,
+    height: 30,
   },
 });

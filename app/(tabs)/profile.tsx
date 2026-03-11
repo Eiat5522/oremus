@@ -31,6 +31,9 @@ export default function ProfileScreen() {
   const { tradition, traditionDetails } = useTradition();
   const uiTheme = useMemo(() => getTraditionUiTheme(tradition), [tradition]);
   const isIslam = tradition === 'islam';
+  const isImmersiveTradition =
+    tradition === 'islam' || tradition === 'buddhism' || tradition === 'christianity';
+  const useTraditionTheme = isImmersiveTradition;
   const backgroundImageStyle = useMemo(
     () => [StyleSheet.absoluteFillObject, isIslam ? styles.islamBackgroundShift : null],
     [isIslam],
@@ -89,14 +92,14 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      {isIslam ? (
+      {isImmersiveTradition ? (
         <>
           <Image source={uiTheme.backgroundImage} style={backgroundImageStyle} contentFit="cover" />
           <LinearGradient colors={uiTheme.overlayGradient} style={StyleSheet.absoluteFillObject} />
         </>
       ) : null}
 
-      <ThemedView style={[styles.container, isIslam ? styles.transparentBg : null]}>
+      <ThemedView style={[styles.container, isImmersiveTradition ? styles.transparentBg : null]}>
         <Stack.Screen
           options={{
             headerShown: true,
@@ -114,28 +117,19 @@ export default function ProfileScreen() {
         />
 
         <ScrollView
-          contentContainerStyle={[styles.scrollContent, isIslam ? styles.scrollContentIslam : null]}
+          contentContainerStyle={[
+            styles.scrollContent,
+            isImmersiveTradition ? styles.scrollContentImmersive : null,
+          ]}
           showsVerticalScrollIndicator={false}
           contentInsetAdjustmentBehavior="automatic"
         >
-          <View style={styles.headerActionsRow}>
-            <Pressable style={styles.roundIconButton} onPress={() => router.back()}>
-              <IconSymbol
-                name="arrow.left"
-                size={20}
-                color={isIslam ? uiTheme.actionTextColor : theme.text}
-              />
-            </Pressable>
-            <Pressable style={styles.roundIconButton}>
-              <IconSymbol
-                name="settings"
-                size={20}
-                color={isIslam ? uiTheme.actionTextColor : theme.text}
-              />
-            </Pressable>
-          </View>
-
-          <View style={[styles.profileHeader, isIslam ? styles.profileHeaderIslam : null]}>
+          <View
+            style={[
+              styles.profileHeader,
+              isImmersiveTradition ? styles.profileHeaderImmersive : null,
+            ]}
+          >
             <View style={styles.avatarContainer}>
               {userProfileImage ? (
                 <Image
@@ -148,20 +142,20 @@ export default function ProfileScreen() {
                   style={[
                     styles.avatar,
                     styles.avatarPlaceholder,
-                    isIslam ? styles.avatarPlaceholderIslam : null,
+                    useTraditionTheme ? styles.avatarPlaceholderImmersive : null,
                   ]}
                 >
                   <IconSymbol
                     name="person.fill"
                     size={44}
-                    color={isIslam ? uiTheme.actionTextColor : '#9ca3af'}
+                    color={useTraditionTheme ? uiTheme.actionTextColor : '#9ca3af'}
                   />
                 </View>
               )}
               <Pressable
                 style={[
                   styles.editBadge,
-                  isIslam
+                  useTraditionTheme
                     ? {
                         backgroundColor: uiTheme.actionCardColor,
                         borderColor: uiTheme.actionCardBorderColor,
@@ -173,7 +167,7 @@ export default function ProfileScreen() {
                 <IconSymbol
                   name="pencil"
                   size={12}
-                  color={isIslam ? uiTheme.actionTextColor : '#fff'}
+                  color={useTraditionTheme ? uiTheme.actionTextColor : '#fff'}
                 />
               </Pressable>
             </View>
@@ -182,7 +176,7 @@ export default function ProfileScreen() {
               <ThemedText
                 style={[
                   styles.userName,
-                  isIslam ? { color: uiTheme.textColor, fontFamily: Fonts.serif } : null,
+                  useTraditionTheme ? { color: uiTheme.textColor, fontFamily: Fonts.serif } : null,
                 ]}
               >
                 {userName}
@@ -193,13 +187,13 @@ export default function ProfileScreen() {
                     value={nameDraft}
                     onChangeText={setNameDraft}
                     placeholder="Enter your name"
-                    placeholderTextColor={isIslam ? 'rgba(232,255,247,0.72)' : '#94a3b8'}
+                    placeholderTextColor={useTraditionTheme ? 'rgba(232,255,247,0.72)' : '#94a3b8'}
                     autoCapitalize="words"
                     returnKeyType="done"
                     onSubmitEditing={saveName}
                     style={[
                       styles.nameInput,
-                      isIslam
+                      useTraditionTheme
                         ? {
                             color: uiTheme.actionTextColor,
                             borderColor: uiTheme.actionCardBorderColor,
@@ -223,7 +217,7 @@ export default function ProfileScreen() {
                       <ThemedText
                         style={[
                           styles.nameActionSecondaryText,
-                          isIslam ? { color: uiTheme.actionTextColor } : null,
+                          useTraditionTheme ? { color: uiTheme.actionTextColor } : null,
                         ]}
                       >
                         Cancel
@@ -236,10 +230,10 @@ export default function ProfileScreen() {
                         styles.nameActionPrimary,
                         {
                           backgroundColor: canSaveName
-                            ? isIslam
+                            ? useTraditionTheme
                               ? uiTheme.actionIconColor
                               : theme.primary
-                            : isIslam
+                            : useTraditionTheme
                               ? 'rgba(172, 239, 215, 0.24)'
                               : 'rgba(100, 116, 139, 0.6)',
                         },
@@ -254,7 +248,7 @@ export default function ProfileScreen() {
                   onPress={() => setIsEditingName(true)}
                   style={[
                     styles.editNameChip,
-                    isIslam
+                    useTraditionTheme
                       ? {
                           backgroundColor: uiTheme.actionCardColor,
                           borderColor: uiTheme.actionCardBorderColor,
@@ -268,12 +262,12 @@ export default function ProfileScreen() {
                   <IconSymbol
                     name="pencil"
                     size={12}
-                    color={isIslam ? uiTheme.actionIconColor : theme.primary}
+                    color={useTraditionTheme ? uiTheme.actionIconColor : theme.primary}
                   />
                   <ThemedText
                     style={[
                       styles.editNameChipText,
-                      { color: isIslam ? uiTheme.actionTextColor : theme.primary },
+                      { color: useTraditionTheme ? uiTheme.actionTextColor : theme.primary },
                     ]}
                   >
                     Edit Name
@@ -284,7 +278,7 @@ export default function ProfileScreen() {
                 <View
                   style={[
                     styles.traditionBadge,
-                    isIslam
+                    useTraditionTheme
                       ? {
                           backgroundColor: uiTheme.actionCardColor,
                           borderColor: uiTheme.actionCardBorderColor,
@@ -295,12 +289,14 @@ export default function ProfileScreen() {
                   <IconSymbol
                     name={traditionDetails.icon}
                     size={14}
-                    color={isIslam ? uiTheme.actionIconColor : traditionDetails.color}
+                    color={useTraditionTheme ? uiTheme.actionIconColor : traditionDetails.color}
                   />
                   <ThemedText
                     style={[
                       styles.traditionText,
-                      { color: isIslam ? uiTheme.actionTextColor : traditionDetails.color },
+                      {
+                        color: useTraditionTheme ? uiTheme.actionTextColor : traditionDetails.color,
+                      },
                     ]}
                   >
                     {traditionDetails.title}
@@ -312,14 +308,17 @@ export default function ProfileScreen() {
 
           <View style={styles.section}>
             <ThemedText
-              style={[styles.sectionLabel, isIslam ? { color: uiTheme.actionIconColor } : null]}
+              style={[
+                styles.sectionLabel,
+                useTraditionTheme ? { color: uiTheme.actionIconColor } : null,
+              ]}
             >
               PREFERENCES
             </ThemedText>
             <View
               style={[
                 styles.settingsList,
-                isIslam
+                useTraditionTheme
                   ? {
                       backgroundColor: uiTheme.actionCardColor,
                       borderColor: uiTheme.actionCardBorderColor,
@@ -334,23 +333,17 @@ export default function ProfileScreen() {
               <SettingItem
                 icon="slider.horizontal.3"
                 title="Change Tradition"
-                color={isIslam ? uiTheme.actionIconColor : theme.primary}
+                color={useTraditionTheme ? uiTheme.actionIconColor : theme.primary}
                 onPress={() => router.push('/onboarding')}
-                islamMode={isIslam}
+                islamMode={useTraditionTheme}
               />
               <SettingItem
                 icon="shield.lock"
                 title="App Blocking"
-                color={isIslam ? uiTheme.actionIconColor : '#16a34a'}
+                color={useTraditionTheme ? uiTheme.actionIconColor : '#16a34a'}
                 onPress={() => router.push('/settings/app-blocking')}
-                islamMode={isIslam}
-              />
-              <SettingItem
-                icon="bell.fill"
-                title="Notifications"
-                color={isIslam ? uiTheme.actionIconColor : '#fbbf24'}
                 isLast
-                islamMode={isIslam}
+                islamMode={useTraditionTheme}
               />
             </View>
           </View>
@@ -359,7 +352,7 @@ export default function ProfileScreen() {
             <View
               style={[
                 styles.privacyCard,
-                isIslam
+                useTraditionTheme
                   ? {
                       backgroundColor: uiTheme.actionCardColor,
                       borderColor: uiTheme.actionCardBorderColor,
@@ -371,7 +364,7 @@ export default function ProfileScreen() {
                 <View
                   style={[
                     styles.privacyIconContainer,
-                    isIslam
+                    useTraditionTheme
                       ? { backgroundColor: 'rgba(172, 239, 215, 0.18)' }
                       : { backgroundColor: `${theme.primary}1A` },
                   ]}
@@ -379,11 +372,14 @@ export default function ProfileScreen() {
                   <IconSymbol
                     name="shield.lock"
                     size={20}
-                    color={isIslam ? uiTheme.actionIconColor : theme.primary}
+                    color={useTraditionTheme ? uiTheme.actionIconColor : theme.primary}
                   />
                 </View>
                 <ThemedText
-                  style={[styles.privacyTitle, isIslam ? { color: uiTheme.actionTextColor } : null]}
+                  style={[
+                    styles.privacyTitle,
+                    useTraditionTheme ? { color: uiTheme.actionTextColor } : null,
+                  ]}
                 >
                   Data & Privacy
                 </ThemedText>
@@ -391,12 +387,14 @@ export default function ProfileScreen() {
               <ThemedText
                 style={[
                   styles.privacyDescription,
-                  isIslam ? { color: uiTheme.actionTextColor } : null,
+                  useTraditionTheme ? { color: uiTheme.actionTextColor } : null,
                 ]}
               >
                 Your data is private. Sessions, notes, and templates are stored on this device only
                 and{' '}
-                <ThemedText style={{ color: isIslam ? uiTheme.actionIconColor : theme.primary }}>
+                <ThemedText
+                  style={{ color: useTraditionTheme ? uiTheme.actionIconColor : theme.primary }}
+                >
                   not synced to the cloud
                 </ThemedText>
                 .
@@ -409,15 +407,21 @@ export default function ProfileScreen() {
                     <IconSymbol
                       name="square.and.arrow.up.fill"
                       size={18}
-                      color={isIslam ? '#0C4B3A' : '#fff'}
+                      color={useTraditionTheme ? '#0C4B3A' : '#fff'}
                     />
                   }
                   style={styles.exportBtn}
-                  variant={isIslam ? 'secondary' : 'primary'}
+                  variant={useTraditionTheme ? 'secondary' : 'primary'}
                 />
                 <Pressable style={styles.clearBtn}>
-                  <IconSymbol name="trash.fill" size={18} color={isIslam ? '#FEE2E2' : '#ef4444'} />
-                  <ThemedText style={[styles.clearBtnText, isIslam ? { color: '#FEE2E2' } : null]}>
+                  <IconSymbol
+                    name="trash.fill"
+                    size={18}
+                    color={useTraditionTheme ? '#FEE2E2' : '#ef4444'}
+                  />
+                  <ThemedText
+                    style={[styles.clearBtnText, useTraditionTheme ? { color: '#FEE2E2' } : null]}
+                  >
                     Clear All Local Data
                   </ThemedText>
                 </Pressable>
@@ -427,7 +431,10 @@ export default function ProfileScreen() {
 
           <View style={styles.footer}>
             <ThemedText
-              style={[styles.versionText, isIslam ? { color: uiTheme.actionIconColor } : null]}
+              style={[
+                styles.versionText,
+                useTraditionTheme ? { color: uiTheme.actionIconColor } : null,
+              ]}
             >
               App Version 1.2.0 (Build 45){'\n'}
               Made for distraction-free practice.
@@ -479,30 +486,15 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingTop: 72,
   },
-  scrollContentIslam: {
+  scrollContentImmersive: {
     paddingBottom: 120,
-  },
-  headerActionsRow: {
-    paddingHorizontal: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  roundIconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(8, 52, 40, 0.35)',
-    borderWidth: 1,
-    borderColor: 'rgba(190, 244, 227, 0.25)',
   },
   profileHeader: {
     alignItems: 'center',
     padding: 32,
     gap: 16,
   },
-  profileHeaderIslam: {
+  profileHeaderImmersive: {
     paddingTop: 24,
   },
   avatarContainer: {
@@ -520,7 +512,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarPlaceholderIslam: {
+  avatarPlaceholderImmersive: {
     backgroundColor: 'rgba(8, 52, 40, 0.45)',
   },
   editBadge: {

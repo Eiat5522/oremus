@@ -268,10 +268,10 @@ const styles = StyleSheet.create({
     height: 0,
     borderLeftWidth: 16,
     borderRightWidth: 16,
-    borderTopWidth: 26,
+    borderBottomWidth: 26,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderTopColor: 'rgba(255,255,255,0.95)',
+    borderBottomColor: 'rgba(255,255,255,0.95)',
   },
   permissionNoticeWrap: {
     position: 'absolute',

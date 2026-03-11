@@ -3,6 +3,11 @@ import * as Location from 'expo-location';
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
 import {
+  PRAYER_LOCATION_PRESETS,
+  PRAYER_LOCATION_STORAGE_KEY,
+  type SavedPrayerLocation,
+} from '@/lib/islam-prayer-location';
+import {
   formatTime,
   getCurrentPrayerName,
   getNextPrayer,
@@ -75,15 +80,29 @@ export function useIslamPrayerData(referenceDate?: Date) {
     useState<Location.PermissionStatus | null>(null);
   const [canAskLocationPermission, setCanAskLocationPermission] = useState(true);
   const [isRequestingLocationPermission, setIsRequestingLocationPermission] = useState(false);
+  const [savedPrayerLocation, setSavedPrayerLocation] = useState<SavedPrayerLocation | null>(null);
   const [prayerCompletions, setPrayerCompletions] = useState<PrayerCompletionStore>({});
   const [rescheduledPrayers, setRescheduledPrayers] = useState<PrayerRescheduleStore>({});
 
   const todayKey = useMemo(() => getLocalDateKey(effectiveDate), [effectiveDate]);
 
+  const prayerCoords = useMemo(() => {
+    if (coords) {
+      return coords;
+    }
+    if (savedPrayerLocation) {
+      return {
+        latitude: savedPrayerLocation.latitude,
+        longitude: savedPrayerLocation.longitude,
+      };
+    }
+    return null;
+  }, [coords, savedPrayerLocation]);
+
   const todayPrayers = useMemo(() => {
-    if (!coords) return [];
-    return getPrayerTimesForDate(coords.latitude, coords.longitude, effectiveDate);
-  }, [coords, effectiveDate]);
+    if (!prayerCoords) return [];
+    return getPrayerTimesForDate(prayerCoords.latitude, prayerCoords.longitude, effectiveDate);
+  }, [prayerCoords, effectiveDate]);
 
   const comparisonNow = useMemo(
     () => getComparisonTimeForDate(effectiveDate, now),
@@ -189,6 +208,61 @@ export function useIslamPrayerData(referenceDate?: Date) {
     }
   }, []);
 
+  const loadSavedPrayerLocation = useCallback(async () => {
+    try {
+      const stored = await AsyncStorage.getItem(PRAYER_LOCATION_STORAGE_KEY);
+      if (!mountedRef.current) return;
+      if (!stored) {
+        setSavedPrayerLocation(null);
+        return;
+      }
+
+      const parsed = JSON.parse(stored) as Partial<SavedPrayerLocation>;
+      if (
+        typeof parsed.id !== 'string' ||
+        typeof parsed.label !== 'string' ||
+        typeof parsed.latitude !== 'number' ||
+        typeof parsed.longitude !== 'number'
+      ) {
+        setSavedPrayerLocation(null);
+        return;
+      }
+
+      setSavedPrayerLocation({
+        id: parsed.id,
+        label: parsed.label,
+        latitude: parsed.latitude,
+        longitude: parsed.longitude,
+      });
+    } catch {
+      if (mountedRef.current) {
+        setSavedPrayerLocation(null);
+      }
+    }
+  }, []);
+
+  const selectSavedPrayerLocation = useCallback(async (locationId: string) => {
+    const location = PRAYER_LOCATION_PRESETS.find((item) => item.id === locationId);
+    if (!location) {
+      return;
+    }
+
+    const nextLocation: SavedPrayerLocation = {
+      id: location.id,
+      label: location.label,
+      latitude: location.latitude,
+      longitude: location.longitude,
+    };
+
+    setSavedPrayerLocation(nextLocation);
+    await AsyncStorage.setItem(PRAYER_LOCATION_STORAGE_KEY, JSON.stringify(nextLocation));
+  }, []);
+
+  const clearSavedPrayerLocation = useCallback(async () => {
+    setSavedPrayerLocation(null);
+    await AsyncStorage.removeItem(PRAYER_LOCATION_STORAGE_KEY);
+  }, []);
+
   const loadPrayerCompletions = useCallback(async () => {
     try {
       const stored = await AsyncStorage.getItem(PRAYER_COMPLETION_STORAGE_KEY);
@@ -256,6 +330,7 @@ export function useIslamPrayerData(referenceDate?: Date) {
     };
 
     void refreshPrayerData();
+    void loadSavedPrayerLocation();
     void loadInitialPermission();
 
     return () => {
@@ -337,6 +412,16 @@ export function useIslamPrayerData(referenceDate?: Date) {
     [todayRescheduled],
   );
 
+  const locationLabel = useMemo(() => {
+    if (coords) {
+      return locationText;
+    }
+    if (savedPrayerLocation) {
+      return savedPrayerLocation.label;
+    }
+    return locationText;
+  }, [coords, locationText, savedPrayerLocation]);
+
   return {
     now,
     todayPrayers,
@@ -346,12 +431,16 @@ export function useIslamPrayerData(referenceDate?: Date) {
     completedCount,
     progress,
     countdownText,
-    locationText,
+    locationText: locationLabel,
     locationError,
     locationPermissionStatus,
     canAskLocationPermission,
     isRequestingLocationPermission,
     requestLocationPermission,
+    savedPrayerLocation,
+    selectSavedPrayerLocation,
+    clearSavedPrayerLocation,
+    isUsingDeviceLocation: Boolean(coords),
     togglePrayerCompletion,
     formatTime,
     todayRescheduled,
