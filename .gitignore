@@ -53,3 +53,9 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Windows Zone.Identifier metadata files
+*:Zone.Identifier
+
+# Local environment variables (may contain machine-specific paths)
+.env

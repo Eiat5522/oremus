@@ -33,7 +33,6 @@ export function QiblaMapPage({
 }: QiblaMapPageProps) {
   const mapRef = useRef<MapView | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
-  const [mapLoadFailed, setMapLoadFailed] = useState(false);
   const platformLabel = process.env.EXPO_OS === 'ios' ? 'iOS' : 'device';
 
   const hasOrigin = Boolean(originCoords);
@@ -111,7 +110,7 @@ export function QiblaMapPage({
       </View>
 
       <View style={styles.mapCard}>
-        {mapLoadFailed ? (
+        {false ? (
           <View style={styles.mapSetupNotice}>
             <ThemedText style={styles.mapSetupNoticeTitle}>Map unavailable</ThemedText>
             <ThemedText style={styles.mapSetupNoticeBody}>
@@ -139,10 +138,6 @@ export function QiblaMapPage({
             }}
             onMapReady={() => {
               setIsMapReady(true);
-            }}
-            onError={(e) => {
-              console.warn('Map load error:', e.nativeEvent?.error ?? e);
-              setMapLoadFailed(true);
             }}
           >
             <Marker coordinate={KAABA_COORDINATES} title="Mecca" description="Kaaba" />

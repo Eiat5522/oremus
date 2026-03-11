@@ -1,10 +1,11 @@
 import { Href, Link } from 'expo-router';
 import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
 import { type ComponentProps } from 'react';
+import { type GestureResponderEvent } from 'react-native';
 
 type Props = Omit<ComponentProps<typeof Link>, 'href'> & {
   href: Href & string;
-  onPress?: (event: React.GestureResponderEvent) => void;
+  onPress?: (event: GestureResponderEvent) => void;
 };
 
 export function ExternalLink({ href, onPress, ...rest }: Props) {

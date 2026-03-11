@@ -109,6 +109,7 @@ import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.WritableArray
 import java.io.ByteArrayOutputStream
 import java.util.TreeMap
@@ -162,7 +163,7 @@ class FocusGateModule(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun listInstalledApps(promise: Promise) {
+  fun listInstalledApps(blockedPackages: ReadableArray?, promise: Promise) {
     try {
       val pm = reactContext.packageManager
       val launcherIntent = Intent(Intent.ACTION_MAIN, null).apply {

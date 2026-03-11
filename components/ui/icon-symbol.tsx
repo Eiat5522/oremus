@@ -43,7 +43,7 @@ const MAPPING = {
   'fork.knife': 'restaurant',
   'fort.fill': 'fort',
   'leaf.fill': 'nature',
-  'shield.person.fill': 'shield-person',
+  'shield.person.fill': 'shield',
   'auto.stories': 'auto-stories',
   'arrow.left': 'arrow-back-ios',
   pencil: 'edit',

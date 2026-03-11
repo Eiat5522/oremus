@@ -413,7 +413,7 @@ export default function ProfileScreen() {
                     />
                   }
                   style={styles.exportBtn}
-                  variant={isIslam ? 'secondary' : 'default'}
+                  variant={isIslam ? 'secondary' : 'primary'}
                 />
                 <Pressable style={styles.clearBtn}>
                   <IconSymbol name="trash.fill" size={18} color={isIslam ? '#FEE2E2' : '#ef4444'} />
