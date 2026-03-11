@@ -9,9 +9,13 @@ type CameraPermissionResponse = {
   status: CameraPermissionStatus;
 };
 
-type CameraModule = {
+type CameraClassCompat = {
   getCameraPermissionsAsync: () => Promise<CameraPermissionResponse>;
   requestCameraPermissionsAsync: () => Promise<CameraPermissionResponse>;
+};
+
+type CameraModule = {
+  Camera?: CameraClassCompat;
 };
 
 const unavailablePermission: CameraPermissionResponse = {
@@ -23,17 +27,19 @@ const unavailablePermission: CameraPermissionResponse = {
 
 export function useSafeCameraPermissions() {
   const [permission, setPermission] = useState<CameraPermissionResponse | null>(null);
-  const modulePromiseRef = useRef<Promise<CameraModule | null> | null>(null);
+  const modulePromiseRef = useRef<Promise<CameraClassCompat | null> | null>(null);
 
   const loadCameraModule = useCallback(async () => {
     if (!modulePromiseRef.current) {
       modulePromiseRef.current = import('expo-camera')
         .then((module) => {
+          const cam = (module as CameraModule).Camera;
           if (
-            typeof module.getCameraPermissionsAsync === 'function' &&
-            typeof module.requestCameraPermissionsAsync === 'function'
+            cam &&
+            typeof cam.getCameraPermissionsAsync === 'function' &&
+            typeof cam.requestCameraPermissionsAsync === 'function'
           ) {
-            return module as CameraModule;
+            return cam;
           }
           return null;
         })

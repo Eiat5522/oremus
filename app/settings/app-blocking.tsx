@@ -176,7 +176,7 @@ export default function AppBlockingSettingsScreen() {
     openUsageAccessSettings,
   } = useFocusGate();
 
-  const visibleApps = useMemo(() => {
+  const visibleApps = useMemo((): { packageName: string; label: string; iconUri?: string }[] => {
     if (!settings) return [];
     if (installedApps.length === 0) {
       return settings.blockedPackages.map((packageName) => ({ packageName, label: packageName }));
