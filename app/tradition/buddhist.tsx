@@ -1,17 +1,18 @@
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import { Image } from 'expo-image';
 import { Stack, useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import {
   buddhistPrayers,
   type BuddhistPrayer,
   type BuddhistTradition,
 } from '@/constants/religious-content';
+import { getTraditionUiTheme } from '@/constants/tradition-ui';
 
 const TRADITIONS: { id: BuddhistTradition; label: string }[] = [
   { id: 'tibetan', label: 'Tibetan' },
@@ -22,6 +23,7 @@ const TRADITIONS: { id: BuddhistTradition; label: string }[] = [
 
 export default function BuddhistScreen() {
   const router = useRouter();
+  const uiTheme = useMemo(() => getTraditionUiTheme('buddhism'), []);
   const [activeTradition, setActiveTradition] = useState<BuddhistTradition>('tibetan');
   const [selectedPrayerId, setSelectedPrayerId] = useState<string>(
     buddhistPrayers.find((prayer) => prayer.tradition === 'tibetan')?.id ??
@@ -116,22 +118,35 @@ export default function BuddhistScreen() {
 
   if (!selectedPrayer) {
     return (
-      <ThemedView style={styles.container}>
+      <View style={styles.container}>
         <ThemedText>No prayers available</ThemedText>
-      </ThemedView>
+      </View>
     );
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       <Stack.Screen
         options={{
           title: 'Buddhist Prayer',
           headerShown: true,
+          headerTransparent: true,
+          headerTintColor: '#FFF1DB',
         }}
       />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <Image
+        source={uiTheme.backgroundImage}
+        style={StyleSheet.absoluteFillObject}
+        contentFit="cover"
+      />
+      <LinearGradient colors={uiTheme.overlayGradient} style={StyleSheet.absoluteFillObject} />
+
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
+      >
         <View style={styles.tabs}>
           {TRADITIONS.map((tradition) => (
             <Pressable
@@ -148,13 +163,13 @@ export default function BuddhistScreen() {
               style={[
                 styles.tab,
                 activeTradition === tradition.id && {
-                  borderColor: '#f59e0b',
-                  backgroundColor: '#fef3c7',
+                  borderColor: 'rgba(255, 219, 170, 0.85)',
+                  backgroundColor: 'rgba(128, 76, 43, 0.78)',
                 },
               ]}
             >
               <ThemedText
-                style={[styles.tabText, activeTradition === tradition.id && { color: '#b45309' }]}
+                style={[styles.tabText, activeTradition === tradition.id && { color: '#FFF4E1' }]}
               >
                 {tradition.label}
               </ThemedText>
@@ -163,7 +178,7 @@ export default function BuddhistScreen() {
         </View>
 
         <View style={styles.heroCard}>
-          <ThemedText style={styles.sectionLabel}>Selected prayer</ThemedText>
+          <ThemedText style={styles.sectionLabel}>Selected mantra</ThemedText>
           <ThemedText style={styles.heroTitle}>{selectedPrayer.title}</ThemedText>
           <ThemedText style={styles.heroSubtitle}>{selectedPrayer.subtitle}</ThemedText>
         </View>
@@ -181,7 +196,21 @@ export default function BuddhistScreen() {
           ))}
         </View>
 
-        <Button title="Quick Play" size="lg" onPress={() => void toggleQuickPlay(selectedPrayer)} />
+        <Pressable
+          style={styles.quickPlayWrap}
+          onPress={() => void toggleQuickPlay(selectedPrayer)}
+        >
+          <LinearGradient colors={uiTheme.ctaGradient} style={styles.quickPlayButton}>
+            <IconSymbol
+              name={status.playing ? 'pause.fill' : 'play.fill'}
+              size={18}
+              color="#FFFFFF"
+            />
+            <ThemedText style={styles.quickPlayText}>
+              {status.playing ? 'Pause mantra' : 'Quick play mantra'}
+            </ThemedText>
+          </LinearGradient>
+        </Pressable>
       </ScrollView>
 
       {quickPlayPrayer ? (
@@ -200,12 +229,12 @@ export default function BuddhistScreen() {
             accessibilityRole="button"
             accessibilityLabel={status.playing ? 'Pause quick play' : 'Play quick play'}
           >
-            <IconSymbol name={status.playing ? 'pause.fill' : 'play.fill'} size={22} color="#fff" />
+            <IconSymbol name={status.playing ? 'pause.fill' : 'play.fill'} size={20} color="#fff" />
           </Pressable>
         </View>
       ) : null}
       {audioError ? <ThemedText style={styles.errorText}>{audioError}</ThemedText> : null}
-    </ThemedView>
+    </View>
   );
 }
 
@@ -226,7 +255,10 @@ function PrayerItem({
     <View
       style={[
         styles.prayerItem,
-        isActive && { borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.08)' },
+        isActive && {
+          borderColor: 'rgba(255, 219, 170, 0.7)',
+          backgroundColor: 'rgba(118, 70, 39, 0.78)',
+        },
       ]}
     >
       <Pressable onPress={onSelect} style={styles.prayerText}>
@@ -242,7 +274,7 @@ function PrayerItem({
         <IconSymbol
           name={isQuickPlaying ? 'pause.fill' : 'play.circle.fill'}
           size={22}
-          color="#f59e0b"
+          color="#FFD7A0"
         />
       </Pressable>
     </View>
@@ -254,9 +286,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingTop: 16,
+    paddingTop: 102,
     paddingHorizontal: 16,
-    paddingBottom: 120,
+    paddingBottom: 124,
     gap: 16,
   },
   tabs: {
@@ -266,20 +298,22 @@ const styles = StyleSheet.create({
   },
   tab: {
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: 'rgba(255, 223, 184, 0.35)',
+    backgroundColor: 'rgba(88, 52, 29, 0.62)',
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
   tabText: {
+    color: '#F9E0C0',
     fontSize: 13,
     fontWeight: '700',
   },
   heroCard: {
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.25)',
-    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+    borderColor: 'rgba(255, 223, 184, 0.35)',
+    backgroundColor: 'rgba(95, 55, 29, 0.72)',
     padding: 16,
     gap: 4,
   },
@@ -287,24 +321,26 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textTransform: 'uppercase',
     letterSpacing: 1,
-    color: '#92400e',
+    color: '#FFD8A8',
     fontWeight: '700',
   },
   heroTitle: {
+    color: '#FFF4E1',
     fontSize: 22,
     fontWeight: '800',
   },
   heroSubtitle: {
+    color: 'rgba(255, 227, 187, 0.92)',
     fontSize: 14,
-    opacity: 0.75,
   },
   list: {
     gap: 8,
   },
   prayerItem: {
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: 'rgba(255, 223, 184, 0.22)',
     borderRadius: 14,
+    backgroundColor: 'rgba(73, 42, 23, 0.66)',
     padding: 14,
     flexDirection: 'row',
     alignItems: 'center',
@@ -317,59 +353,78 @@ const styles = StyleSheet.create({
   quickAction: {
     minHeight: 36,
     minWidth: 36,
-    borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
   },
   prayerTitle: {
+    color: '#FFF3E0',
     fontSize: 16,
     fontWeight: '700',
   },
   prayerSubtitle: {
+    color: 'rgba(255, 224, 188, 0.9)',
     fontSize: 13,
-    opacity: 0.7,
     marginTop: 2,
+  },
+  quickPlayWrap: {
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  quickPlayButton: {
+    minHeight: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  quickPlayText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 16,
   },
   miniPlayer: {
     position: 'absolute',
     left: 16,
     right: 16,
-    bottom: 20,
-    backgroundColor: '#111827',
+    bottom: 26,
     borderRadius: 16,
-    padding: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 223, 184, 0.35)',
+    backgroundColor: 'rgba(73, 42, 23, 0.92)',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
   },
   miniMeta: {
     flex: 1,
     gap: 2,
   },
   miniTitle: {
-    color: '#f8fafc',
-    fontSize: 15,
+    color: '#FFF4E1',
+    fontSize: 14,
     fontWeight: '700',
   },
   miniSubtitle: {
-    color: '#cbd5e1',
+    color: 'rgba(255, 222, 180, 0.85)',
     fontSize: 12,
   },
   miniAction: {
-    width: 42,
-    height: 42,
-    borderRadius: 999,
-    backgroundColor: '#f59e0b',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(196, 120, 54, 0.85)',
   },
   errorText: {
     position: 'absolute',
     left: 16,
     right: 16,
-    bottom: 86,
-    color: '#dc2626',
-    fontSize: 12,
+    bottom: 0,
     textAlign: 'center',
+    color: '#FECACA',
+    fontSize: 13,
   },
 });

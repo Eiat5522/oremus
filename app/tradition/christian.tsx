@@ -1,19 +1,18 @@
+import { Image } from 'expo-image';
 import { Stack, useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Fonts } from '@/constants/theme';
 import { christianVerses, type ChristianVerse } from '@/constants/religious-content';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { getTraditionUiTheme } from '@/constants/tradition-ui';
 
 export default function ChristianScreen() {
   const router = useRouter();
-  const colorScheme = useColorScheme() ?? 'light';
-  const theme = Colors[colorScheme];
+  const uiTheme = useMemo(() => getTraditionUiTheme('christianity'), []);
   const [selectedVerseId, setSelectedVerseId] = useState<string | null>(
     christianVerses[0]?.id ?? null,
   );
@@ -40,24 +39,35 @@ export default function ChristianScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       <Stack.Screen
         options={{
           title: 'Religious Verses',
           headerShown: true,
           headerTransparent: true,
-          gestureEnabled: false,
+          headerTintColor: '#FFF0DC',
           headerLeft: () => (
             <Pressable onPress={() => router.back()} style={styles.headerIcon}>
-              <IconSymbol name="arrow.left" size={20} color={theme.text} />
+              <IconSymbol name="arrow.left" size={20} color="#FFF0DC" />
             </Pressable>
           ),
         }}
       />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <Image
+        source={uiTheme.backgroundImage}
+        style={StyleSheet.absoluteFillObject}
+        contentFit="cover"
+      />
+      <LinearGradient colors={uiTheme.overlayGradient} style={StyleSheet.absoluteFillObject} />
+
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
+      >
         <View style={styles.heroCard}>
-          <ThemedText style={styles.sectionLabel}>Selected verse</ThemedText>
+          <ThemedText style={styles.sectionLabel}>Selected Verse</ThemedText>
           {selectedVerse ? (
             <>
               <ThemedText style={styles.verseText}>&quot;{selectedVerse.text}&quot;</ThemedText>
@@ -70,11 +80,11 @@ export default function ChristianScreen() {
 
         <View style={styles.actionRow}>
           <Pressable onPress={randomizeVerse} style={styles.randomButton}>
-            <IconSymbol name="sparkles" size={16} color="#1d4ed8" />
+            <IconSymbol name="sparkles" size={16} color="#F7D7A8" />
             <ThemedText style={styles.randomButtonText}>Pick random verse</ThemedText>
           </Pressable>
-          <Button
-            title="Start Session"
+
+          <Pressable
             onPress={() => {
               if (!selectedVerse) {
                 return;
@@ -85,8 +95,12 @@ export default function ChristianScreen() {
               });
             }}
             disabled={!selectedVerse}
-            style={styles.startButton}
-          />
+            style={[styles.startButtonWrap, !selectedVerse && styles.disabled]}
+          >
+            <LinearGradient colors={uiTheme.ctaGradient} style={styles.startButton}>
+              <ThemedText style={styles.startButtonText}>Start Session</ThemedText>
+            </LinearGradient>
+          </Pressable>
         </View>
 
         <View style={styles.list}>
@@ -100,7 +114,7 @@ export default function ChristianScreen() {
           ))}
         </View>
       </ScrollView>
-    </ThemedView>
+    </View>
   );
 }
 
@@ -118,7 +132,10 @@ function VerseItem({
       onPress={onPress}
       style={[
         styles.verseItem,
-        active && { borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.08)' },
+        active && {
+          borderColor: 'rgba(251, 191, 36, 0.6)',
+          backgroundColor: 'rgba(88, 52, 32, 0.76)',
+        },
       ]}
     >
       <View style={styles.verseItemText}>
@@ -130,7 +147,7 @@ function VerseItem({
       <IconSymbol
         name={active ? 'checkmark.circle.fill' : 'chevron.right'}
         size={20}
-        color="#3b82f6"
+        color="#F7D7A8"
       />
     </Pressable>
   );
@@ -145,16 +162,16 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   content: {
-    paddingTop: 100,
+    paddingTop: 106,
     paddingHorizontal: 16,
-    paddingBottom: 32,
+    paddingBottom: 42,
     gap: 16,
   },
   heroCard: {
-    borderRadius: 16,
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.24)',
-    backgroundColor: 'rgba(59, 130, 246, 0.08)',
+    borderColor: 'rgba(255, 223, 184, 0.35)',
+    backgroundColor: 'rgba(70, 41, 25, 0.72)',
     padding: 16,
     gap: 8,
   },
@@ -162,26 +179,28 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textTransform: 'uppercase',
     letterSpacing: 1,
-    color: '#1d4ed8',
-    fontWeight: '700',
+    color: '#F6D7A8',
+    fontWeight: '800',
   },
   verseText: {
-    fontSize: 20,
-    lineHeight: 30,
+    color: '#FFF3E1',
+    fontSize: 21,
+    lineHeight: 31,
     fontStyle: 'italic',
+    fontFamily: Fonts.serif,
   },
   reference: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#1d4ed8',
+    color: '#F7D7A8',
   },
   actionRow: {
     gap: 10,
   },
   randomButton: {
     borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.4)',
-    backgroundColor: 'rgba(59, 130, 246, 0.08)',
+    borderColor: 'rgba(255, 223, 184, 0.35)',
+    backgroundColor: 'rgba(80, 47, 29, 0.68)',
     borderRadius: 12,
     minHeight: 48,
     alignItems: 'center',
@@ -190,18 +209,34 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   randomButtonText: {
-    color: '#1d4ed8',
+    color: '#FFF0DC',
     fontWeight: '700',
   },
-  startButton: {
+  startButtonWrap: {
     borderRadius: 12,
+    overflow: 'hidden',
+  },
+  startButton: {
+    minHeight: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  startButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 16,
+  },
+  disabled: {
+    opacity: 0.5,
   },
   list: {
     gap: 8,
   },
   verseItem: {
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: 'rgba(255, 223, 184, 0.22)',
+    backgroundColor: 'rgba(52, 30, 18, 0.66)',
     borderRadius: 12,
     padding: 14,
     flexDirection: 'row',
@@ -214,11 +249,12 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   verseItemTitle: {
+    color: '#FFF3E1',
     fontSize: 16,
     fontWeight: '700',
   },
   verseItemMeta: {
+    color: 'rgba(255, 224, 188, 0.85)',
     fontSize: 13,
-    opacity: 0.7,
   },
 });
