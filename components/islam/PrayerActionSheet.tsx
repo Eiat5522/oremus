@@ -24,6 +24,8 @@ type PrayerActionSheetProps = {
   onReschedule: () => void;
   onToggleComplete: () => void;
   onClose?: () => void;
+  /** Navigate to the Islamic Prayer Session screen for this prayer. */
+  onBeginSession?: () => void;
 };
 
 export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSheetProps>(
@@ -37,6 +39,7 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
       onReschedule,
       onToggleComplete,
       onClose,
+      onBeginSession,
     },
     ref,
   ) => {
@@ -161,6 +164,23 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
               </ThemedText>
             </TouchableOpacity>
           </View>
+
+          {/* Begin Prayer Session */}
+          {onBeginSession ? (
+            <TouchableOpacity
+              style={[styles.optionRow, { borderTopColor: 'rgba(244, 200, 107, 0.14)' }]}
+              onPress={() => {
+                onBeginSession();
+                bottomSheetRef.current?.close();
+              }}
+            >
+              <IconSymbol name="play.fill" size={22} color="#D4AF37" />
+              <ThemedText style={[styles.optionText, { color: '#F4E5A0' }]}>
+                Begin Prayer Session
+              </ThemedText>
+              <IconSymbol name="chevron.right" size={18} color={theme.icon} />
+            </TouchableOpacity>
+          ) : null}
 
           {/* Reschedule Section */}
           <TouchableOpacity

@@ -63,7 +63,7 @@ export default function TabLayout() {
               {...props}
               style={[props.style, styles.centerTabButton]}
               onPress={() => {
-                router.push('/active-session');
+                router.push(uiTheme.ctaRoute);
               }}
             />
           ),
