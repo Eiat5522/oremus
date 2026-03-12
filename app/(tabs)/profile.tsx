@@ -6,10 +6,12 @@ import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { PrayerLocationSettingsCard } from '@/components/islam/prayer-location-settings-card';
 import { Button } from '@/components/ui/button';
 import type { IconSymbolName } from '@/components/ui/icon-symbol';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors, Fonts } from '@/constants/theme';
+import { usePrayerLocationSettings } from '@/hooks/use-prayer-location-settings';
 import { getTraditionUiTheme } from '@/constants/tradition-ui';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTradition } from '@/hooks/use-tradition';
@@ -31,6 +33,7 @@ export default function ProfileScreen() {
   const { tradition, traditionDetails } = useTradition();
   const uiTheme = useMemo(() => getTraditionUiTheme(tradition), [tradition]);
   const isIslam = tradition === 'islam';
+  const prayerLocationSettings = usePrayerLocationSettings({ enabled: isIslam });
   const isImmersiveTradition =
     tradition === 'islam' || tradition === 'buddhism' || tradition === 'christianity';
   const useTraditionTheme = isImmersiveTradition;
@@ -347,6 +350,29 @@ export default function ProfileScreen() {
               />
             </View>
           </View>
+
+          {isIslam ? (
+            <View style={styles.section}>
+              <ThemedText style={[styles.sectionLabel, { color: uiTheme.actionIconColor }]}>
+                PRAYER TIMES
+              </ThemedText>
+              <PrayerLocationSettingsCard
+                canAskLocationPermission={prayerLocationSettings.canAskLocationPermission}
+                clearSavedPrayerLocation={prayerLocationSettings.clearSavedPrayerLocation}
+                isRequestingLocationPermission={
+                  prayerLocationSettings.isRequestingLocationPermission
+                }
+                isUsingDeviceLocation={prayerLocationSettings.isUsingDeviceLocation}
+                locationError={prayerLocationSettings.locationError}
+                locationPermissionStatus={prayerLocationSettings.locationPermissionStatus}
+                locationText={prayerLocationSettings.locationText}
+                requestLocationPermission={prayerLocationSettings.requestLocationPermission}
+                savedPrayerLocation={prayerLocationSettings.savedPrayerLocation}
+                selectSavedPrayerLocation={prayerLocationSettings.selectSavedPrayerLocation}
+                showPresets
+              />
+            </View>
+          ) : null}
 
           <View style={styles.section}>
             <View

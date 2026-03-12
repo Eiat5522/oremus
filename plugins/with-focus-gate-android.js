@@ -749,6 +749,28 @@ const removeConflictingDrawables = async (resourceBasePath) => {
     })
   );
 };
+const BLOCKER_THEME_XML = `  <style name="Theme.App.Blocker" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <item name="android:windowNoTitle">true</item>
+    <item name="windowNoTitle">true</item>
+    <item name="android:windowActionBar">false</item>
+    <item name="windowActionBar">false</item>
+    <item name="android:statusBarColor">@android:color/transparent</item>
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+    <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+  </style>
+`;
+const ensureBlockerThemeInStylesXml = async (stylesPath) => {
+  const current = await import_promises.default.readFile(stylesPath, "utf8");
+  if (current.includes('name="Theme.App.Blocker"')) {
+    return;
+  }
+  if (!current.includes("</resources>")) {
+    throw new Error(`Unable to add Theme.App.Blocker to ${stylesPath}.`);
+  }
+  const next = current.replace("</resources>", `${BLOCKER_THEME_XML}</resources>`);
+  await import_promises.default.writeFile(stylesPath, next, "utf8");
+};
 const withFocusGateAndroid = (config) => {
   config = (0, import_config_plugins.withAndroidManifest)(config, (mod) => {
     const manifest = mod.modResults.manifest;
@@ -769,7 +791,7 @@ const withFocusGateAndroid = (config) => {
             "android:exported": "false",
             "android:excludeFromRecents": "true",
             "android:launchMode": "singleTask",
-            "android:theme": "@style/Theme.App.SplashScreen"
+            "android:theme": "@style/Theme.App.Blocker"
           }
         });
       }
@@ -849,6 +871,14 @@ ${importLine}`);
         FOCUS_PACKAGE
       );
       const xmlDir = import_path.default.join(mod.modRequest.platformProjectRoot, "app", "src", "main", "res", "xml");
+      const valuesDir = import_path.default.join(
+        mod.modRequest.platformProjectRoot,
+        "app",
+        "src",
+        "main",
+        "res",
+        "values"
+      );
       const drawableDir = import_path.default.join(
         mod.modRequest.platformProjectRoot,
         "app",
@@ -859,6 +889,7 @@ ${importLine}`);
       );
       await import_promises.default.mkdir(javaDir, { recursive: true });
       await import_promises.default.mkdir(xmlDir, { recursive: true });
+      await import_promises.default.mkdir(valuesDir, { recursive: true });
       await import_promises.default.mkdir(drawableDir, { recursive: true });
       await Promise.all(
         Object.entries(focusFiles).map(async ([filename, template]) => {
@@ -877,6 +908,7 @@ ${importLine}`);
         })
       );
       await writeIfChanged(import_path.default.join(xmlDir, "social_blocker_service.xml"), serviceXml);
+      await ensureBlockerThemeInStylesXml(import_path.default.join(valuesDir, "styles.xml"));
       return mod;
     }
   ]);

@@ -108,7 +108,7 @@ export default function BuddhistSessionScreen() {
     [player, status.currentTime, status.duration],
   );
 
-  if (prayer === null) {
+  if (!prayer) {
     return (
       <ThemedView style={[styles.container, styles.stateContainer]}>
         <Stack.Screen options={{ title: 'Buddhist Player', headerShown: true }} />

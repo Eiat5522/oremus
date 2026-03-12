@@ -742,6 +742,44 @@ const removeConflictingDrawables = async (resourceBasePath: string) => {
   );
 };
 
+const BLOCKER_THEME_XML = `  <style name="Theme.App.Blocker" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <item name="android:windowNoTitle">true</item>
+    <item name="windowNoTitle">true</item>
+    <item name="android:windowActionBar">false</item>
+    <item name="windowActionBar">false</item>
+    <item name="android:statusBarColor">@android:color/transparent</item>
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+    <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+  </style>
+`;
+
+const ensureBlockerThemeInStylesXml = async (stylesPath: string) => {
+  let current: string;
+  try {
+    current = await fs.readFile(stylesPath, 'utf8');
+  } catch (error: any) {
+    if (error?.code === 'ENOENT') {
+      // Create minimal styles.xml with the blocker theme
+      const minimal = `<?xml version="1.0" encoding="utf-8"?>\n<resources>\n${BLOCKER_THEME_XML}</resources>\n`;
+      await fs.writeFile(stylesPath, minimal, 'utf8');
+      return;
+    }
+    throw error;
+  }
+
+  if (current.includes('name="Theme.App.Blocker"')) {
+    return;
+  }
+
+  if (!current.includes('</resources>')) {
+    throw new Error(`Unable to add Theme.App.Blocker to ${stylesPath}.`);
+  }
+
+  const next = current.replace('</resources>', `${BLOCKER_THEME_XML}</resources>`);
+  await fs.writeFile(stylesPath, next, 'utf8');
+};
+
 const withFocusGateAndroid: ConfigPlugin = (config) => {
   config = withAndroidManifest(config, (mod) => {
     const manifest = mod.modResults.manifest;
@@ -768,7 +806,7 @@ const withFocusGateAndroid: ConfigPlugin = (config) => {
             'android:exported': 'false',
             'android:excludeFromRecents': 'true',
             'android:launchMode': 'singleTask',
-            'android:theme': '@style/Theme.App.SplashScreen',
+            'android:theme': '@style/Theme.App.Blocker',
           },
         });
       }
@@ -868,6 +906,14 @@ const withFocusGateAndroid: ConfigPlugin = (config) => {
         'res',
         'xml',
       );
+      const valuesDir = path.join(
+        mod.modRequest.platformProjectRoot,
+        'app',
+        'src',
+        'main',
+        'res',
+        'values',
+      );
       const drawableDir = path.join(
         mod.modRequest.platformProjectRoot,
         'app',
@@ -879,6 +925,7 @@ const withFocusGateAndroid: ConfigPlugin = (config) => {
 
       await fs.mkdir(javaDir, { recursive: true });
       await fs.mkdir(xmlDir, { recursive: true });
+      await fs.mkdir(valuesDir, { recursive: true });
       await fs.mkdir(drawableDir, { recursive: true });
 
       await Promise.all(
@@ -900,6 +947,7 @@ const withFocusGateAndroid: ConfigPlugin = (config) => {
       );
 
       await writeIfChanged(path.join(xmlDir, 'social_blocker_service.xml'), serviceXml);
+      await ensureBlockerThemeInStylesXml(path.join(valuesDir, 'styles.xml'));
       return mod;
     },
   ]);

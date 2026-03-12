@@ -532,7 +532,6 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    blur: 40,
   },
   orb: {
     width: 192,
@@ -620,7 +619,6 @@ const styles = StyleSheet.create({
     height: 300,
     borderRadius: 150,
     opacity: 0.1,
-    blur: 60,
   },
   timerRing: {
     position: 'absolute',

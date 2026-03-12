@@ -28,7 +28,6 @@ export function Collapsible({ children, title }: PropsWithChildren & { title: st
         <IconSymbol
           name="chevron.right"
           size={18}
-          weight="medium"
           color={theme === 'light' ? Colors.light.icon : Colors.dark.icon}
           style={iconStyle}
         />

@@ -1,15 +1,7 @@
 import { useKeepAwake } from 'expo-keep-awake';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
-import {
-  Animated,
-  Easing,
-  Platform,
-  Pressable,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Animated, Easing, Platform, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated2, { useAnimatedStyle } from 'react-native-reanimated';
 
@@ -105,10 +97,8 @@ export default function IslamPrayerSessionScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <PrayerSessionBackground width={width} height={height}>
-        {/* Tap anywhere to reveal controls */}
-        <Pressable style={StyleSheet.absoluteFillObject} onPress={reveal} />
-
         <Animated.View
+          onTouchStart={reveal}
           style={[
             styles.scene,
             { paddingTop: insets.top, paddingBottom: insets.bottom },

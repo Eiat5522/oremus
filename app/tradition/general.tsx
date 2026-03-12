@@ -27,7 +27,6 @@ export default function GeneralScreen() {
             color: 'rgba(255,255,255,0.6)',
             fontSize: 12,
             fontWeight: 'bold',
-            letterSpacing: 1.5,
           },
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()} style={styles.headerIcon}>
