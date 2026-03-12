@@ -80,6 +80,13 @@ const MAPPING = {
   'chevron.up.double': 'keyboard-double-arrow-up',
   'moon.stars': 'nightlight-round',
   ellipsis: 'more-horiz',
+  'arrow.counterclockwise': 'replay',
+  'backward.end.fill': 'skip-previous',
+  'forward.end.fill': 'skip-next',
+  'rotate.left': 'rotate-left',
+  'rotate.right': 'rotate-right',
+  'minus.magnifyingglass': 'zoom-out',
+  'plus.magnifyingglass': 'zoom-in',
 } as const satisfies IconMapping;
 
 /**

@@ -119,8 +119,8 @@ const THEMES: Record<TraditionThemeKey, TraditionUiTheme> = {
   buddhism: {
     greeting: 'Welcome Back',
     subtitle: 'Find a moment for mindfulness.',
-    ctaLabel: 'Begin Session',
-    ctaRoute: '/active-session',
+    ctaLabel: 'Buddhist Prayer',
+    ctaRoute: '/tradition/buddhist-prayer',
     textColor: '#33200E',
     subtitleColor: 'rgba(92, 54, 30, 0.92)',
     ctaGradient: ['#B8763E', '#744321'],
@@ -139,9 +139,15 @@ const THEMES: Record<TraditionThemeKey, TraditionUiTheme> = {
     tabActiveTint: '#FFF0DC',
     tabInactiveTint: 'rgba(255, 214, 161, 0.72)',
     actions: [
-      { id: 'teachings', label: 'Teachings', icon: 'spa', route: '/tradition/buddhist' },
+      {
+        id: 'prayer',
+        label: 'Prayer',
+        icon: 'spa',
+        route: '/tradition/buddhist-prayer',
+      },
+      // Routes to the existing mantra player screen (separate from the new prayer module)
+      { id: 'mantras', label: 'Mantras', icon: 'music.note', route: '/tradition/buddhist' },
       { id: 'reflection', label: 'Meditation', icon: 'flower.fill', route: '/tradition/general' },
-      { id: 'settings', label: 'Settings', icon: 'settings', route: '/profile' },
     ],
   },
 };
