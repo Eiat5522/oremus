@@ -1,9 +1,11 @@
 import { Image } from 'expo-image';
+import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Stack, useRouter } from 'expo-router';
-import React, { useMemo } from 'react';
+import { Stack, useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -160,6 +162,7 @@ export default function AppBlockingSettingsScreen() {
   const router = useRouter();
   const { tradition } = useTradition();
   const uiTheme = useMemo(() => getTraditionUiTheme(tradition), [tradition]);
+  const [isTogglingBlocking, setIsTogglingBlocking] = useState(false);
   const isIslam = tradition === 'islam';
   const isBuddhism = tradition === 'buddhism';
   const isChristianity = tradition === 'christianity';
@@ -169,12 +172,19 @@ export default function AppBlockingSettingsScreen() {
     settings,
     permissionStatus,
     installedApps,
+    reload,
     setEnabled,
     setUnlockWindowMinutes,
     setBlockedPackages,
     openAccessibilitySettings,
     openUsageAccessSettings,
   } = useFocusGate();
+
+  useFocusEffect(
+    useCallback(() => {
+      void reload();
+    }, [reload]),
+  );
 
   const visibleApps = useMemo((): { packageName: string; label: string; iconUri?: string }[] => {
     if (!settings) return [];
@@ -229,6 +239,103 @@ export default function AppBlockingSettingsScreen() {
       : isChristianity
         ? '#4A2B1C'
         : '#1B264A';
+  const isAndroid = Platform.OS === 'android';
+  const settingsEnabled = settings?.enabled ?? false;
+  const selectedAppCount = settings?.blockedPackages.length ?? 0;
+  const remainingMs = settings ? getUnlockRemainingMs(settings) : 0;
+  const remainingMinutes = Math.ceil(remainingMs / 60000);
+  const hasPermissions = Boolean(
+    permissionStatus?.accessibilityEnabled && permissionStatus?.usageAccessGranted,
+  );
+  const blockingStatus = useMemo(() => {
+    if (!isAndroid) {
+      return {
+        label: 'Unavailable',
+        detail: 'App blocking currently works on Android devices only.',
+        tone: 'neutral' as const,
+      };
+    }
+
+    if (!settingsEnabled) {
+      return {
+        label: 'Off',
+        detail: 'App blocking is turned off. Selected apps will open normally.',
+        tone: 'neutral' as const,
+      };
+    }
+
+    if (!hasPermissions) {
+      return {
+        label: 'Needs permissions',
+        detail: 'Turn on Accessibility and Usage Access before blocking can start.',
+        tone: 'warning' as const,
+      };
+    }
+
+    if (selectedAppCount === 0) {
+      return {
+        label: 'No apps selected',
+        detail: 'Choose at least one app below to start blocking.',
+        tone: 'warning' as const,
+      };
+    }
+
+    if (remainingMs > 0) {
+      return {
+        label: 'Temporarily unlocked',
+        detail: `Blocked apps can open for about ${remainingMinutes} more min.`,
+        tone: 'info' as const,
+      };
+    }
+
+    return {
+      label: 'Active',
+      detail: `${selectedAppCount} app${selectedAppCount === 1 ? '' : 's'} will be blocked when you leave Oremus.`,
+      tone: 'success' as const,
+    };
+  }, [hasPermissions, isAndroid, remainingMinutes, remainingMs, selectedAppCount, settingsEnabled]);
+  const statusAccentStyle = useMemo(() => {
+    switch (blockingStatus.tone) {
+      case 'success':
+        return styles.statusAccentSuccess;
+      case 'warning':
+        return styles.statusAccentWarning;
+      case 'info':
+        return styles.statusAccentInfo;
+      default:
+        return styles.statusAccentNeutral;
+    }
+  }, [blockingStatus.tone]);
+  const statusDotStyle = useMemo(() => {
+    switch (blockingStatus.tone) {
+      case 'success':
+        return styles.statusDotSuccess;
+      case 'warning':
+        return styles.statusDotWarning;
+      case 'info':
+        return styles.statusDotInfo;
+      default:
+        return styles.statusDotNeutral;
+    }
+  }, [blockingStatus.tone]);
+
+  const handleBlockingToggle = useCallback(async () => {
+    if (!settings) return;
+
+    const nextEnabled = !settings.enabled;
+    try {
+      setIsTogglingBlocking(true);
+      await setEnabled(nextEnabled);
+      await reload();
+      if (nextEnabled) {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } else {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    } finally {
+      setIsTogglingBlocking(false);
+    }
+  }, [reload, setEnabled, settings]);
 
   if (!settings) {
     return (
@@ -246,9 +353,6 @@ export default function AppBlockingSettingsScreen() {
       />
     );
   }
-
-  const remainingMs = getUnlockRemainingMs(settings);
-  const remainingMinutes = Math.ceil(remainingMs / 60000);
 
   return (
     <View style={styles.container}>
@@ -346,7 +450,7 @@ export default function AppBlockingSettingsScreen() {
                     : null,
                 ]}
               >
-                Pause. Realign.
+                Blocked screen preview
               </ThemedText>
               <ThemedText
                 style={[
@@ -354,52 +458,82 @@ export default function AppBlockingSettingsScreen() {
                   hasBlockingBackground ? { color: blockerPreview.bodyColor } : null,
                 ]}
               >
-                {"You've chosen to protect your focus.\nComplete a session in Oremus to continue."}
+                {'This page opens over a blocked app.\nIt is a preview, not a live control.'}
               </ThemedText>
-              {hasBlockingBackground ? (
-                <Button
-                  title={blockerPreview.buttonLabel}
-                  onPress={() => void setEnabled(true)}
-                  style={[
-                    styles.previewButton,
-                    {
-                      backgroundColor: blockerPreview.buttonBackground,
-                      borderWidth: 1,
-                      borderColor: blockerPreview.buttonBorder,
-                    },
-                  ]}
-                  textStyle={[styles.previewButtonText, { color: blockerPreview.buttonText }]}
-                />
-              ) : null}
-              {hasBlockingBackground ? (
-                <ThemedText style={[styles.previewFooter, { color: blockerPreview.footerColor }]}>
-                  Open Oremus to continue
-                </ThemedText>
-              ) : null}
-            </View>
-            <View style={[styles.heroRow, hasBlockingBackground ? styles.heroRowIslam : null]}>
               <ThemedText
                 style={[
-                  styles.heroLabel,
-                  hasBlockingBackground ? { color: blockerPreview.cardText } : null,
+                  styles.previewFooter,
+                  hasBlockingBackground ? { color: blockerPreview.footerColor } : null,
                 ]}
               >
-                Blocking enabled
+                Users only see this after they try to open a blocked app.
               </ThemedText>
-              <Switch value={settings.enabled} onValueChange={(value) => void setEnabled(value)} />
             </View>
-            <View
-              style={[styles.statusPill, hasBlockingBackground ? styles.statusPillBlocking : null]}
+          </View>
+
+          <View
+            style={[
+              styles.card,
+              hasBlockingBackground
+                ? {
+                    borderColor: blockerPreview.cardBorder,
+                    backgroundColor: blockerPreview.cardSurface,
+                    borderRadius: 20,
+                  }
+                : null,
+            ]}
+          >
+            <ThemedText
+              style={[
+                styles.sectionTitle,
+                hasBlockingBackground ? { color: blockerPreview.cardText } : null,
+              ]}
             >
+              Current status
+            </ThemedText>
+            <View style={[styles.statusSummary, statusAccentStyle]}>
+              <View style={styles.statusSummaryHeader}>
+                <View style={[styles.statusDot, statusDotStyle]} />
+                <ThemedText
+                  style={[
+                    styles.statusSummaryLabel,
+                    hasBlockingBackground ? { color: blockerPreview.cardText } : null,
+                  ]}
+                >
+                  {blockingStatus.label}
+                </ThemedText>
+              </View>
               <ThemedText
                 style={[
-                  styles.statusPillText,
+                  styles.statusSummaryDetail,
                   hasBlockingBackground ? { color: blockerPreview.cardText } : null,
                 ]}
               >
-                {remainingMs > 0 ? `Unlocked for ${remainingMinutes} min` : 'Locked now'}
+                {blockingStatus.detail}
               </ThemedText>
             </View>
+            <ThemedText
+              style={[
+                styles.subtitle,
+                hasBlockingBackground ? { color: blockerPreview.cardText } : null,
+              ]}
+            >
+              {selectedAppCount} app{selectedAppCount === 1 ? '' : 's'} selected for blocking.
+            </ThemedText>
+            <Button
+              title={
+                isAndroid
+                  ? settings.enabled
+                    ? 'Turn off app blocking'
+                    : 'Turn on app blocking'
+                  : 'Available on Android only'
+              }
+              onPress={() => void handleBlockingToggle()}
+              disabled={!isAndroid}
+              loading={isTogglingBlocking}
+              style={hasBlockingBackground ? styles.primaryButtonBlocking : undefined}
+              textStyle={hasBlockingBackground ? styles.primaryButtonTextBlocking : undefined}
+            />
           </View>
 
           <View
@@ -728,38 +862,61 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     textAlign: 'center',
   },
-  previewButton: {
-    alignSelf: 'stretch',
-    minHeight: 56,
-    borderRadius: 14,
-  },
-  previewButtonText: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
   previewFooter: {
     fontSize: 13,
     lineHeight: 18,
     textAlign: 'center',
   },
-  heroRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  heroRowIslam: { width: '100%' },
-  heroLabel: { fontSize: 15, fontWeight: '700', color: '#e2e8f0' },
-  statusPill: {
-    alignSelf: 'flex-start',
-    borderRadius: 999,
-    backgroundColor: '#f8fafc',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-  },
-  statusPillBlocking: {
-    backgroundColor: 'rgba(255,255,255,0.12)',
-  },
-  statusPillText: { fontSize: 12, fontWeight: '800', color: '#0f172a' },
   card: { borderRadius: 16, borderWidth: 1, borderColor: '#e2e8f0', padding: 14, gap: 10 },
   subtitle: { fontSize: 13, lineHeight: 18, color: '#64748b' },
   rowLabel: { fontSize: 15, fontWeight: '600' },
   sectionTitle: { fontSize: 16, fontWeight: '800' },
+  statusSummary: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 12,
+    gap: 8,
+  },
+  statusSummaryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  statusSummaryLabel: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#0f172a',
+  },
+  statusSummaryDetail: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#334155',
+  },
+  statusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 999,
+  },
+  statusDotNeutral: { backgroundColor: '#64748b' },
+  statusDotInfo: { backgroundColor: '#2563eb' },
+  statusDotSuccess: { backgroundColor: '#15803d' },
+  statusDotWarning: { backgroundColor: '#c2410c' },
+  statusAccentNeutral: {
+    borderColor: '#cbd5e1',
+    backgroundColor: '#f8fafc',
+  },
+  statusAccentInfo: {
+    borderColor: '#bfdbfe',
+    backgroundColor: '#eff6ff',
+  },
+  statusAccentSuccess: {
+    borderColor: '#bbf7d0',
+    backgroundColor: '#f0fdf4',
+  },
+  statusAccentWarning: {
+    borderColor: '#fed7aa',
+    backgroundColor: '#fff7ed',
+  },
   windowRow: { flexDirection: 'row', gap: 8 },
   windowChip: {
     borderRadius: 999,
@@ -809,6 +966,15 @@ const styles = StyleSheet.create({
   secondaryButtonTextBlocking: {
     color: '#0C4B3A',
     fontWeight: '700',
+  },
+  primaryButtonBlocking: {
+    backgroundColor: '#ecfff7',
+    borderWidth: 1,
+    borderColor: '#d8fff0',
+  },
+  primaryButtonTextBlocking: {
+    color: '#0C4B3A',
+    fontWeight: '800',
   },
   appRow: {
     flexDirection: 'row',

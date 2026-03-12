@@ -51,8 +51,9 @@ export function QiblaCompassPage({
   alignmentState,
 }: QiblaCompassPageProps) {
   const insets = useSafeAreaInsets();
-  const [safeCameraView, setSafeCameraView] = React.useState<CameraViewComponentType | null>(null);
-  const isCameraLoading = showLiveCamera && safeCameraView === null;
+  const cameraViewRef = React.useRef<CameraViewComponentType | null>(null);
+  const [isCameraReady, setIsCameraReady] = React.useState(false);
+  const isCameraLoading = showLiveCamera && !isCameraReady;
 
   React.useEffect(() => {
     let isMounted = true;
@@ -61,14 +62,17 @@ export function QiblaCompassPage({
       .then((cameraModule) => {
         if (!isMounted) return;
         if (typeof cameraModule.CameraView === 'function') {
-          setSafeCameraView(cameraModule.CameraView as CameraViewComponentType);
+          cameraViewRef.current = cameraModule.CameraView as CameraViewComponentType;
+          setIsCameraReady(true);
         } else {
-          setSafeCameraView(null);
+          cameraViewRef.current = null;
+          setIsCameraReady(false);
         }
       })
       .catch(() => {
         if (isMounted) {
-          setSafeCameraView(null);
+          cameraViewRef.current = null;
+          setIsCameraReady(false);
         }
       });
 
@@ -80,12 +84,13 @@ export function QiblaCompassPage({
   const arrowAngle = Math.max(-90, Math.min(90, signedOffset));
   const isAligned = alignmentState === 'aligned';
   const isNearAligned = alignmentState === 'nearAligned';
+  const SafeCameraView = cameraViewRef.current;
 
   return (
     <View style={styles.container}>
-      {showLiveCamera && safeCameraView ? (
+      {showLiveCamera && SafeCameraView ? (
         <View style={StyleSheet.absoluteFill}>
-          {React.createElement(safeCameraView, {
+          {React.createElement(SafeCameraView, {
             style: StyleSheet.absoluteFillObject,
             facing: 'back',
           })}
