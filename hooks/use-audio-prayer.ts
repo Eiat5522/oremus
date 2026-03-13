@@ -11,8 +11,8 @@ export function useAudioPrayer() {
 
   const chantAudio = useAudioPlayer(CHANT_AUDIO_SOURCE);
   const chantStatus = useAudioPlayerStatus(chantAudio);
-  const templeBellAudio = useAudioPlayer(TEMPLE_BELL_AUDIO_SOURCE);
-  const templeBellStatus = useAudioPlayerStatus(templeBellAudio);
+  const templeBellPlayer = useAudioPlayer(TEMPLE_BELL_AUDIO_SOURCE);
+  const templeBellStatus = useAudioPlayerStatus(templeBellPlayer);
 
   const isReleasedPlayerError = useCallback((error: unknown): boolean => {
     if (!(error instanceof Error)) return false;
@@ -49,22 +49,22 @@ export function useAudioPrayer() {
 
   const safePauseTempleBell = useCallback(() => {
     try {
-      templeBellAudio.pause();
+      templeBellPlayer.pause();
     } catch (error) {
       if (!isReleasedPlayerError(error)) {
         console.warn('Could not pause temple bell audio:', error);
       }
     }
-  }, [isReleasedPlayerError, templeBellAudio]);
+  }, [isReleasedPlayerError, templeBellPlayer]);
 
   const playTempleBell = useCallback(async () => {
     if (!isAudioEnabled || !templeBellEnabled) return;
 
     try {
       if (templeBellStatus.currentTime > 0) {
-        await templeBellAudio.seekTo(0);
+        await templeBellPlayer.seekTo(0);
       }
-      templeBellAudio.play();
+      templeBellPlayer.play();
     } catch (error) {
       if (!isReleasedPlayerError(error)) {
         console.warn('Could not play temple bell audio:', error);
@@ -73,8 +73,8 @@ export function useAudioPrayer() {
   }, [
     isAudioEnabled,
     isReleasedPlayerError,
-    templeBellAudio,
     templeBellEnabled,
+    templeBellPlayer,
     templeBellStatus.currentTime,
   ]);
 
