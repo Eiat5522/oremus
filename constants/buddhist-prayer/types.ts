@@ -46,6 +46,7 @@ export interface ChantSessionState {
   placementScale: number;
   placementRotation: number;
   scanStatus: ScanStatus;
+  altarExperienceMode: AltarExperienceMode;
   isLoading: boolean;
   error: string | null;
 }

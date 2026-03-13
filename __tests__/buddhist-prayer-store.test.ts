@@ -33,4 +33,50 @@ describe('buddhist prayer store', () => {
     useBuddhistPrayerStore.getState().completeSession();
     expect(useBuddhistPrayerStore.getState().sessionCompletedAt).not.toBeNull();
   });
+
+  it('keeps altar mode and transform available through the AR flow until session reset', () => {
+    const store = useBuddhistPrayerStore.getState();
+
+    store.setAltarExperienceMode('nativeARReady');
+    store.startScan();
+    store.surfaceDetected();
+    store.updatePlacementScale(1.6);
+    store.updatePlacementRotation(-15);
+    store.placeAltar();
+    store.startPreparation('namo-tassa', true);
+    store.startSession();
+    store.completeSession();
+
+    const state = useBuddhistPrayerStore.getState();
+    expect(state.altarExperienceMode).toBe('nativeARReady');
+    expect(state.altarPlaced).toBe(true);
+    expect(state.scanStatus).toBe('placed');
+    expect(state.placementScale).toBe(1.6);
+    expect(state.placementRotation).toBe(345);
+    expect(state.currentChantId).toBe('namo-tassa');
+    expect(state.isARMode).toBe(true);
+
+    state.resetSession();
+    expect(useBuddhistPrayerStore.getState().altarExperienceMode).toBe('immersive3D');
+    expect(useBuddhistPrayerStore.getState().placementScale).toBe(1);
+    expect(useBuddhistPrayerStore.getState().placementRotation).toBe(0);
+  });
+
+  it('clears confirmed placement state when placement is reset for a new scan', () => {
+    const store = useBuddhistPrayerStore.getState();
+
+    store.startScan();
+    store.surfaceDetected();
+    store.updatePlacementScale(2.2);
+    store.updatePlacementRotation(60);
+    store.placeAltar();
+
+    store.resetPlacement();
+
+    const state = useBuddhistPrayerStore.getState();
+    expect(state.altarPlaced).toBe(false);
+    expect(state.scanStatus).toBe('idle');
+    expect(state.placementScale).toBe(1);
+    expect(state.placementRotation).toBe(0);
+  });
 });

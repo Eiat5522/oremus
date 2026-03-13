@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import { DEFAULT_ALTAR_EXPERIENCE_MODE } from '@/constants/buddhist-prayer/altar-experience';
 import type {
   AltarExperienceMode,
   MeritOption,
@@ -63,13 +64,14 @@ interface BuddhistPrayerActions {
   // Merit
   selectMeritOption: (option: MeritOption) => void;
   setDedicationNote: (note: string) => void;
+  setAltarExperienceMode: (mode: AltarExperienceMode) => void;
   // Error
   setError: (error: string | null) => void;
 }
 
 type BuddhistPrayerStore = BuddhistPrayerState & BuddhistPrayerActions;
 
-export const BUDDHIST_PRAYER_SESSION_STORAGE_KEY = '@oremus/buddhist-prayer-session-v1';
+const normalizeRotation = (rotation: number) => ((rotation % 360) + 360) % 360;
 
 const initialState: BuddhistPrayerState = {
   currentChantSlug: null,
@@ -89,7 +91,7 @@ const initialState: BuddhistPrayerState = {
   placementScale: 1.0,
   placementRotation: 0,
   scanStatus: 'idle',
-  altarExperienceMode: 'immersive3D',
+  altarExperienceMode: DEFAULT_ALTAR_EXPERIENCE_MODE,
   isLoading: false,
   error: null,
 };
@@ -107,7 +109,7 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>()(
 
       updatePlacementScale: (scale) => set({ placementScale: Math.max(0.5, Math.min(3.0, scale)) }),
 
-      updatePlacementRotation: (rotation) => set({ placementRotation: rotation % 360 }),
+  updatePlacementRotation: (rotation) => set({ placementRotation: normalizeRotation(rotation) }),
 
       resetPlacement: () =>
         set({ altarPlaced: false, placementScale: 1.0, placementRotation: 0, scanStatus: 'idle' }),
@@ -164,24 +166,7 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>()(
 
       setDedicationNote: (note) => set({ dedicationNote: note }),
 
-      setError: (error) => set({ error }),
-    }),
-    {
-      name: BUDDHIST_PRAYER_SESSION_STORAGE_KEY,
-      storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state) => ({
-        currentChantSlug: state.currentChantSlug,
-        currentVerseIndex: state.currentVerseIndex,
-        showMeaning: state.showMeaning,
-        autoScroll: state.autoScroll,
-        isAudioEnabled: state.isAudioEnabled,
-        templeBellEnabled: state.templeBellEnabled,
-        sessionStartedAt: state.sessionStartedAt,
-        sessionCompletedAt: state.sessionCompletedAt,
-        meritOption: state.meritOption,
-        dedicationNote: state.dedicationNote,
-        isARMode: state.isARMode,
-      }),
-    },
-  ),
-);
+  setAltarExperienceMode: (mode) => set({ altarExperienceMode: mode, error: null }),
+
+  setError: (error) => set({ error }),
+}));
