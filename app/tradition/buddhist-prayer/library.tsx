@@ -1,6 +1,6 @@
-import { Stack, useRouter } from 'expo-router';
-import React, { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { GlassCard, SacredHeader } from '@/components/buddhist-prayer';
 import { ThemedText } from '@/components/themed-text';
@@ -13,20 +13,50 @@ import {
 } from '@/constants/buddhist-prayer/theme';
 import { formatDuration } from '@/lib/chant-helpers';
 
+function isValidCategory(category?: string): category is ChantCategory {
+  return CHANT_CATEGORIES.some((item) => item.id === category);
+}
+
 export default function ChantLibraryScreen() {
   const router = useRouter();
+  const { category, intent } = useLocalSearchParams<{
+    category?: ChantCategory;
+    intent?: string;
+  }>();
   const [query, setQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<ChantCategory | 'all'>('all');
+
+  useEffect(() => {
+    if (isValidCategory(category)) {
+      setSelectedCategory(category);
+      return;
+    }
+
+    setSelectedCategory('all');
+  }, [category]);
+
+  const intentCard = useMemo(() => {
+    if (intent === 'learn') {
+      return {
+        title: 'Study with intention',
+        description: 'Choose a chant to explore its meaning and practice at a reflective pace.',
+      };
+    }
+
+    return null;
+  }, [intent]);
 
   const filteredChants = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return CHANTS;
     return CHANTS.filter(
       (c) =>
-        c.title.toLowerCase().includes(q) ||
-        c.subtitle.toLowerCase().includes(q) ||
-        (c.titleThai ?? '').includes(q),
+        (selectedCategory === 'all' || c.category === selectedCategory) &&
+        (q.length === 0 ||
+          c.title.toLowerCase().includes(q) ||
+          c.subtitle.toLowerCase().includes(q) ||
+          (c.titleThai ?? '').includes(q)),
     );
-  }, [query]);
+  }, [query, selectedCategory]);
 
   const chantsByCategory = useMemo(() => {
     const map = new Map<ChantCategory, typeof CHANTS>();
@@ -62,6 +92,51 @@ export default function ChantLibraryScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
+        {intentCard ? (
+          <GlassCard style={styles.intentCard}>
+            <ThemedText style={styles.intentTitle}>{intentCard.title}</ThemedText>
+            <ThemedText style={styles.intentDescription}>{intentCard.description}</ThemedText>
+          </GlassCard>
+        ) : null}
+
+        <View style={styles.filterRow}>
+          <Pressable
+            style={[
+              styles.filterChip,
+              selectedCategory === 'all' ? styles.filterChipSelected : null,
+            ]}
+            onPress={() => setSelectedCategory('all')}
+          >
+            <ThemedText
+              style={[
+                styles.filterChipText,
+                selectedCategory === 'all' ? styles.filterChipTextSelected : null,
+              ]}
+            >
+              All
+            </ThemedText>
+          </Pressable>
+          {CHANT_CATEGORIES.map((cat) => (
+            <Pressable
+              key={cat.id}
+              style={[
+                styles.filterChip,
+                selectedCategory === cat.id ? styles.filterChipSelected : null,
+              ]}
+              onPress={() => setSelectedCategory(cat.id)}
+            >
+              <ThemedText
+                style={[
+                  styles.filterChipText,
+                  selectedCategory === cat.id ? styles.filterChipTextSelected : null,
+                ]}
+              >
+                {cat.label}
+              </ThemedText>
+            </Pressable>
+          ))}
+        </View>
+
         {CHANT_CATEGORIES.map((cat) => {
           const items = chantsByCategory.get(cat.id);
           if (!items) return null;
@@ -78,7 +153,10 @@ export default function ChantLibraryScreen() {
                     onPress={() =>
                       router.push({
                         pathname: '/tradition/buddhist-prayer/preparation',
-                        params: { chantId: chant.id },
+                        params: {
+                          chantId: chant.id,
+                          ...(intent === 'learn' ? { intent: 'learn' } : {}),
+                        },
                       })
                     }
                     style={styles.chantCard}
@@ -140,6 +218,44 @@ const styles = StyleSheet.create({
     paddingHorizontal: BuddhistPrayerSpacing.md,
     paddingBottom: BuddhistPrayerSpacing.xxl,
     gap: BuddhistPrayerSpacing.lg,
+  },
+  intentCard: {
+    gap: BuddhistPrayerSpacing.xs,
+  },
+  intentTitle: {
+    color: BuddhistPrayerColors.goldPrimary,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  intentDescription: {
+    color: BuddhistPrayerColors.textSecondary,
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: BuddhistPrayerSpacing.xs,
+  },
+  filterChip: {
+    borderWidth: 1,
+    borderColor: BuddhistPrayerColors.cardBorder,
+    borderRadius: BuddhistPrayerRadius.full,
+    paddingHorizontal: BuddhistPrayerSpacing.sm,
+    paddingVertical: 6,
+    backgroundColor: BuddhistPrayerColors.card,
+  },
+  filterChipSelected: {
+    borderColor: BuddhistPrayerColors.goldPrimary,
+    backgroundColor: 'rgba(224,185,110,0.1)',
+  },
+  filterChipText: {
+    color: BuddhistPrayerColors.textSecondary,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  filterChipTextSelected: {
+    color: BuddhistPrayerColors.goldPrimary,
   },
   section: {
     gap: BuddhistPrayerSpacing.sm,

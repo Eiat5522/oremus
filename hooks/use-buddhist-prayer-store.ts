@@ -20,6 +20,7 @@ interface BuddhistPrayerState {
   sessionStartedAt: number | null;
   sessionCompletedAt: number | null;
   meritOption: MeritOption | null;
+  dedicationNote: string;
   // AR/Altar
   altarPlaced: boolean;
   placementScale: number;
@@ -52,12 +53,14 @@ interface BuddhistPrayerActions {
   previousVerse: () => void;
   replayVerse: () => void;
   // Toggles
+  setShowMeaning: (value: boolean) => void;
   toggleMeaning: () => void;
   toggleAutoScroll: () => void;
   toggleAudio: () => void;
   toggleTempleBell: () => void;
   // Merit
   selectMeritOption: (option: MeritOption) => void;
+  setDedicationNote: (note: string) => void;
   // Error
   setError: (error: string | null) => void;
 }
@@ -77,6 +80,7 @@ const initialState: BuddhistPrayerState = {
   sessionStartedAt: null,
   sessionCompletedAt: null,
   meritOption: null,
+  dedicationNote: '',
   altarPlaced: false,
   placementScale: 1.0,
   placementRotation: 0,
@@ -112,6 +116,7 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>((set) => ({
       sessionStartedAt: null,
       sessionCompletedAt: null,
       meritOption: null,
+      dedicationNote: '',
       error: null,
     }),
 
@@ -139,6 +144,8 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>((set) => ({
   // to re-trigger audio playback from the beginning of the current verse.
   replayVerse: () => set((state) => ({ currentVerseIndex: state.currentVerseIndex })),
 
+  setShowMeaning: (value) => set({ showMeaning: value }),
+
   toggleMeaning: () => set((state) => ({ showMeaning: !state.showMeaning })),
 
   toggleAutoScroll: () => set((state) => ({ autoScroll: !state.autoScroll })),
@@ -148,6 +155,8 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>((set) => ({
   toggleTempleBell: () => set((state) => ({ templeBellEnabled: !state.templeBellEnabled })),
 
   selectMeritOption: (option) => set({ meritOption: option }),
+
+  setDedicationNote: (note) => set({ dedicationNote: note }),
 
   setError: (error) => set({ error }),
 }));
