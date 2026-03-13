@@ -1,11 +1,17 @@
 import { useMemo } from 'react';
 
-import { calculateSessionProgress, getChantBySlug, getNextVerse, getPreviousVerse } from '@/lib/chant-helpers';
+import {
+  calculateSessionProgress,
+  getChantBySlug,
+  getNextVerse,
+  getPreviousVerse,
+} from '@/lib/chant-helpers';
 
 import { useBuddhistPrayerStore } from './use-buddhist-prayer-store';
 
 export function useChantSession() {
   const store = useBuddhistPrayerStore();
+  const chantId = store.currentChantId ?? store.currentChantSlug;
 
   const currentChant = useMemo(
     () => (store.currentChantSlug ? getChantBySlug(store.currentChantSlug) : null),

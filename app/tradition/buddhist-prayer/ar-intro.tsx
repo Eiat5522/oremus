@@ -46,22 +46,24 @@ export default function ARIntroScreen() {
 
         <View style={styles.descriptionBlock}>
           <ThemedText style={styles.description}>
-            Use your camera to scan any flat surface — a table, shelf, or floor. A sacred altar will
-            appear in your environment, creating an immersive space for meditation and chanting.
+            Slowly scan a clear surface — a table, shelf, or floor. When the altar appears, treat it
+            as you would a shrine at home: with quiet attention and respect.
           </ThemedText>
           <ThemedText style={styles.description}>
-            Walk slowly around the surface to help the app detect it. Once found, tap to place the
-            altar and adjust its size and orientation to your liking.
+            Walk mindfully around the surface to help the app sense depth. When ready, place the
+            altar and adjust its size and orientation until it feels settled in the room.
           </ThemedText>
           <ThemedText style={styles.description}>
-            You can then chant your chosen sutra with the altar visible throughout your session,
-            deepening your sense of presence and devotion.
+            Chant with the altar in view to deepen presence. If you prefer not to use the camera,
+            the experience will gently fall back to a calm illustration.
           </ThemedText>
         </View>
 
         <View style={styles.noteCard}>
           <IconSymbol name="info.circle" size={16} color={BuddhistPrayerColors.goldPrimary} />
-          <ThemedText style={styles.noteText}>Works with or without AR capability</ThemedText>
+          <ThemedText style={styles.noteText}>
+            Works gracefully with or without camera access.
+          </ThemedText>
         </View>
 
         <View style={styles.modeCard}>

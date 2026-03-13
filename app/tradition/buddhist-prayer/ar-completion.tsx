@@ -72,7 +72,7 @@ export default function ARCompletionScreen() {
 
         <ThemedText style={styles.heading}>🪷 Sadhu!</ThemedText>
         <ThemedText style={styles.subheading}>
-          May the merit of your AR practice bring peace to all beings.
+          May the merit of this practice ease suffering and bring peace to all beings.
         </ThemedText>
 
         {/* Gold divider */}

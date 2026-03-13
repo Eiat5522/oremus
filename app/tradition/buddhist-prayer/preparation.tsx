@@ -72,6 +72,10 @@ export default function ChantPreparationScreen() {
       <SacredHeader title="Preparation" showBackButton onBack={() => router.back()} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <ThemedText style={styles.introCopy}>
+          Set an intention, soften the breath, and choose the support that keeps your mind at ease.
+        </ThemedText>
+
         {/* Chant info */}
         <GlassCard style={styles.chantInfo}>
           <ThemedText style={styles.chantTitle}>{chant.title}</ThemedText>
@@ -84,7 +88,7 @@ export default function ChantPreparationScreen() {
 
         {/* Settings */}
         <GlassCard style={styles.settings}>
-          <ThemedText style={styles.settingsHeading}>Session Settings</ThemedText>
+          <ThemedText style={styles.settingsHeading}>Session Preferences</ThemedText>
           <IconToggleRow
             icon="quote.bubble"
             label="Show Meaning"
@@ -110,7 +114,8 @@ export default function ChantPreparationScreen() {
             onToggle={toggleTempleBell}
           />
           <ThemedText style={styles.settingsHint}>
-            Sessions flow one verse at a time. Auto Advance moves you forward when a verse finishes.
+            Sessions flow one verse at a time. Auto Advance moves you forward when a verse finishes,
+            or linger if your breath asks for more space.
           </ThemedText>
         </GlassCard>
 
@@ -133,6 +138,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: BuddhistPrayerSpacing.md,
     paddingBottom: BuddhistPrayerSpacing.xxl,
     gap: BuddhistPrayerSpacing.md,
+  },
+  introCopy: {
+    color: BuddhistPrayerColors.textSecondary,
+    fontSize: 13,
+    lineHeight: 20,
   },
   chantInfo: {
     gap: BuddhistPrayerSpacing.xs,

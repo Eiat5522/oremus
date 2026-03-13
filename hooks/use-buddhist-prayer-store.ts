@@ -110,7 +110,8 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>()(
 
       placeAltar: () => set({ altarPlaced: true, scanStatus: 'placed' }),
 
-      updatePlacementScale: (scale) => set({ placementScale: Math.max(0.5, Math.min(3.0, scale)) }),
+      updatePlacementScale: (scale) =>
+        set({ placementScale: Math.max(0.5, Math.min(3.0, scale)) }),
 
       updatePlacementRotation: (rotation) => set({ placementRotation: normalizeRotation(rotation) }),
 
@@ -138,7 +139,8 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>()(
 
       resumeSession: () => set({ isPlaying: true, isPaused: false }),
 
-      completeSession: () => set({ isPlaying: false, isPaused: false, sessionCompletedAt: Date.now() }),
+      completeSession: () =>
+        set({ isPlaying: false, isPaused: false, sessionCompletedAt: Date.now() }),
 
       resetSession: () => set({ ...initialState }),
 
