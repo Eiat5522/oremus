@@ -3,7 +3,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import {
-  Altar3DPlaceholder,
+  BuddhistAltar3D,
   GoldButton,
   MeritOptionCard,
   SacredHeader,
@@ -38,7 +38,8 @@ const MERIT_OPTIONS: { option: MeritOption; label: string; description: string }
 
 export default function ARMeritScreen() {
   const router = useRouter();
-  const { meritOption, selectMeritOption } = useBuddhistPrayerStore();
+  const { meritOption, placementScale, placementRotation, selectMeritOption } =
+    useBuddhistPrayerStore();
 
   return (
     <View style={styles.container}>
@@ -48,7 +49,12 @@ export default function ARMeritScreen() {
 
       {/* Altar — top 35%, background feel */}
       <View style={styles.altarArea}>
-        <Altar3DPlaceholder showHalo={false} style={styles.altar} />
+        <BuddhistAltar3D
+          scale={placementScale}
+          rotation={placementRotation}
+          showHalo={false}
+          style={styles.altar}
+        />
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
