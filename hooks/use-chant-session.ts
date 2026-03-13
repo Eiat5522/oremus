@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
 import {
   calculateSessionProgress,
@@ -10,32 +11,63 @@ import {
 import { useBuddhistPrayerStore } from './use-buddhist-prayer-store';
 
 export function useChantSession() {
-  const currentChantSlug = useBuddhistPrayerStore((state) => state.currentChantSlug);
-  const currentVerseIndex = useBuddhistPrayerStore((state) => state.currentVerseIndex);
-  const sessionStartedAt = useBuddhistPrayerStore((state) => state.sessionStartedAt);
-  const sessionCompletedAt = useBuddhistPrayerStore((state) => state.sessionCompletedAt);
-  const nextVerse = useBuddhistPrayerStore((state) => state.nextVerse);
-  const previousVerse = useBuddhistPrayerStore((state) => state.previousVerse);
-  const replayVerse = useBuddhistPrayerStore((state) => state.replayVerse);
-  const pauseSession = useBuddhistPrayerStore((state) => state.pauseSession);
-  const resumeSession = useBuddhistPrayerStore((state) => state.resumeSession);
-  const completeSession = useBuddhistPrayerStore((state) => state.completeSession);
-  const isPlaying = useBuddhistPrayerStore((state) => state.isPlaying);
-  const isPaused = useBuddhistPrayerStore((state) => state.isPaused);
-  const isAudioEnabled = useBuddhistPrayerStore((state) => state.isAudioEnabled);
-  const showMeaning = useBuddhistPrayerStore((state) => state.showMeaning);
-  const autoScroll = useBuddhistPrayerStore((state) => state.autoScroll);
-  const templeBellEnabled = useBuddhistPrayerStore((state) => state.templeBellEnabled);
-  const isARMode = useBuddhistPrayerStore((state) => state.isARMode);
-  const meritOption = useBuddhistPrayerStore((state) => state.meritOption);
-  const dedicationNote = useBuddhistPrayerStore((state) => state.dedicationNote);
-  const altarPlaced = useBuddhistPrayerStore((state) => state.altarPlaced);
-  const placementScale = useBuddhistPrayerStore((state) => state.placementScale);
-  const placementRotation = useBuddhistPrayerStore((state) => state.placementRotation);
-  const scanStatus = useBuddhistPrayerStore((state) => state.scanStatus);
-  const altarExperienceMode = useBuddhistPrayerStore((state) => state.altarExperienceMode);
-  const isLoading = useBuddhistPrayerStore((state) => state.isLoading);
-  const error = useBuddhistPrayerStore((state) => state.error);
+  const {
+    currentChantSlug,
+    currentVerseIndex,
+    isPlaying,
+    isPaused,
+    isAudioEnabled,
+    showMeaning,
+    autoScroll,
+    templeBellEnabled,
+    isARMode,
+    sessionStartedAt,
+    sessionCompletedAt,
+    meritOption,
+    dedicationNote,
+    altarPlaced,
+    placementScale,
+    placementRotation,
+    scanStatus,
+    altarExperienceMode,
+    isLoading,
+    error,
+    nextVerse,
+    previousVerse,
+    replayVerse,
+    pauseSession,
+    resumeSession,
+    completeSession,
+  } = useBuddhistPrayerStore(
+    useShallow((state) => ({
+      currentChantSlug: state.currentChantSlug,
+      currentVerseIndex: state.currentVerseIndex,
+      isPlaying: state.isPlaying,
+      isPaused: state.isPaused,
+      isAudioEnabled: state.isAudioEnabled,
+      showMeaning: state.showMeaning,
+      autoScroll: state.autoScroll,
+      templeBellEnabled: state.templeBellEnabled,
+      isARMode: state.isARMode,
+      sessionStartedAt: state.sessionStartedAt,
+      sessionCompletedAt: state.sessionCompletedAt,
+      meritOption: state.meritOption,
+      dedicationNote: state.dedicationNote,
+      altarPlaced: state.altarPlaced,
+      placementScale: state.placementScale,
+      placementRotation: state.placementRotation,
+      scanStatus: state.scanStatus,
+      altarExperienceMode: state.altarExperienceMode,
+      isLoading: state.isLoading,
+      error: state.error,
+      nextVerse: state.nextVerse,
+      previousVerse: state.previousVerse,
+      replayVerse: state.replayVerse,
+      pauseSession: state.pauseSession,
+      resumeSession: state.resumeSession,
+      completeSession: state.completeSession,
+    })),
+  );
 
   const currentChant = useMemo(
     () => (currentChantSlug ? getChantBySlug(currentChantSlug) : null),

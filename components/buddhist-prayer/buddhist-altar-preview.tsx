@@ -25,6 +25,10 @@ class AltarPreviewErrorBoundary extends React.Component<
     return { hasError: true };
   }
 
+  componentDidCatch(error: Error) {
+    console.warn('Could not render Buddhist altar preview:', error);
+  }
+
   render() {
     if (this.state.hasError) {
       return this.props.fallback;

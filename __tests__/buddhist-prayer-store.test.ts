@@ -1,8 +1,8 @@
-import asyncStorageMock from '@react-native-async-storage/async-storage/jest/async-storage-mock';
+import mockAsyncStorage from '@react-native-async-storage/async-storage/jest/async-storage-mock';
 
 import { useBuddhistPrayerStore } from '@/hooks/use-buddhist-prayer-store';
 
-jest.mock('@react-native-async-storage/async-storage', () => asyncStorageMock);
+jest.mock('@react-native-async-storage/async-storage', () => mockAsyncStorage);
 
 describe('buddhist prayer store', () => {
   beforeEach(() => {

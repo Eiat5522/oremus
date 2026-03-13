@@ -34,8 +34,8 @@ export function BuddhistAltar3D({
   animated = true,
   style,
 }: BuddhistAltar3DProps) {
-  const reduceMotionEnabled = useReducedMotion();
-  const shouldAnimate = animated && !reduceMotionEnabled;
+  const prefersReducedMotion = useReducedMotion();
+  const shouldAnimate = animated && !prefersReducedMotion;
   const haloOpacity = useRef(new Animated.Value(showHalo ? 0.42 : 0)).current;
   const smokeLift = useRef(new Animated.Value(0)).current;
   const smokeFade = useRef(new Animated.Value(0.25)).current;
@@ -155,7 +155,7 @@ export function BuddhistAltar3D({
       accessibilityRole="image"
       accessibilityLabel="Buddhist altar preview"
       accessibilityHint={
-        reduceMotionEnabled
+        prefersReducedMotion
           ? 'Static altar preview shown with reduced motion enabled.'
           : 'Animated altar preview with halo and incense.'
       }
