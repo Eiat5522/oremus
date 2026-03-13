@@ -3,7 +3,7 @@ import { Stack, useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { Altar3DPlaceholder, GoldButton, SacredHeader } from '@/components/buddhist-prayer';
+import { BuddhistAltar3D, GoldButton, SacredHeader } from '@/components/buddhist-prayer';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import {
@@ -12,10 +12,13 @@ import {
   BuddhistPrayerSpacing,
 } from '@/constants/buddhist-prayer/theme';
 import { useChantSession } from '@/hooks/use-chant-session';
+import { useBuddhistPrayerStore } from '@/hooks/use-buddhist-prayer-store';
 import { formatDuration } from '@/lib/chant-helpers';
 
 export default function ARCompletionScreen() {
   const router = useRouter();
+  const placementScale = useBuddhistPrayerStore((state) => state.placementScale);
+  const placementRotation = useBuddhistPrayerStore((state) => state.placementRotation);
   const { completeSession, sessionDurationSeconds, versesCompleted, currentChantId } =
     useChantSession();
 
@@ -53,7 +56,12 @@ export default function ARCompletionScreen() {
 
       {/* Altar — small at top */}
       <View style={styles.altarArea}>
-        <Altar3DPlaceholder showHalo style={styles.altar} />
+        <BuddhistAltar3D
+          scale={placementScale}
+          rotation={placementRotation}
+          showHalo
+          style={styles.altar}
+        />
       </View>
 
       <View style={styles.content}>

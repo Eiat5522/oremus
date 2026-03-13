@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import {
-  Altar3DPlaceholder,
+  BuddhistAltar3D,
   ChantTextBlock,
   ProgressPill,
   SacredHeader,
@@ -12,9 +12,12 @@ import {
 import { ThemedText } from '@/components/themed-text';
 import { BuddhistPrayerColors, BuddhistPrayerSpacing } from '@/constants/buddhist-prayer/theme';
 import { useChantSession } from '@/hooks/use-chant-session';
+import { useBuddhistPrayerStore } from '@/hooks/use-buddhist-prayer-store';
 
 export default function ARChantScreen() {
   const router = useRouter();
+  const placementScale = useBuddhistPrayerStore((state) => state.placementScale);
+  const placementRotation = useBuddhistPrayerStore((state) => state.placementRotation);
 
   const {
     currentChant,
@@ -78,7 +81,12 @@ export default function ARChantScreen() {
 
       {/* Altar — top 40% */}
       <View style={styles.altarArea}>
-        <Altar3DPlaceholder showHalo style={styles.altar} />
+        <BuddhistAltar3D
+          scale={placementScale}
+          rotation={placementRotation}
+          showHalo
+          style={styles.altar}
+        />
       </View>
 
       {/* Verse content */}

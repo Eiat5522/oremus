@@ -3,7 +3,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import {
-  Altar3DPlaceholder,
+  BuddhistAltar3D,
   GlassCard,
   PlacementControls,
   SacredHeader,
@@ -14,11 +14,23 @@ import { useAltarExperience } from '@/hooks/use-altar-experience';
 
 export default function ARPlacementScreen() {
   const router = useRouter();
-  const { placementScale, placementRotation, adjustRotation, adjustScale, resetAltarPlacement } =
-    useAltarExperience();
+  const {
+    placementScale,
+    placementRotation,
+    adjustRotation,
+    adjustScale,
+    resetAltarPlacement,
+    confirmPlacement,
+  } = useAltarExperience();
 
   const handleConfirm = () => {
+    confirmPlacement();
     router.push('/tradition/buddhist-prayer/ar-preparation');
+  };
+
+  const handleReset = () => {
+    resetAltarPlacement();
+    router.replace('/tradition/buddhist-prayer/ar-scan');
   };
 
   return (
@@ -33,7 +45,7 @@ export default function ARPlacementScreen() {
       />
 
       <View style={styles.altarArea}>
-        <Altar3DPlaceholder
+        <BuddhistAltar3D
           scale={placementScale}
           rotation={placementRotation}
           showHalo={false}
@@ -48,7 +60,7 @@ export default function ARPlacementScreen() {
           onRotateRight={() => adjustRotation(15)}
           onScaleDown={() => adjustScale(-0.1)}
           onScaleUp={() => adjustScale(0.1)}
-          onReset={resetAltarPlacement}
+          onReset={handleReset}
           onConfirm={handleConfirm}
         />
       </GlassCard>

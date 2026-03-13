@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 
+import { DEFAULT_ALTAR_EXPERIENCE_MODE } from '@/constants/buddhist-prayer/altar-experience';
 import type {
   AltarExperienceMode,
   MeritOption,
@@ -61,11 +62,14 @@ interface BuddhistPrayerActions {
   // Merit
   selectMeritOption: (option: MeritOption) => void;
   setDedicationNote: (note: string) => void;
+  setAltarExperienceMode: (mode: AltarExperienceMode) => void;
   // Error
   setError: (error: string | null) => void;
 }
 
 type BuddhistPrayerStore = BuddhistPrayerState & BuddhistPrayerActions;
+
+const normalizeRotation = (rotation: number) => ((rotation % 360) + 360) % 360;
 
 const initialState: BuddhistPrayerState = {
   currentChantId: null,
@@ -85,7 +89,7 @@ const initialState: BuddhistPrayerState = {
   placementScale: 1.0,
   placementRotation: 0,
   scanStatus: 'idle',
-  altarExperienceMode: 'immersive3D',
+  altarExperienceMode: DEFAULT_ALTAR_EXPERIENCE_MODE,
   isLoading: false,
   error: null,
 };
@@ -101,7 +105,7 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>((set) => ({
 
   updatePlacementScale: (scale) => set({ placementScale: Math.max(0.5, Math.min(3.0, scale)) }),
 
-  updatePlacementRotation: (rotation) => set({ placementRotation: rotation % 360 }),
+  updatePlacementRotation: (rotation) => set({ placementRotation: normalizeRotation(rotation) }),
 
   resetPlacement: () =>
     set({ altarPlaced: false, placementScale: 1.0, placementRotation: 0, scanStatus: 'idle' }),
@@ -157,6 +161,8 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>((set) => ({
   selectMeritOption: (option) => set({ meritOption: option }),
 
   setDedicationNote: (note) => set({ dedicationNote: note }),
+
+  setAltarExperienceMode: (mode) => set({ altarExperienceMode: mode, error: null }),
 
   setError: (error) => set({ error }),
 }));

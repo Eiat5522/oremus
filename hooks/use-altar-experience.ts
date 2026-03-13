@@ -6,6 +6,9 @@ import { useBuddhistPrayerStore } from './use-buddhist-prayer-store';
 // when integrating ViroReact or Expo AR native module.
 // The abstraction below keeps the same interface so screens don't need to change.
 
+const IMMERSIVE_3D_SCAN_DURATION_MS = 1400;
+const NATIVE_AR_SCAN_DURATION_MS = 2500;
+
 export type AltarExperienceCallbacks = {
   onSurfaceDetected?: () => void;
   onAltarPlaced?: () => void;
@@ -38,15 +41,12 @@ export function useAltarExperience(callbacks?: AltarExperienceCallbacks) {
 
   const beginScan = useCallback(() => {
     startScan();
-    if (altarExperienceMode === 'immersive3D') {
-      // Simulate finding a surface after ~2.5 seconds
-      scanSimulationTimeoutRef.current = setTimeout(() => {
-        surfaceDetected();
-        callbacksRef.current?.onSurfaceDetected?.();
-      }, 2500);
-    }
-    // TODO: [NATIVE AR SWAP-IN] In nativeARReady mode, start real AR session here
-    // and listen for ARPlaneAnchor detected event from native module
+    // TODO: [NATIVE AR SWAP-IN] In nativeARReady mode, start a native AR session here
+    // and replace the timeout with a real plane-detection callback from the AR module.
+    scanSimulationTimeoutRef.current = setTimeout(() => {
+      surfaceDetected();
+      callbacksRef.current?.onSurfaceDetected?.();
+    }, altarExperienceMode === 'immersive3D' ? IMMERSIVE_3D_SCAN_DURATION_MS : NATIVE_AR_SCAN_DURATION_MS);
   }, [altarExperienceMode, startScan, surfaceDetected]);
 
   const confirmPlacement = useCallback(() => {
