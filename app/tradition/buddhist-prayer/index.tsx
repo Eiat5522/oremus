@@ -105,9 +105,9 @@ export default function BuddhistPrayerHomeScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Hero */}
         <GlassCard style={styles.heroCard}>
-          <ThemedText style={styles.heroHeading}>🪷 Sacred Practice</ThemedText>
+          <ThemedText style={styles.heroHeading}>🪷 Quiet Practice</ThemedText>
           <ThemedText style={styles.heroSubtitle}>
-            Unite body, breath, and mind through traditional Theravāda chanting.
+            Enter gently. Let each chant be an offering of steadiness and goodwill.
           </ThemedText>
           <View style={styles.heroButtons}>
             <GoldButton

@@ -1,18 +1,18 @@
 import { Stack, useRouter } from 'expo-router';
-import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 import {
-  BuddhistAltarPreview,
+  ChantOverlay,
+  BuddhistAltar3D,
   ChantTextBlock,
-  GoldButton,
-  ProgressPill,
   SacredHeader,
   SessionControls,
 } from '@/components/buddhist-prayer';
 import { ThemedText } from '@/components/themed-text';
 import { BuddhistPrayerColors, BuddhistPrayerSpacing } from '@/constants/buddhist-prayer/theme';
 import { useChantAutoAdvance } from '@/hooks/use-chant-auto-advance';
+import { useAudioPrayer } from '@/hooks/use-audio-prayer';
 import { useChantSession } from '@/hooks/use-chant-session';
 import { useBuddhistPrayerStore } from '@/hooks/use-buddhist-prayer-store';
 
@@ -38,6 +38,9 @@ export default function ARChantScreen() {
     pauseSession,
     resumeSession,
   } = useChantSession();
+  const { play, pause, playTempleBell } = useAudioPrayer();
+  const previousIsPlayingRef = useRef(isPlaying);
+  const previousVerseIndexRef = useRef(currentVerseIndex);
 
   const isLastVerse = !hasNextVerse;
   const autoAdvanceDurationMs = useMemo(() => {
@@ -48,6 +51,8 @@ export default function ARChantScreen() {
 
   const handleNext = () => {
     if (isLastVerse) {
+      playTempleBell();
+      pause();
       router.push('/tradition/buddhist-prayer/ar-merit');
     } else {
       nextVerse(totalVerses);
@@ -62,6 +67,42 @@ export default function ARChantScreen() {
     durationMs: autoAdvanceDurationMs,
     onAdvance: handleNext,
   });
+
+  // Ambient chant playback tied to session play state
+  useEffect(() => {
+    if (!currentChant || !currentVerse) return;
+
+    if (isPlaying && !previousIsPlayingRef.current) {
+      playTempleBell();
+      void play();
+    }
+
+    if (!isPlaying && previousIsPlayingRef.current) {
+      pause();
+    }
+
+    previousIsPlayingRef.current = isPlaying;
+  }, [currentChant, currentVerse, isPlaying, pause, play, playTempleBell]);
+
+  // Bell + restart on verse transitions while playing
+  useEffect(() => {
+    if (!isPlaying) {
+      previousVerseIndexRef.current = currentVerseIndex;
+      return;
+    }
+
+    if (currentVerseIndex !== previousVerseIndexRef.current) {
+      previousVerseIndexRef.current = currentVerseIndex;
+      playTempleBell();
+      void play();
+    }
+  }, [currentVerseIndex, isPlaying, play, playTempleBell]);
+
+  const handleReplay = () => {
+    playTempleBell();
+    void play();
+    replayVerse();
+  };
 
   if (!currentChant || !currentVerse) {
     return (
@@ -88,19 +129,13 @@ export default function ARChantScreen() {
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* Progress bar */}
-      <View style={styles.progressBarTrack}>
-        <View style={[styles.progressBarFill, { width: `${progress * 100}%` }]} />
-      </View>
-
       <SacredHeader
-        title={currentChant.title}
-        subtitle={currentChant.subtitle}
+        title="AR Chant Session"
+        subtitle="Your altar will stay present as you recite."
         showBackButton
         onBack={() => router.back()}
       />
 
-      {/* Altar — top 40% */}
       <View style={styles.altarArea}>
         <BuddhistAltarPreview
           scale={placementScale}
@@ -141,7 +176,7 @@ export default function ARChantScreen() {
           onPause={pauseSession}
           onPrevious={previousVerse}
           onNext={handleNext}
-          onReplay={replayVerse}
+          onReplay={handleReplay}
         />
         {isLastVerse ? (
           <ThemedText style={styles.lastVerseHint}>Tap ▶▶ to dedicate your merit</ThemedText>
@@ -155,14 +190,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: BuddhistPrayerColors.background,
-  },
-  progressBarTrack: {
-    height: 3,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: BuddhistPrayerColors.goldPrimary,
   },
   centered: {
     flex: 1,
@@ -178,7 +205,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   altarArea: {
-    height: '40%',
+    height: '36%',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: BuddhistPrayerSpacing.md,
@@ -187,26 +214,14 @@ const styles = StyleSheet.create({
     width: '100%',
     aspectRatio: 1,
   },
-  verseContainer: {
+  overlayArea: {
     flex: 1,
   },
   verseContent: {
     justifyContent: 'center',
     paddingHorizontal: BuddhistPrayerSpacing.md,
-    gap: BuddhistPrayerSpacing.lg,
-    paddingBottom: BuddhistPrayerSpacing.lg,
-    minHeight: '100%',
-  },
-  textBlock: {
-    alignItems: 'center',
-  },
-  recoveryAction: {
-    width: '100%',
-  },
-  controlsContainer: {
     paddingBottom: BuddhistPrayerSpacing.xl,
-    paddingHorizontal: BuddhistPrayerSpacing.md,
-    gap: BuddhistPrayerSpacing.xs,
+    gap: BuddhistPrayerSpacing.sm,
   },
   lastVerseHint: {
     color: BuddhistPrayerColors.goldPrimary,

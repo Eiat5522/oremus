@@ -1,12 +1,13 @@
 export { BuddhistAltar3D } from './buddhist-altar-3d';
 export { Altar3DPlaceholder } from './altar-3d-placeholder';
-export { BuddhistAltarPreview } from './buddhist-altar-preview';
+export { ChantOverlay } from './chant-overlay';
 export { ChantTextBlock } from './chant-text-block';
 export { GlassCard } from './glass-card';
 export { GoldButton } from './gold-button';
 export { IconToggleRow } from './icon-toggle-row';
 export { MeritOptionCard } from './merit-option-card';
 export { PlacementControls } from './placement-controls';
+export { Altar3DPlaceholder } from './altar-3d-placeholder';
 export { ProgressPill } from './progress-pill';
 export { SacredHeader } from './sacred-header';
 export { ScanOverlay } from './scan-overlay';

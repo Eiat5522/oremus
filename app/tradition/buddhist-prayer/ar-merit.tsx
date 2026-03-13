@@ -61,8 +61,8 @@ export default function ARMeritScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.messageBlock}>
           <ThemedText style={styles.completionMessage}>
-            Your AR practice is complete. With a calm and open heart, share this merit with all who
-            need it.
+            Your AR practice is complete. With a calm and open heart, offer this merit to those who
+            guided you, those you love, and all beings in need.
           </ThemedText>
         </View>
 
@@ -80,7 +80,7 @@ export default function ARMeritScreen() {
         </View>
 
         <GoldButton
-          title="Continue"
+          title="Offer Merit"
           onPress={() => router.push('/tradition/buddhist-prayer/ar-completion')}
           disabled={!meritOption}
         />

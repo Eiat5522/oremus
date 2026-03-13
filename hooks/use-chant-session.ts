@@ -11,67 +11,17 @@ import {
 import { useBuddhistPrayerStore } from './use-buddhist-prayer-store';
 
 export function useChantSession() {
-  const {
-    currentChantSlug,
-    currentVerseIndex,
-    isPlaying,
-    isPaused,
-    isAudioEnabled,
-    showMeaning,
-    autoScroll,
-    templeBellEnabled,
-    isARMode,
-    sessionStartedAt,
-    sessionCompletedAt,
-    meritOption,
-    dedicationNote,
-    altarPlaced,
-    placementScale,
-    placementRotation,
-    scanStatus,
-    altarExperienceMode,
-    isLoading,
-    error,
-    nextVerse,
-    previousVerse,
-    replayVerse,
-    pauseSession,
-    resumeSession,
-    completeSession,
-  } = useBuddhistPrayerStore(
-    useShallow((state) => ({
-      currentChantSlug: state.currentChantSlug,
-      currentVerseIndex: state.currentVerseIndex,
-      isPlaying: state.isPlaying,
-      isPaused: state.isPaused,
-      isAudioEnabled: state.isAudioEnabled,
-      showMeaning: state.showMeaning,
-      autoScroll: state.autoScroll,
-      templeBellEnabled: state.templeBellEnabled,
-      isARMode: state.isARMode,
-      sessionStartedAt: state.sessionStartedAt,
-      sessionCompletedAt: state.sessionCompletedAt,
-      meritOption: state.meritOption,
-      dedicationNote: state.dedicationNote,
-      altarPlaced: state.altarPlaced,
-      placementScale: state.placementScale,
-      placementRotation: state.placementRotation,
-      scanStatus: state.scanStatus,
-      altarExperienceMode: state.altarExperienceMode,
-      isLoading: state.isLoading,
-      error: state.error,
-      nextVerse: state.nextVerse,
-      previousVerse: state.previousVerse,
-      replayVerse: state.replayVerse,
-      pauseSession: state.pauseSession,
-      resumeSession: state.resumeSession,
-      completeSession: state.completeSession,
-    })),
-  );
+  const store = useBuddhistPrayerStore();
+  const chantId = store.currentChantId ?? store.currentChantSlug;
 
   const currentChant = useMemo(
     () => (currentChantSlug ? getChantBySlug(currentChantSlug) : null),
     [currentChantSlug],
+  );
+
+  const currentChantId = useMemo(
+    () => currentChant?.id ?? store.currentChantId,
+    [currentChant?.id, store.currentChantId],
   );
 
   const currentVerse = useMemo(
@@ -108,32 +58,8 @@ export function useChantSession() {
   );
 
   return {
-    currentChantSlug,
-    currentVerseIndex,
-    isPlaying,
-    isPaused,
-    isAudioEnabled,
-    showMeaning,
-    autoScroll,
-    templeBellEnabled,
-    isARMode,
-    sessionStartedAt,
-    sessionCompletedAt,
-    meritOption,
-    dedicationNote,
-    altarPlaced,
-    placementScale,
-    placementRotation,
-    scanStatus,
-    altarExperienceMode,
-    isLoading,
-    error,
-    nextVerse,
-    previousVerse,
-    replayVerse,
-    pauseSession,
-    resumeSession,
-    completeSession,
+    ...store,
+    currentChantId,
     currentChant: currentChant ?? null,
     currentVerse,
     hasNextVerse,

@@ -45,7 +45,8 @@ export default function MeritDedicationScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.messageBlock}>
           <ThemedText style={styles.completionMessage}>
-            Your practice is complete. With a calm and open heart, share this merit.
+            Your practice is complete. With a calm and open heart, offer this merit to those in your
+            care and to all beings.
           </ThemedText>
         </View>
 
@@ -77,7 +78,7 @@ export default function MeritDedicationScreen() {
         </View>
 
         <GoldButton
-          title="Continue"
+          title="Offer Merit"
           onPress={() => router.push('/tradition/buddhist-prayer/completion')}
           disabled={!meritOption}
         />
