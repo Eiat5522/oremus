@@ -1,11 +1,10 @@
+import type { Href } from 'expo-router';
+
 import type { Chant, ChantCategory } from '@/constants/buddhist-prayer/types';
 
 export type HomeQuickActionId = 'ar' | 'chant' | 'merit' | 'learn';
 
-export interface RouteTarget {
-  pathname: string;
-  params?: Record<string, string>;
-}
+export type RouteTarget = Href;
 
 export interface HomeSessionCardState {
   eyebrow: string;
@@ -79,7 +78,7 @@ export function getHomeSessionCardState({
   }
 
   if (sessionStartedAt) {
-    const verseNumber = Math.min(currentVerseIndex + 1, chant.verses.length);
+    const verseNumber = currentVerseIndex + 1;
 
     return {
       eyebrow: 'Continue Practice',

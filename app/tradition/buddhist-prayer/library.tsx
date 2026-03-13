@@ -13,6 +13,10 @@ import {
 } from '@/constants/buddhist-prayer/theme';
 import { formatDuration } from '@/lib/chant-helpers';
 
+function isValidCategory(category?: string): category is ChantCategory {
+  return CHANT_CATEGORIES.some((item) => item.id === category);
+}
+
 export default function ChantLibraryScreen() {
   const router = useRouter();
   const { category, intent } = useLocalSearchParams<{
@@ -23,7 +27,7 @@ export default function ChantLibraryScreen() {
   const [selectedCategory, setSelectedCategory] = useState<ChantCategory | 'all'>('all');
 
   useEffect(() => {
-    if (category && CHANT_CATEGORIES.some((item) => item.id === category)) {
+    if (isValidCategory(category)) {
       setSelectedCategory(category);
       return;
     }
@@ -46,7 +50,7 @@ export default function ChantLibraryScreen() {
     const q = query.trim().toLowerCase();
     return CHANTS.filter(
       (c) =>
-        (selectedCategory === 'all' ? true : c.category === selectedCategory) &&
+        (selectedCategory === 'all' || c.category === selectedCategory) &&
         (q.length === 0 ||
           c.title.toLowerCase().includes(q) ||
           c.subtitle.toLowerCase().includes(q) ||

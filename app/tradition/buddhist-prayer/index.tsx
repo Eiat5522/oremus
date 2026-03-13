@@ -63,13 +63,13 @@ export default function BuddhistPrayerHomeScreen() {
   const handleQuickActionPress = useCallback(
     (actionId: (typeof QUICK_ACTIONS)[number]['id']) => {
       const target = getQuickActionRoute(actionId);
-      router.push(target as never);
+      router.push(target);
     },
     [router],
   );
   const handleCategoryPress = useCallback(
     (category: (typeof CHANT_CATEGORIES)[number]['id']) => {
-      router.push(getCategoryRoute(category) as never);
+      router.push(getCategoryRoute(category));
     },
     [router],
   );
@@ -78,7 +78,7 @@ export default function BuddhistPrayerHomeScreen() {
       return;
     }
 
-    router.push(sessionCard.primaryRoute as never);
+    router.push(sessionCard.primaryRoute);
   }, [router, sessionCard]);
 
   return (
