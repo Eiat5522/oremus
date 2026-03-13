@@ -3,7 +3,7 @@ import { Stack, useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { BuddhistAltar3D, GoldButton, SacredHeader } from '@/components/buddhist-prayer';
+import { BuddhistAltarPreview, GoldButton, SacredHeader } from '@/components/buddhist-prayer';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import {
@@ -19,7 +19,7 @@ export default function ARCompletionScreen() {
   const router = useRouter();
   const placementScale = useBuddhistPrayerStore((state) => state.placementScale);
   const placementRotation = useBuddhistPrayerStore((state) => state.placementRotation);
-  const { completeSession, sessionDurationSeconds, versesCompleted, currentChantId } =
+  const { completeSession, sessionDurationSeconds, versesCompleted, currentChantSlug } =
     useChantSession();
 
   const completedRef = useRef(false);
@@ -56,11 +56,12 @@ export default function ARCompletionScreen() {
 
       {/* Altar — small at top */}
       <View style={styles.altarArea}>
-        <BuddhistAltar3D
+        <BuddhistAltarPreview
           scale={placementScale}
           rotation={placementRotation}
           showHalo
           style={styles.altar}
+          fallbackStyle={styles.altar}
         />
       </View>
 

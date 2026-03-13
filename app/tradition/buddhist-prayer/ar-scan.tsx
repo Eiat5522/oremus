@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { useCameraPermissions } from 'expo-camera';
 
 import {
-  BuddhistAltar3D,
+  BuddhistAltarPreview,
   GoldButton,
   SacredHeader,
   ScanOverlay,
@@ -109,7 +109,11 @@ export default function ARScanScreen() {
               />
             ) : (
               <View style={styles.immersiveScene}>
-                <BuddhistAltar3D showHalo style={styles.immersiveAltar} />
+                <BuddhistAltarPreview
+                  showHalo
+                  style={styles.immersiveAltar}
+                  fallbackStyle={styles.immersiveAltar}
+                />
                 <ThemedText style={styles.immersiveCopy}>
                   Entering the immersive fallback scene. We will keep your altar in this sanctuary
                   and let you fine-tune its placement before chanting.

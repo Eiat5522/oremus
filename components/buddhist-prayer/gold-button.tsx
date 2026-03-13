@@ -14,6 +14,7 @@ interface GoldButtonProps {
   disabled?: boolean;
   size?: 'sm' | 'md' | 'lg';
   variant?: 'primary' | 'outline' | 'ghost';
+  accessibilityHint?: string;
 }
 
 const BUTTON_HEIGHTS: Record<NonNullable<GoldButtonProps['size']>, number> = {
@@ -28,6 +29,7 @@ export function GoldButton({
   disabled,
   size = 'md',
   variant = 'primary',
+  accessibilityHint,
 }: GoldButtonProps) {
   const height = BUTTON_HEIGHTS[size];
   const fontSize = size === 'sm' ? 14 : size === 'lg' ? 18 : 16;
@@ -38,14 +40,20 @@ export function GoldButton({
       style={[styles.wrapper, { opacity: disabled ? 0.45 : 1 }]}
       accessibilityRole="button"
       accessibilityLabel={title}
+      accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled }}
     >
       {variant === 'primary' ? (
-        <LinearGradient colors={['#C89B4B', '#8B6328']} style={[styles.button, { height }]}>
+        <LinearGradient
+          colors={['#C89B4B', '#8B6328']}
+          style={[styles.button, { minHeight: height }]}
+        >
           <ThemedText style={[styles.label, { fontSize }]}>{title}</ThemedText>
         </LinearGradient>
       ) : (
-        <View style={[styles.button, { height }, variant === 'outline' && styles.outline]}>
+        <View
+          style={[styles.button, { minHeight: height }, variant === 'outline' && styles.outline]}
+        >
           <ThemedText
             style={[
               styles.label,
@@ -72,6 +80,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: BuddhistPrayerSpacing.lg,
+    paddingVertical: BuddhistPrayerSpacing.sm,
     borderRadius: BuddhistPrayerRadius.lg,
   },
   outline: {

@@ -24,6 +24,7 @@ export function IconToggleRow({ icon, label, value, onToggle }: IconToggleRowPro
       accessibilityRole="switch"
       accessibilityState={{ checked: value }}
       accessibilityLabel={label}
+      accessibilityHint={`Double tap to ${value ? 'turn off' : 'turn on'} ${label.toLowerCase()}.`}
     >
       <IconSymbol
         name={icon}

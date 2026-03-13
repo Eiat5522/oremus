@@ -41,11 +41,17 @@ export function PlacementControls({
           style={styles.resetButton}
           accessibilityRole="button"
           accessibilityLabel="Reset placement"
+          accessibilityHint="Clears the altar placement and returns to surface scanning."
         >
           <ThemedText style={styles.resetText}>Reset</ThemedText>
         </Pressable>
         <View style={styles.confirmButton}>
-          <GoldButton title="Confirm Placement" onPress={onConfirm} size="md" />
+          <GoldButton
+            title="Confirm Placement"
+            onPress={onConfirm}
+            size="md"
+            accessibilityHint="Locks in the altar position and continues to chanting setup."
+          />
         </View>
       </View>
     </View>
@@ -67,6 +73,7 @@ function ControlButton({
       style={styles.iconButton}
       accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityHint={`Double tap to ${label.toLowerCase()} the altar.`}
     >
       <IconSymbol name={icon} size={22} color={BuddhistPrayerColors.goldPrimary} />
       <ThemedText style={styles.iconLabel}>{label}</ThemedText>

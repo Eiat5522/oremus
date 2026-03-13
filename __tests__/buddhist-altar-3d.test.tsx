@@ -1,11 +1,10 @@
-import { act, render } from '@testing-library/react-native';
+import { render, waitFor } from '@testing-library/react-native';
 import { AccessibilityInfo } from 'react-native';
 
-import { Altar3DPlaceholder } from '@/components/buddhist-prayer';
+import { BuddhistAltar3D } from '@/components/buddhist-prayer';
 
 describe('buddhist altar 3D placeholder', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
     jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(false);
     jest
       .spyOn(AccessibilityInfo, 'addEventListener')
@@ -13,34 +12,38 @@ describe('buddhist altar 3D placeholder', () => {
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
     jest.restoreAllMocks();
   });
 
-  it('shows a safe loading state before settling on the altar fallback scene in tests', async () => {
-    const { getByText, getByTestId, queryByTestId } = render(
-      <Altar3DPlaceholder showHalo showIncenseSmoke />,
+  it('renders the altar scene with accessible overlays when motion is allowed', () => {
+    const { getByTestId, getAllByTestId, getByA11yHint } = render(
+      <BuddhistAltar3D showHalo showIncenseSmoke />,
     );
 
-    expect(getByText('Preparing 3D altar…')).toBeTruthy();
     expect(getByTestId('altar-fallback')).toBeTruthy();
-
-    await act(async () => {
-      jest.advanceTimersByTime(300);
-    });
-
-    expect(queryByTestId('altar-loading')).toBeNull();
+    expect(getByTestId('altar-halo-overlay')).toBeTruthy();
+    expect(getAllByTestId('altar-smoke-overlay')).toHaveLength(2);
+    expect(getAllByTestId('altar-particle')).toHaveLength(4);
+    expect(getByA11yHint('Animated altar preview with halo and incense.')).toBeTruthy();
   });
 
-  it('respects halo and incense smoke visibility props in fallback mode', async () => {
-    const { queryByTestId } = render(
-      <Altar3DPlaceholder showHalo={false} showIncenseSmoke={false} animated={false} />,
+  it('respects reduced motion by removing animated particles and using a static accessibility hint', async () => {
+    jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true);
+
+    const { getByA11yHint, queryAllByTestId } = render(
+      <BuddhistAltar3D showHalo showIncenseSmoke />,
     );
 
-    await act(async () => {
-      jest.advanceTimersByTime(300);
+    await waitFor(() => {
+      expect(queryAllByTestId('altar-particle')).toHaveLength(0);
     });
+    expect(getByA11yHint('Static altar preview shown with reduced motion enabled.')).toBeTruthy();
+  });
+
+  it('respects halo and incense smoke visibility props in static mode', () => {
+    const { queryByTestId } = render(
+      <BuddhistAltar3D showHalo={false} showIncenseSmoke={false} animated={false} />,
+    );
 
     expect(queryByTestId('altar-halo-overlay')).toBeNull();
     expect(queryByTestId('altar-smoke-overlay')).toBeNull();

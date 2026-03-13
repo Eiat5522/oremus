@@ -182,6 +182,7 @@ export default function BuddhistPrayerHomeScreen() {
               onPress={() => handleQuickActionPress(action.id)}
               accessibilityRole="button"
               accessibilityLabel={action.label}
+              accessibilityHint={`Opens the ${action.label.toLowerCase()} flow.`}
             >
               <IconSymbol name={action.icon} size={24} color={BuddhistPrayerColors.goldPrimary} />
               <ThemedText style={styles.actionLabel}>{action.label}</ThemedText>

@@ -3,7 +3,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import {
-  BuddhistAltar3D,
+  BuddhistAltarPreview,
   GlassCard,
   PlacementControls,
   SacredHeader,
@@ -45,10 +45,11 @@ export default function ARPlacementScreen() {
       />
 
       <View style={styles.altarArea}>
-        <BuddhistAltar3D
+        <BuddhistAltarPreview
           scale={placementScale}
           rotation={placementRotation}
           style={styles.altar}
+          fallbackStyle={styles.altar}
         />
       </View>
 
@@ -89,7 +90,7 @@ const styles = StyleSheet.create({
   },
   controlsLabel: {
     color: BuddhistPrayerColors.textSecondary,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 1,

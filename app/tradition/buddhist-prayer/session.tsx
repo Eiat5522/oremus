@@ -1,9 +1,10 @@
 import { Stack, useRouter } from 'expo-router';
-import React, { useEffect, useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useMemo } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 import {
   ChantTextBlock,
+  GoldButton,
   ProgressPill,
   SacredHeader,
   SessionControls,
@@ -41,12 +42,6 @@ export default function ChantSessionScreen() {
     return Math.min(Math.max(Math.round(perVerseSeconds * 1000), 5000), 20000);
   }, [currentChant]);
 
-  useEffect(() => {
-    if (!currentChant) {
-      router.replace('/tradition/buddhist-prayer');
-    }
-  }, [currentChant, router]);
-
   const handleNext = () => {
     if (isLastVerse) {
       router.push('/tradition/buddhist-prayer/merit');
@@ -69,7 +64,16 @@ export default function ChantSessionScreen() {
       <View style={styles.container}>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={styles.centered}>
-          <ThemedText style={styles.waitText}>Loading session…</ThemedText>
+          <ThemedText style={styles.waitText}>
+            This chanting session is no longer available. Please choose a chant and begin again.
+          </ThemedText>
+          <View style={styles.recoveryAction}>
+            <GoldButton
+              title="Return to Prayer Home"
+              onPress={() => router.replace('/tradition/buddhist-prayer')}
+              accessibilityHint="Returns to the Buddhist Prayer home screen so you can start a new session."
+            />
+          </View>
         </View>
       </View>
     );
@@ -92,7 +96,11 @@ export default function ChantSessionScreen() {
       />
 
       {/* Verse content */}
-      <View style={styles.verseContainer}>
+      <ScrollView
+        style={styles.verseContainer}
+        contentContainerStyle={styles.verseContent}
+        showsVerticalScrollIndicator={false}
+      >
         <ProgressPill current={currentVerseIndex + 1} total={totalVerses} />
 
         <View style={styles.textBlock}>
@@ -105,7 +113,7 @@ export default function ChantSessionScreen() {
             showMeaning={showMeaning}
           />
         </View>
-      </View>
+      </ScrollView>
 
       {/* Controls */}
       <View style={styles.controlsContainer}>
@@ -144,19 +152,30 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: BuddhistPrayerSpacing.lg,
+    gap: BuddhistPrayerSpacing.md,
   },
   waitText: {
     color: BuddhistPrayerColors.textMuted,
     fontSize: 15,
+    lineHeight: 24,
+    textAlign: 'center',
   },
   verseContainer: {
     flex: 1,
+  },
+  verseContent: {
     justifyContent: 'center',
     paddingHorizontal: BuddhistPrayerSpacing.md,
     gap: BuddhistPrayerSpacing.lg,
+    paddingBottom: BuddhistPrayerSpacing.lg,
+    minHeight: '100%',
   },
   textBlock: {
     alignItems: 'center',
+  },
+  recoveryAction: {
+    width: '100%',
   },
   controlsContainer: {
     paddingBottom: BuddhistPrayerSpacing.xl,

@@ -3,7 +3,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import {
-  BuddhistAltar3D,
+  BuddhistAltarPreview,
   GoldButton,
   MeritOptionCard,
   SacredHeader,
@@ -49,11 +49,12 @@ export default function ARMeritScreen() {
 
       {/* Altar — top 35%, background feel */}
       <View style={styles.altarArea}>
-        <BuddhistAltar3D
+        <BuddhistAltarPreview
           scale={placementScale}
           rotation={placementRotation}
           showHalo={false}
           style={styles.altar}
+          fallbackStyle={styles.altar}
         />
       </View>
 

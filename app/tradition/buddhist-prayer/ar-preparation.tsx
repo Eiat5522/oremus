@@ -3,7 +3,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import {
-  BuddhistAltar3D,
+  BuddhistAltarPreview,
   GlassCard,
   GoldButton,
   IconToggleRow,
@@ -17,7 +17,7 @@ export default function ARPreparationScreen() {
   const router = useRouter();
 
   const {
-    currentChantId,
+    currentChantSlug,
     placementScale,
     placementRotation,
     showMeaning,
@@ -59,11 +59,12 @@ export default function ARPreparationScreen() {
 
       {/* Altar preview — top 50% */}
       <View style={styles.altarArea}>
-        <BuddhistAltar3D
+        <BuddhistAltarPreview
           scale={placementScale}
           rotation={placementRotation}
           showHalo
           style={styles.altar}
+          fallbackStyle={styles.altar}
         />
       </View>
 
@@ -139,7 +140,7 @@ const styles = StyleSheet.create({
   },
   settingsHint: {
     color: BuddhistPrayerColors.textMuted,
-    fontSize: 12,
+    fontSize: 13,
     lineHeight: 18,
   },
   errorState: {

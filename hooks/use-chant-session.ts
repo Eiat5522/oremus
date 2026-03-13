@@ -1,52 +1,107 @@
 import { useMemo } from 'react';
 
-import { calculateSessionProgress, getChantBySlug, getNextVerse, getPreviousVerse } from '@/lib/chant-helpers';
+import {
+  calculateSessionProgress,
+  getChantBySlug,
+  getNextVerse,
+  getPreviousVerse,
+} from '@/lib/chant-helpers';
 
 import { useBuddhistPrayerStore } from './use-buddhist-prayer-store';
 
 export function useChantSession() {
-  const store = useBuddhistPrayerStore();
+  const currentChantSlug = useBuddhistPrayerStore((state) => state.currentChantSlug);
+  const currentVerseIndex = useBuddhistPrayerStore((state) => state.currentVerseIndex);
+  const sessionStartedAt = useBuddhistPrayerStore((state) => state.sessionStartedAt);
+  const sessionCompletedAt = useBuddhistPrayerStore((state) => state.sessionCompletedAt);
+  const nextVerse = useBuddhistPrayerStore((state) => state.nextVerse);
+  const previousVerse = useBuddhistPrayerStore((state) => state.previousVerse);
+  const replayVerse = useBuddhistPrayerStore((state) => state.replayVerse);
+  const pauseSession = useBuddhistPrayerStore((state) => state.pauseSession);
+  const resumeSession = useBuddhistPrayerStore((state) => state.resumeSession);
+  const completeSession = useBuddhistPrayerStore((state) => state.completeSession);
+  const isPlaying = useBuddhistPrayerStore((state) => state.isPlaying);
+  const isPaused = useBuddhistPrayerStore((state) => state.isPaused);
+  const isAudioEnabled = useBuddhistPrayerStore((state) => state.isAudioEnabled);
+  const showMeaning = useBuddhistPrayerStore((state) => state.showMeaning);
+  const autoScroll = useBuddhistPrayerStore((state) => state.autoScroll);
+  const templeBellEnabled = useBuddhistPrayerStore((state) => state.templeBellEnabled);
+  const isARMode = useBuddhistPrayerStore((state) => state.isARMode);
+  const meritOption = useBuddhistPrayerStore((state) => state.meritOption);
+  const dedicationNote = useBuddhistPrayerStore((state) => state.dedicationNote);
+  const altarPlaced = useBuddhistPrayerStore((state) => state.altarPlaced);
+  const placementScale = useBuddhistPrayerStore((state) => state.placementScale);
+  const placementRotation = useBuddhistPrayerStore((state) => state.placementRotation);
+  const scanStatus = useBuddhistPrayerStore((state) => state.scanStatus);
+  const altarExperienceMode = useBuddhistPrayerStore((state) => state.altarExperienceMode);
+  const isLoading = useBuddhistPrayerStore((state) => state.isLoading);
+  const error = useBuddhistPrayerStore((state) => state.error);
 
   const currentChant = useMemo(
-    () => (store.currentChantSlug ? getChantBySlug(store.currentChantSlug) : null),
-    [store.currentChantSlug],
+    () => (currentChantSlug ? getChantBySlug(currentChantSlug) : null),
+    [currentChantSlug],
   );
 
   const currentVerse = useMemo(
-    () => currentChant?.verses[store.currentVerseIndex] ?? null,
-    [currentChant, store.currentVerseIndex],
+    () => currentChant?.verses[currentVerseIndex] ?? null,
+    [currentChant, currentVerseIndex],
   );
 
   const hasNextVerse = useMemo(
-    () => (currentChant ? store.currentVerseIndex < currentChant.verses.length - 1 : false),
-    [currentChant, store.currentVerseIndex],
+    () => (currentChant ? currentVerseIndex < currentChant.verses.length - 1 : false),
+    [currentChant, currentVerseIndex],
   );
 
-  const hasPreviousVerse = useMemo(() => store.currentVerseIndex > 0, [store.currentVerseIndex]);
+  const hasPreviousVerse = useMemo(() => currentVerseIndex > 0, [currentVerseIndex]);
 
   const progress = useMemo(
-    () => (currentChant ? calculateSessionProgress(currentChant, store.currentVerseIndex) : 0),
-    [currentChant, store.currentVerseIndex],
+    () => (currentChant ? calculateSessionProgress(currentChant, currentVerseIndex) : 0),
+    [currentChant, currentVerseIndex],
   );
 
   const sessionDurationSeconds = useMemo(() => {
-    if (!store.sessionStartedAt) return 0;
-    const endTime = store.sessionCompletedAt ?? Date.now();
-    return Math.floor((endTime - store.sessionStartedAt) / 1000);
-  }, [store.sessionStartedAt, store.sessionCompletedAt]);
+    if (!sessionStartedAt) return 0;
+    const endTime = sessionCompletedAt ?? Date.now();
+    return Math.floor((endTime - sessionStartedAt) / 1000);
+  }, [sessionCompletedAt, sessionStartedAt]);
 
   const nextVerseObj = useMemo(
-    () => (currentChant ? getNextVerse(currentChant, store.currentVerseIndex) : null),
-    [currentChant, store.currentVerseIndex],
+    () => (currentChant ? getNextVerse(currentChant, currentVerseIndex) : null),
+    [currentChant, currentVerseIndex],
   );
 
   const previousVerseObj = useMemo(
-    () => (currentChant ? getPreviousVerse(currentChant, store.currentVerseIndex) : null),
-    [currentChant, store.currentVerseIndex],
+    () => (currentChant ? getPreviousVerse(currentChant, currentVerseIndex) : null),
+    [currentChant, currentVerseIndex],
   );
 
   return {
-    ...store,
+    currentChantSlug,
+    currentVerseIndex,
+    isPlaying,
+    isPaused,
+    isAudioEnabled,
+    showMeaning,
+    autoScroll,
+    templeBellEnabled,
+    isARMode,
+    sessionStartedAt,
+    sessionCompletedAt,
+    meritOption,
+    dedicationNote,
+    altarPlaced,
+    placementScale,
+    placementRotation,
+    scanStatus,
+    altarExperienceMode,
+    isLoading,
+    error,
+    nextVerse,
+    previousVerse,
+    replayVerse,
+    pauseSession,
+    resumeSession,
+    completeSession,
     currentChant: currentChant ?? null,
     currentVerse,
     hasNextVerse,
@@ -56,6 +111,6 @@ export function useChantSession() {
     nextVerseObj,
     previousVerseObj,
     totalVerses: currentChant?.verses.length ?? 0,
-    versesCompleted: store.currentVerseIndex + 1,
+    versesCompleted: currentVerseIndex + 1,
   };
 }

@@ -35,6 +35,7 @@ export function SessionControls({
         style={styles.sideButton}
         accessibilityRole="button"
         accessibilityLabel="Replay verse"
+        accessibilityHint="Restarts the current verse from the beginning."
       >
         <IconSymbol
           name="arrow.counterclockwise"
@@ -49,6 +50,7 @@ export function SessionControls({
         style={[styles.sideButton, !hasPrevious && styles.disabled]}
         accessibilityRole="button"
         accessibilityLabel="Previous verse"
+        accessibilityHint="Returns to the previous verse in this chant."
         accessibilityState={{ disabled: !hasPrevious }}
       >
         <IconSymbol
@@ -63,6 +65,9 @@ export function SessionControls({
         style={styles.playButton}
         accessibilityRole="button"
         accessibilityLabel={isPlaying ? 'Pause session' : 'Play session'}
+        accessibilityHint={
+          isPlaying ? 'Pauses automatic verse playback.' : 'Resumes automatic verse playback.'
+        }
       >
         <IconSymbol name={isPlaying ? 'pause.fill' : 'play.fill'} size={32} color="#FFFFFF" />
       </Pressable>
@@ -73,6 +78,7 @@ export function SessionControls({
         style={[styles.sideButton, !hasNext && styles.disabled]}
         accessibilityRole="button"
         accessibilityLabel="Next verse"
+        accessibilityHint="Advances to the next verse or dedication screen."
         accessibilityState={{ disabled: !hasNext }}
       >
         <IconSymbol

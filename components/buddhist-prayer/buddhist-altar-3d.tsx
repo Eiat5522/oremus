@@ -7,11 +7,14 @@ import {
   BuddhistPrayerRadius,
   BuddhistPrayerSpacing,
 } from '@/constants/buddhist-prayer/theme';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
-interface BuddhistAltar3DProps {
+export interface BuddhistAltar3DProps {
   scale?: number;
   rotation?: number;
   showHalo?: boolean;
+  showIncenseSmoke?: boolean;
+  animated?: boolean;
   style?: ViewStyle;
 }
 
@@ -27,8 +30,12 @@ export function BuddhistAltar3D({
   scale = 1,
   rotation = 0,
   showHalo = true,
+  showIncenseSmoke = true,
+  animated = true,
   style,
 }: BuddhistAltar3DProps) {
+  const reduceMotionEnabled = useReducedMotion();
+  const shouldAnimate = animated && !reduceMotionEnabled;
   const haloOpacity = useRef(new Animated.Value(showHalo ? 0.42 : 0)).current;
   const smokeLift = useRef(new Animated.Value(0)).current;
   const smokeFade = useRef(new Animated.Value(0.25)).current;
@@ -38,6 +45,11 @@ export function BuddhistAltar3D({
   );
 
   useEffect(() => {
+    if (!shouldAnimate) {
+      haloOpacity.setValue(showHalo ? 0.54 : 0);
+      return;
+    }
+
     if (!showHalo) {
       haloOpacity.setValue(0);
       return;
@@ -62,9 +74,15 @@ export function BuddhistAltar3D({
 
     loop.start();
     return () => loop.stop();
-  }, [haloOpacity, showHalo]);
+  }, [haloOpacity, shouldAnimate, showHalo]);
 
   useEffect(() => {
+    if (!showIncenseSmoke || !shouldAnimate) {
+      smokeLift.setValue(0);
+      smokeFade.setValue(showIncenseSmoke ? 0.2 : 0);
+      return;
+    }
+
     const smokeLoop = Animated.loop(
       Animated.parallel([
         Animated.sequence([
@@ -97,9 +115,14 @@ export function BuddhistAltar3D({
 
     smokeLoop.start();
     return () => smokeLoop.stop();
-  }, [smokeFade, smokeLift]);
+  }, [showIncenseSmoke, shouldAnimate, smokeFade, smokeLift]);
 
   useEffect(() => {
+    if (!shouldAnimate) {
+      particleValues.forEach((value) => value.setValue(0.28));
+      return;
+    }
+
     const loops = particleValues.map((value, index) =>
       Animated.loop(
         Animated.sequence([
@@ -124,11 +147,20 @@ export function BuddhistAltar3D({
     return () => {
       loops.forEach((loop) => loop.stop());
     };
-  }, [particleValues]);
+  }, [particleValues, shouldAnimate]);
 
   return (
     <View
+      accessible
+      accessibilityRole="image"
+      accessibilityLabel="Buddhist altar preview"
+      accessibilityHint={
+        reduceMotionEnabled
+          ? 'Static altar preview shown with reduced motion enabled.'
+          : 'Animated altar preview with halo and incense.'
+      }
       style={[styles.container, style, { transform: [{ scale }, { rotate: `${rotation}deg` }] }]}
+      testID="altar-fallback"
     >
       <LinearGradient
         colors={['rgba(255,255,255,0.04)', 'rgba(224,185,110,0.03)', 'rgba(0,0,0,0.35)'] as const}
@@ -136,24 +168,32 @@ export function BuddhistAltar3D({
         end={{ x: 0.5, y: 1 }}
         style={styles.sceneFrame}
       >
-        {showHalo ? <Animated.View style={[styles.halo, { opacity: haloOpacity }]} /> : null}
-
-        {AMBIENT_PARTICLE_OFFSETS.map((particle, index) => (
+        {showHalo ? (
           <Animated.View
-            key={`${particle.top}-${particle.left}`}
-            style={[
-              styles.particle,
-              {
-                top: particle.top,
-                left: particle.left,
-                width: particle.size,
-                height: particle.size,
-                borderRadius: particle.size / 2,
-                opacity: particleValues[index],
-              },
-            ]}
+            testID="altar-halo-overlay"
+            style={[styles.halo, { opacity: haloOpacity }]}
           />
-        ))}
+        ) : null}
+
+        {shouldAnimate
+          ? AMBIENT_PARTICLE_OFFSETS.map((particle, index) => (
+              <Animated.View
+                key={`${particle.top}-${particle.left}`}
+                testID="altar-particle"
+                style={[
+                  styles.particle,
+                  {
+                    top: particle.top,
+                    left: particle.left,
+                    width: particle.size,
+                    height: particle.size,
+                    borderRadius: particle.size / 2,
+                    opacity: particleValues[index],
+                  },
+                ]}
+              />
+            ))
+          : null}
 
         <LinearGradient
           colors={['rgba(224,185,110,0.05)', 'rgba(20,15,10,0.8)'] as const}
@@ -174,8 +214,13 @@ export function BuddhistAltar3D({
         </View>
 
         <View style={styles.candleRow}>
-          <Candle smokeFade={smokeFade} smokeLift={smokeLift} />
-          <Candle smokeFade={smokeFade} smokeLift={smokeLift} mirrored />
+          <Candle smokeFade={smokeFade} smokeLift={smokeLift} showSmoke={showIncenseSmoke} />
+          <Candle
+            smokeFade={smokeFade}
+            smokeLift={smokeLift}
+            showSmoke={showIncenseSmoke}
+            mirrored
+          />
         </View>
 
         <View style={styles.offeringsRow}>
@@ -220,23 +265,28 @@ export function BuddhistAltar3D({
 function Candle({
   smokeFade,
   smokeLift,
+  showSmoke,
   mirrored = false,
 }: {
   smokeFade: Animated.Value;
   smokeLift: Animated.Value;
+  showSmoke: boolean;
   mirrored?: boolean;
 }) {
   return (
     <View style={[styles.candle, mirrored ? styles.candleMirrored : null]}>
-      <Animated.View
-        style={[
-          styles.smokeTrail,
-          {
-            opacity: smokeFade,
-            transform: [{ translateY: smokeLift }],
-          },
-        ]}
-      />
+      {showSmoke ? (
+        <Animated.View
+          testID="altar-smoke-overlay"
+          style={[
+            styles.smokeTrail,
+            {
+              opacity: smokeFade,
+              transform: [{ translateY: smokeLift }],
+            },
+          ]}
+        />
+      ) : null}
       <View style={styles.flameOuter}>
         <View style={styles.flameInner} />
       </View>

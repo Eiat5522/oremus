@@ -1,8 +1,8 @@
-jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
-);
+import asyncStorageMock from '@react-native-async-storage/async-storage/jest/async-storage-mock';
 
 import { useBuddhistPrayerStore } from '@/hooks/use-buddhist-prayer-store';
+
+jest.mock('@react-native-async-storage/async-storage', () => asyncStorageMock);
 
 describe('buddhist prayer store', () => {
   beforeEach(() => {
@@ -53,7 +53,7 @@ describe('buddhist prayer store', () => {
     expect(state.scanStatus).toBe('placed');
     expect(state.placementScale).toBe(1.6);
     expect(state.placementRotation).toBe(345);
-    expect(state.currentChantId).toBe('namo-tassa');
+    expect(state.currentChantSlug).toBe('namo-tassa');
     expect(state.isARMode).toBe(true);
 
     state.resetSession();
