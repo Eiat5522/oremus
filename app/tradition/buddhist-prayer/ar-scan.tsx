@@ -88,7 +88,7 @@ export default function ARScanScreen() {
               scan experience, or switch to immersive 3D if you prefer the fallback scene.
             </ThemedText>
             <View style={styles.permissionActions}>
-              <GoldButton title="Allow Camera" onPress={() => void requestPermission()} />
+              <GoldButton title="Allow Camera" onPress={() => requestPermission()} />
               <GoldButton
                 title="Use Immersive 3D Instead"
                 variant="outline"
@@ -136,7 +136,7 @@ export default function ARScanScreen() {
         )}
         <ThemedText style={styles.modeFootnote}>
           {isNativeMode
-            ? 'Native AR ready mode keeps the camera-driven swap point for a future native AR session.'
+            ? 'Native AR ready mode prepares the camera-based placement experience for future AR features.'
             : 'Immersive 3D mode skips the camera and keeps the altar experience intentional on unsupported devices.'}
         </ThemedText>
       </View>

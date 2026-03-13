@@ -69,6 +69,8 @@ interface BuddhistPrayerActions {
 
 type BuddhistPrayerStore = BuddhistPrayerState & BuddhistPrayerActions;
 
+const normalizeRotation = (rotation: number) => ((rotation % 360) + 360) % 360;
+
 const initialState: BuddhistPrayerState = {
   currentChantId: null,
   currentVerseIndex: 0,
@@ -103,8 +105,7 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>((set) => ({
 
   updatePlacementScale: (scale) => set({ placementScale: Math.max(0.5, Math.min(3.0, scale)) }),
 
-  updatePlacementRotation: (rotation) =>
-    set({ placementRotation: ((rotation % 360) + 360) % 360 }),
+  updatePlacementRotation: (rotation) => set({ placementRotation: normalizeRotation(rotation) }),
 
   resetPlacement: () =>
     set({ altarPlaced: false, placementScale: 1.0, placementRotation: 0, scanStatus: 'idle' }),
