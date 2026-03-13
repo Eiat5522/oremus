@@ -45,11 +45,7 @@ export default function ARPlacementScreen() {
       />
 
       <View style={styles.altarArea}>
-        <BuddhistAltar3D
-          scale={placementScale}
-          rotation={placementRotation}
-          style={styles.altar}
-        />
+        <BuddhistAltar3D scale={placementScale} rotation={placementRotation} style={styles.altar} />
       </View>
 
       <GlassCard style={styles.controlsCard}>

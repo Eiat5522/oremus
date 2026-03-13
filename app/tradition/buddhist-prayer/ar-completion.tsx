@@ -19,7 +19,7 @@ export default function ARCompletionScreen() {
   const router = useRouter();
   const placementScale = useBuddhistPrayerStore((state) => state.placementScale);
   const placementRotation = useBuddhistPrayerStore((state) => state.placementRotation);
-  const { completeSession, sessionDurationSeconds, versesCompleted, currentChantId } =
+  const { completeSession, sessionDurationSeconds, versesCompleted, currentChantSlug } =
     useChantSession();
 
   const completedRef = useRef(false);
@@ -72,7 +72,7 @@ export default function ARCompletionScreen() {
 
         <ThemedText style={styles.heading}>🪷 Sadhu!</ThemedText>
         <ThemedText style={styles.subheading}>
-          May the merit of your AR practice bring peace to all beings.
+          May the merit of this practice ease suffering and bring peace to all beings.
         </ThemedText>
 
         {/* Gold divider */}

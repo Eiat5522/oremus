@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 
 import {
   ChantTextBlock,
-  ProgressPill,
+  ChantOverlay,
   SacredHeader,
   SessionControls,
 } from '@/components/buddhist-prayer';
@@ -79,46 +79,49 @@ export default function ChantSessionScreen() {
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* Top progress bar */}
-      <View style={styles.progressBarTrack}>
-        <View style={[styles.progressBarFill, { width: `${progress * 100}%` }]} />
-      </View>
-
       <SacredHeader
-        title={currentChant.title}
-        subtitle={currentChant.subtitle}
+        title="Chant Session"
+        subtitle="Stay with your breath and let the words flow."
         showBackButton
         onBack={() => router.back()}
       />
 
-      {/* Verse content */}
-      <View style={styles.verseContainer}>
-        <ProgressPill current={currentVerseIndex + 1} total={totalVerses} />
-
-        <View style={styles.textBlock}>
-          <ChantTextBlock
-            thai={currentVerse.thai}
-            pali={currentVerse.pali}
-            english={currentVerse.english}
-            transliteration={currentVerse.transliteration}
-            meaning={currentVerse.meaning}
-            showMeaning={showMeaning}
-          />
-        </View>
-      </View>
-
-      {/* Controls */}
-      <View style={styles.controlsContainer}>
-        <SessionControls
-          isPlaying={isPlaying}
-          hasPrevious={hasPreviousVerse}
-          hasNext
-          onPlay={resumeSession}
-          onPause={pauseSession}
-          onPrevious={previousVerse}
-          onNext={handleNext}
-          onReplay={replayVerse}
+      <View style={styles.body}>
+        <ChantOverlay
+          title={currentChant.title}
+          subtitle={currentChant.subtitle}
+          progress={progress}
+          verseIndex={currentVerseIndex}
+          totalVerses={totalVerses}
+          verseContent={
+            <ChantTextBlock
+              thai={currentVerse.thai}
+              pali={currentVerse.pali}
+              english={currentVerse.english}
+              transliteration={currentVerse.transliteration}
+              meaning={currentVerse.meaning}
+              showMeaning={showMeaning}
+            />
+          }
+          controls={
+            <SessionControls
+              isPlaying={isPlaying}
+              hasPrevious={hasPreviousVerse}
+              hasNext
+              onPlay={resumeSession}
+              onPause={pauseSession}
+              onPrevious={previousVerse}
+              onNext={handleNext}
+              onReplay={replayVerse}
+            />
+          }
+          hint={
+            isLastVerse
+              ? 'When the final line settles, dedicate your merit with gratitude.'
+              : 'Let each verse land gently. Move forward when you are ready.'
+          }
         />
+
         {isLastVerse ? (
           <ThemedText style={styles.lastVerseHint}>Tap ▶▶ to dedicate your merit</ThemedText>
         ) : null}
@@ -132,14 +135,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: BuddhistPrayerColors.background,
   },
-  progressBarTrack: {
-    height: 3,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: BuddhistPrayerColors.goldPrimary,
-  },
   centered: {
     flex: 1,
     alignItems: 'center',
@@ -149,19 +144,12 @@ const styles = StyleSheet.create({
     color: BuddhistPrayerColors.textMuted,
     fontSize: 15,
   },
-  verseContainer: {
+  body: {
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: BuddhistPrayerSpacing.md,
-    gap: BuddhistPrayerSpacing.lg,
-  },
-  textBlock: {
-    alignItems: 'center',
-  },
-  controlsContainer: {
     paddingBottom: BuddhistPrayerSpacing.xl,
-    paddingHorizontal: BuddhistPrayerSpacing.md,
-    gap: BuddhistPrayerSpacing.xs,
+    gap: BuddhistPrayerSpacing.sm,
   },
   lastVerseHint: {
     color: BuddhistPrayerColors.goldPrimary,

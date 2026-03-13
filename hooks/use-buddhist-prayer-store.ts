@@ -12,6 +12,7 @@ import type {
 interface BuddhistPrayerState {
   // Session
   currentChantSlug: string | null;
+  currentChantId: string | null;
   currentVerseIndex: number;
   isPlaying: boolean;
   isPaused: boolean;
@@ -75,6 +76,7 @@ const normalizeRotation = (rotation: number) => ((rotation % 360) + 360) % 360;
 
 const initialState: BuddhistPrayerState = {
   currentChantSlug: null,
+  currentChantId: null,
   currentVerseIndex: 0,
   isPlaying: false,
   isPaused: false,
@@ -107,9 +109,11 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>()(
 
       placeAltar: () => set({ altarPlaced: true, scanStatus: 'placed' }),
 
-      updatePlacementScale: (scale) => set({ placementScale: Math.max(0.5, Math.min(3.0, scale)) }),
+      updatePlacementScale: (scale) =>
+        set({ placementScale: Math.max(0.5, Math.min(3.0, scale)) }),
 
-  updatePlacementRotation: (rotation) => set({ placementRotation: normalizeRotation(rotation) }),
+      updatePlacementRotation: (rotation) =>
+        set({ placementRotation: normalizeRotation(rotation) }),
 
       resetPlacement: () =>
         set({ altarPlaced: false, placementScale: 1.0, placementRotation: 0, scanStatus: 'idle' }),
@@ -117,6 +121,7 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>()(
       startPreparation: (chantSlug, isAR = false) =>
         set({
           currentChantSlug: chantSlug,
+          currentChantId: chantSlug,
           currentVerseIndex: 0,
           isARMode: isAR,
           isPlaying: false,
@@ -134,7 +139,8 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>()(
 
       resumeSession: () => set({ isPlaying: true, isPaused: false }),
 
-      completeSession: () => set({ isPlaying: false, isPaused: false, sessionCompletedAt: Date.now() }),
+      completeSession: () =>
+        set({ isPlaying: false, isPaused: false, sessionCompletedAt: Date.now() }),
 
       resetSession: () => set({ ...initialState }),
 
@@ -166,7 +172,35 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>()(
 
       setDedicationNote: (note) => set({ dedicationNote: note }),
 
-  setAltarExperienceMode: (mode) => set({ altarExperienceMode: mode, error: null }),
+      setAltarExperienceMode: (mode) => set({ altarExperienceMode: mode, error: null }),
 
-  setError: (error) => set({ error }),
-}));
+      setError: (error) => set({ error }),
+    }),
+    {
+      name: 'buddhist-prayer-store',
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({
+        currentChantSlug: state.currentChantSlug,
+        currentChantId: state.currentChantId,
+        currentVerseIndex: state.currentVerseIndex,
+        isPlaying: state.isPlaying,
+        isPaused: state.isPaused,
+        isAudioEnabled: state.isAudioEnabled,
+        showMeaning: state.showMeaning,
+        autoScroll: state.autoScroll,
+        templeBellEnabled: state.templeBellEnabled,
+        isARMode: state.isARMode,
+        sessionStartedAt: state.sessionStartedAt,
+        sessionCompletedAt: state.sessionCompletedAt,
+        meritOption: state.meritOption,
+        dedicationNote: state.dedicationNote,
+        altarPlaced: state.altarPlaced,
+        placementScale: state.placementScale,
+        placementRotation: state.placementRotation,
+        scanStatus: state.scanStatus,
+        altarExperienceMode: state.altarExperienceMode,
+        error: state.error,
+      }),
+    },
+  ),
+);

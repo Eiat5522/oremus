@@ -3,9 +3,9 @@ import React, { useEffect, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import {
+  ChantOverlay,
   BuddhistAltar3D,
   ChantTextBlock,
-  ProgressPill,
   SacredHeader,
   SessionControls,
 } from '@/components/buddhist-prayer';
@@ -83,19 +83,13 @@ export default function ARChantScreen() {
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* Progress bar */}
-      <View style={styles.progressBarTrack}>
-        <View style={[styles.progressBarFill, { width: `${progress * 100}%` }]} />
-      </View>
-
       <SacredHeader
-        title={currentChant.title}
-        subtitle={currentChant.subtitle}
+        title="AR Chant Session"
+        subtitle="Your altar will stay present as you recite."
         showBackButton
         onBack={() => router.back()}
       />
 
-      {/* Altar — top 40% */}
       <View style={styles.altarArea}>
         <BuddhistAltar3D
           scale={placementScale}
@@ -105,33 +99,41 @@ export default function ARChantScreen() {
         />
       </View>
 
-      {/* Verse content */}
-      <View style={styles.verseContainer}>
-        <ProgressPill current={currentVerseIndex + 1} total={totalVerses} />
-
-        <View style={styles.textBlock}>
-          <ChantTextBlock
-            thai={currentVerse.thai}
-            pali={currentVerse.pali}
-            english={currentVerse.english}
-            transliteration={currentVerse.transliteration}
-            meaning={currentVerse.meaning}
-            showMeaning={showMeaning}
-          />
-        </View>
-      </View>
-
-      {/* Controls */}
-      <View style={styles.controlsContainer}>
-        <SessionControls
-          isPlaying={isPlaying}
-          hasPrevious={hasPreviousVerse}
-          hasNext
-          onPlay={resumeSession}
-          onPause={pauseSession}
-          onPrevious={previousVerse}
-          onNext={handleNext}
-          onReplay={replayVerse}
+      <View style={styles.overlayArea}>
+        <ChantOverlay
+          title={currentChant.title}
+          subtitle={currentChant.subtitle}
+          progress={progress}
+          verseIndex={currentVerseIndex}
+          totalVerses={totalVerses}
+          tone="ar"
+          verseContent={
+            <ChantTextBlock
+              thai={currentVerse.thai}
+              pali={currentVerse.pali}
+              english={currentVerse.english}
+              transliteration={currentVerse.transliteration}
+              meaning={currentVerse.meaning}
+              showMeaning={showMeaning}
+            />
+          }
+          controls={
+            <SessionControls
+              isPlaying={isPlaying}
+              hasPrevious={hasPreviousVerse}
+              hasNext
+              onPlay={resumeSession}
+              onPause={pauseSession}
+              onPrevious={previousVerse}
+              onNext={handleNext}
+              onReplay={replayVerse}
+            />
+          }
+          hint={
+            isLastVerse
+              ? 'Offer the final verse and dedicate your practice.'
+              : 'Keep the altar in view and move gently between verses.'
+          }
         />
         {isLastVerse ? (
           <ThemedText style={styles.lastVerseHint}>Tap ▶▶ to dedicate your merit</ThemedText>
@@ -146,14 +148,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: BuddhistPrayerColors.background,
   },
-  progressBarTrack: {
-    height: 3,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: BuddhistPrayerColors.goldPrimary,
-  },
   centered: {
     flex: 1,
     alignItems: 'center',
@@ -164,7 +158,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   altarArea: {
-    height: '40%',
+    height: '36%',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: BuddhistPrayerSpacing.md,
@@ -173,19 +167,12 @@ const styles = StyleSheet.create({
     width: '100%',
     aspectRatio: 1,
   },
-  verseContainer: {
+  overlayArea: {
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: BuddhistPrayerSpacing.md,
-    gap: BuddhistPrayerSpacing.lg,
-  },
-  textBlock: {
-    alignItems: 'center',
-  },
-  controlsContainer: {
     paddingBottom: BuddhistPrayerSpacing.xl,
-    paddingHorizontal: BuddhistPrayerSpacing.md,
-    gap: BuddhistPrayerSpacing.xs,
+    gap: BuddhistPrayerSpacing.sm,
   },
   lastVerseHint: {
     color: BuddhistPrayerColors.goldPrimary,
