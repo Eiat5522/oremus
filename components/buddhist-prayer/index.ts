@@ -1,4 +1,4 @@
-export { Altar3DPlaceholder } from './altar-3d-placeholder';
+export { BuddhistAltar3D } from './buddhist-altar-3d';
 export { ChantTextBlock } from './chant-text-block';
 export { GlassCard } from './glass-card';
 export { GoldButton } from './gold-button';

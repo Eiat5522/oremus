@@ -11,7 +11,7 @@ describe('buddhist prayer home helpers', () => {
   it('maps merit and learn quick actions into intentional flows', () => {
     expect(getQuickActionRoute('merit')).toEqual({
       pathname: '/tradition/buddhist-prayer/preparation',
-      params: { chantId: 'merit-dedication' },
+      params: { chantSlug: 'merit-dedication' },
     });
 
     expect(getQuickActionRoute('learn')).toEqual({
@@ -65,7 +65,7 @@ describe('buddhist prayer home helpers', () => {
       progressLabel: 'Completed',
       primaryRoute: {
         pathname: '/tradition/buddhist-prayer/preparation',
-        params: { chantId: chant.id },
+        params: { chantSlug: chant.slug },
       },
     });
   });

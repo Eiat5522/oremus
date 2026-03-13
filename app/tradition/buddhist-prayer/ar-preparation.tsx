@@ -3,7 +3,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import {
-  Altar3DPlaceholder,
+  BuddhistAltar3D,
   GlassCard,
   GoldButton,
   IconToggleRow,
@@ -18,6 +18,8 @@ export default function ARPreparationScreen() {
 
   const {
     currentChantId,
+    placementScale,
+    placementRotation,
     showMeaning,
     autoScroll,
     isAudioEnabled,
@@ -34,7 +36,7 @@ export default function ARPreparationScreen() {
     router.push('/tradition/buddhist-prayer/ar-chant');
   };
 
-  if (!currentChantId) {
+  if (!currentChantSlug) {
     return (
       <View style={styles.container}>
         <Stack.Screen options={{ headerShown: false }} />
@@ -57,7 +59,12 @@ export default function ARPreparationScreen() {
 
       {/* Altar preview — top 50% */}
       <View style={styles.altarArea}>
-        <Altar3DPlaceholder showHalo style={styles.altar} />
+        <BuddhistAltar3D
+          scale={placementScale}
+          rotation={placementRotation}
+          showHalo
+          style={styles.altar}
+        />
       </View>
 
       {/* Bottom sheet overlay */}
@@ -73,7 +80,7 @@ export default function ARPreparationScreen() {
           />
           <IconToggleRow
             icon="arrow.down.to.line"
-            label="Auto Scroll"
+            label="Auto Advance"
             value={autoScroll}
             onToggle={toggleAutoScroll}
           />
@@ -90,6 +97,10 @@ export default function ARPreparationScreen() {
             onToggle={toggleTempleBell}
           />
         </View>
+
+        <ThemedText style={styles.settingsHint}>
+          Sessions flow one verse at a time. Auto Advance moves you forward when a verse finishes.
+        </ThemedText>
 
         <GoldButton title="Start Chanting" onPress={handleStartChanting} />
       </GlassCard>
@@ -125,6 +136,11 @@ const styles = StyleSheet.create({
   },
   toggles: {
     gap: BuddhistPrayerSpacing.xs,
+  },
+  settingsHint: {
+    color: BuddhistPrayerColors.textMuted,
+    fontSize: 12,
+    lineHeight: 18,
   },
   errorState: {
     flex: 1,
