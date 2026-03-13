@@ -16,7 +16,7 @@ import { formatDuration } from '@/lib/chant-helpers';
 
 export default function CompletionScreen() {
   const router = useRouter();
-  const { completeSession, sessionDurationSeconds, versesCompleted, currentChantId } =
+  const { completeSession, sessionDurationSeconds, versesCompleted, currentChantSlug } =
     useChantSession();
 
   const completedRef = useRef(false);
@@ -97,7 +97,7 @@ export default function CompletionScreen() {
             onPress={() =>
               router.replace({
                 pathname: '/tradition/buddhist-prayer/preparation',
-                params: { chantId: currentChantId ?? '' },
+                params: { chantSlug: currentChantSlug ?? '' },
               })
             }
           />

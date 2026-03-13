@@ -1,5 +1,5 @@
 import { Stack, useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import {
@@ -11,6 +11,7 @@ import {
 } from '@/components/buddhist-prayer';
 import { ThemedText } from '@/components/themed-text';
 import { BuddhistPrayerColors, BuddhistPrayerSpacing } from '@/constants/buddhist-prayer/theme';
+import { useChantAutoAdvance } from '@/hooks/use-chant-auto-advance';
 import { useChantSession } from '@/hooks/use-chant-session';
 import { useBuddhistPrayerStore } from '@/hooks/use-buddhist-prayer-store';
 
@@ -26,6 +27,7 @@ export default function ARChantScreen() {
     totalVerses,
     hasNextVerse,
     hasPreviousVerse,
+    autoScroll,
     isPlaying,
     showMeaning,
     progress,
@@ -37,6 +39,11 @@ export default function ARChantScreen() {
   } = useChantSession();
 
   const isLastVerse = !hasNextVerse;
+  const autoAdvanceDurationMs = useMemo(() => {
+    if (!currentChant) return 8000;
+    const perVerseSeconds = currentChant.durationSeconds / Math.max(currentChant.verses.length, 1);
+    return Math.min(Math.max(Math.round(perVerseSeconds * 1000), 5000), 20000);
+  }, [currentChant]);
 
   useEffect(() => {
     if (!currentChant) {
@@ -51,6 +58,15 @@ export default function ARChantScreen() {
       nextVerse(totalVerses);
     }
   };
+
+  useChantAutoAdvance({
+    autoScroll: autoScroll && Boolean(currentChant && currentVerse),
+    isPlaying,
+    verseKey: currentVerse?.id ?? currentVerseIndex,
+    hasNextVerse,
+    durationMs: autoAdvanceDurationMs,
+    onAdvance: handleNext,
+  });
 
   if (!currentChant || !currentVerse) {
     return (

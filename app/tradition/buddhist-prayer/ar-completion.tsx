@@ -110,7 +110,7 @@ export default function ARCompletionScreen() {
             onPress={() =>
               router.push({
                 pathname: '/tradition/buddhist-prayer/ar-preparation',
-                params: { chantId: currentChantId ?? '' },
+                params: { chantSlug: currentChantSlug ?? '' },
               })
             }
           />

@@ -1,3 +1,7 @@
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
+);
+
 import { useBuddhistPrayerStore } from '@/hooks/use-buddhist-prayer-store';
 
 describe('buddhist prayer store', () => {
@@ -21,7 +25,7 @@ describe('buddhist prayer store', () => {
     store.nextVerse(3);
     store.nextVerse(3);
 
-    expect(useBuddhistPrayerStore.getState().currentChantId).toBe('namo-tassa');
+    expect(useBuddhistPrayerStore.getState().currentChantSlug).toBe('namo-tassa');
     expect(useBuddhistPrayerStore.getState().currentVerseIndex).toBe(2);
     expect(useBuddhistPrayerStore.getState().sessionStartedAt).not.toBeNull();
     expect(useBuddhistPrayerStore.getState().sessionCompletedAt).toBeNull();

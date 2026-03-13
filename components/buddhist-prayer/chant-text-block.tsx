@@ -22,16 +22,30 @@ export function ChantTextBlock({
 }: ChantTextBlockProps) {
   return (
     <View style={styles.container}>
-      {thai ? <ThemedText style={styles.thaiText}>{thai}</ThemedText> : null}
-      {pali ? <ThemedText style={styles.paliText}>{pali}</ThemedText> : null}
-      {transliteration && !thai ? (
-        <ThemedText style={styles.transliterationText}>{transliteration}</ThemedText>
+      {thai ? (
+        <ThemedText style={styles.thaiText} accessibilityLanguage="th-TH">
+          {thai}
+        </ThemedText>
       ) : null}
-      <ThemedText style={styles.englishText}>{english}</ThemedText>
+      {pali ? (
+        <ThemedText style={styles.paliText} accessibilityLanguage="pi">
+          {pali}
+        </ThemedText>
+      ) : null}
+      {transliteration && !thai ? (
+        <ThemedText style={styles.transliterationText} accessibilityLanguage="pi-Latn">
+          {transliteration}
+        </ThemedText>
+      ) : null}
+      <ThemedText style={styles.englishText} accessibilityLanguage="en-US">
+        {english}
+      </ThemedText>
       {showMeaning && meaning ? (
         <View style={styles.meaningContainer}>
           <View style={styles.meaningDivider} />
-          <ThemedText style={styles.meaningText}>{meaning}</ThemedText>
+          <ThemedText style={styles.meaningText} accessibilityLanguage="en-US">
+            {meaning}
+          </ThemedText>
         </View>
       ) : null}
     </View>

@@ -28,7 +28,7 @@ export function getQuickActionRoute(actionId: HomeQuickActionId): RouteTarget {
     case 'merit':
       return {
         pathname: '/tradition/buddhist-prayer/preparation',
-        params: { chantId: 'merit-dedication' },
+        params: { chantSlug: 'merit-dedication' },
       };
     case 'learn':
       return {
@@ -72,7 +72,7 @@ export function getHomeSessionCardState({
       progressLabel: 'Completed',
       primaryRoute: {
         pathname: '/tradition/buddhist-prayer/preparation',
-        params: { chantId: chant.id },
+        params: { chantSlug: chant.slug },
       },
     };
   }
@@ -102,7 +102,7 @@ export function getHomeSessionCardState({
     progressLabel: 'Prepared',
     primaryRoute: {
       pathname: '/tradition/buddhist-prayer/preparation',
-      params: { chantId: chant.id },
+      params: { chantSlug: chant.slug },
     },
   };
 }

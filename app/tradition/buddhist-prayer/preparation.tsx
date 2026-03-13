@@ -6,11 +6,12 @@ import { GlassCard, GoldButton, IconToggleRow, SacredHeader } from '@/components
 import { ThemedText } from '@/components/themed-text';
 import { CHANTS } from '@/constants/buddhist-prayer/chants';
 import { BuddhistPrayerColors, BuddhistPrayerSpacing } from '@/constants/buddhist-prayer/theme';
+import { getChantBySlug } from '@/lib/chant-helpers';
 import { useBuddhistPrayerStore } from '@/hooks/use-buddhist-prayer-store';
 
 export default function ChantPreparationScreen() {
   const router = useRouter();
-  const { chantId, intent } = useLocalSearchParams<{ chantId?: string; intent?: string }>();
+  const { chantSlug, intent } = useLocalSearchParams<{ chantSlug?: string; intent?: string }>();
 
   const {
     showMeaning,
@@ -26,10 +27,12 @@ export default function ChantPreparationScreen() {
     startSession,
   } = useBuddhistPrayerStore();
 
-  const chant = useMemo(
-    () => (chantId ? CHANTS.find((c) => c.id === chantId) : null) ?? CHANTS[0] ?? null,
-    [chantId],
-  );
+  const chant = useMemo(() => {
+    if (chantSlug) {
+      return getChantBySlug(chantSlug) ?? null;
+    }
+    return CHANTS[0] ?? null;
+  }, [chantSlug]);
 
   useEffect(() => {
     if (intent === 'learn') {
@@ -39,14 +42,14 @@ export default function ChantPreparationScreen() {
 
   const handleBeginChanting = () => {
     if (!chant) return;
-    startPreparation(chant.id, false);
+    startPreparation(chant.slug, false);
     startSession();
     router.push('/tradition/buddhist-prayer/session');
   };
 
   const handleBeginAR = () => {
     if (!chant) return;
-    startPreparation(chant.id, true);
+    startPreparation(chant.slug, true);
     router.push('/tradition/buddhist-prayer/ar-intro');
   };
 
@@ -90,7 +93,7 @@ export default function ChantPreparationScreen() {
           />
           <IconToggleRow
             icon="arrow.down.to.line"
-            label="Auto Scroll"
+            label="Auto Advance"
             value={autoScroll}
             onToggle={toggleAutoScroll}
           />
@@ -106,6 +109,9 @@ export default function ChantPreparationScreen() {
             value={templeBellEnabled}
             onToggle={toggleTempleBell}
           />
+          <ThemedText style={styles.settingsHint}>
+            Sessions flow one verse at a time. Auto Advance moves you forward when a verse finishes.
+          </ThemedText>
         </GlassCard>
 
         {/* CTAs */}
@@ -160,6 +166,12 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: BuddhistPrayerSpacing.xs,
+  },
+  settingsHint: {
+    color: BuddhistPrayerColors.textMuted,
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: BuddhistPrayerSpacing.sm,
   },
   ctaGroup: {
     gap: BuddhistPrayerSpacing.sm,

@@ -29,7 +29,7 @@ export interface Chant {
 }
 
 export interface ChantSessionState {
-  currentChantId: string | null;
+  currentChantSlug: string | null;
   currentVerseIndex: number;
   isPlaying: boolean;
   isPaused: boolean;

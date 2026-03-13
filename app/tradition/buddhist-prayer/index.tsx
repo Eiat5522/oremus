@@ -19,7 +19,7 @@ import {
   getHomeSessionCardState,
   getQuickActionRoute,
 } from '@/lib/buddhist-prayer-home';
-import { formatDuration, getChantById, getFeaturedChants } from '@/lib/chant-helpers';
+import { formatDuration, getChantBySlug, getFeaturedChants } from '@/lib/chant-helpers';
 
 const QUICK_ACTIONS = [
   { id: 'ar', icon: 'sparkles' as const, label: 'AR Prayer' },
@@ -33,13 +33,18 @@ const featuredChants = _featuredChants.length > 0 ? _featuredChants : CHANTS.sli
 
 export default function BuddhistPrayerHomeScreen() {
   const router = useRouter();
-  const { currentChantId, currentVerseIndex, sessionStartedAt, sessionCompletedAt, resetSession } =
-    useBuddhistPrayerStore();
+  const {
+    currentChantSlug,
+    currentVerseIndex,
+    sessionStartedAt,
+    sessionCompletedAt,
+    resetSession,
+  } = useBuddhistPrayerStore();
 
-  const currentChant = useMemo(
-    () => (currentChantId ? (getChantById(currentChantId) ?? null) : null),
-    [currentChantId],
-  );
+  const currentChant = useMemo(() => {
+    if (!currentChantSlug) return null;
+    return getChantBySlug(currentChantSlug) ?? null;
+  }, [currentChantSlug]);
   const sessionCard = useMemo(
     () =>
       getHomeSessionCardState({
@@ -52,10 +57,10 @@ export default function BuddhistPrayerHomeScreen() {
   );
 
   const handleChantPress = useCallback(
-    (chantId: string) => {
+    (chantSlug: string) => {
       router.push({
         pathname: '/tradition/buddhist-prayer/preparation',
-        params: { chantId },
+        params: { chantSlug },
       });
     },
     [router],
@@ -192,7 +197,7 @@ export default function BuddhistPrayerHomeScreen() {
           {featuredChants.map((chant) => (
             <GlassCard
               key={chant.id}
-              onPress={() => handleChantPress(chant.id)}
+              onPress={() => handleChantPress(chant.slug)}
               style={styles.chantCard}
             >
               <View style={styles.chantCardRow}>
