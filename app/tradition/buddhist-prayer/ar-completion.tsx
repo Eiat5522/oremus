@@ -19,7 +19,7 @@ export default function ARCompletionScreen() {
   const router = useRouter();
   const placementScale = useBuddhistPrayerStore((state) => state.placementScale);
   const placementRotation = useBuddhistPrayerStore((state) => state.placementRotation);
-  const { completeSession, sessionDurationSeconds, versesCompleted, currentChantId } =
+  const { completeSession, sessionDurationSeconds, versesCompleted, currentChantSlug } =
     useChantSession();
 
   const completedRef = useRef(false);
