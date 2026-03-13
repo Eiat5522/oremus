@@ -1,8 +1,10 @@
 import { CHANTS } from '@/constants/buddhist-prayer/chants';
 import {
+  getARIntroRoute,
   getCategoryRoute,
   getHomeSessionCardState,
   getQuickActionRoute,
+  resolveARChantSlug,
 } from '@/lib/buddhist-prayer-home';
 
 describe('buddhist prayer home helpers', () => {
@@ -20,6 +22,22 @@ describe('buddhist prayer home helpers', () => {
     });
   });
 
+  it('resolves AR entries to a valid chant before the intro flow begins', () => {
+    expect(resolveARChantSlug('metta-sutta')).toBe('metta-sutta');
+    expect(resolveARChantSlug('missing-chant')).toBe(chant.slug);
+    expect(resolveARChantSlug()).toBe(chant.slug);
+
+    expect(getARIntroRoute()).toEqual({
+      pathname: '/tradition/buddhist-prayer/ar-intro',
+      params: { chantSlug: chant.slug },
+    });
+
+    expect(getQuickActionRoute('ar', 'metta-sutta')).toEqual({
+      pathname: '/tradition/buddhist-prayer/ar-intro',
+      params: { chantSlug: 'metta-sutta' },
+    });
+  });
+
   it('maps category cards to filtered library routes', () => {
     expect(getCategoryRoute('daily')).toEqual({
       pathname: '/tradition/buddhist-prayer/library',
@@ -32,6 +50,7 @@ describe('buddhist prayer home helpers', () => {
       getHomeSessionCardState({
         chant,
         currentVerseIndex: 1,
+        isARMode: false,
         sessionStartedAt: 123,
         sessionCompletedAt: null,
       }),
@@ -48,11 +67,34 @@ describe('buddhist prayer home helpers', () => {
     });
   });
 
+  it('routes interrupted AR sessions back to the AR chant flow', () => {
+    expect(
+      getHomeSessionCardState({
+        chant,
+        currentVerseIndex: 1,
+        isARMode: true,
+        sessionStartedAt: 123,
+        sessionCompletedAt: null,
+      }),
+    ).toEqual({
+      eyebrow: 'Continue Practice',
+      title: chant.title,
+      description: `Resume from verse 2 of ${chant.verses.length}.`,
+      primaryLabel: 'Continue',
+      secondaryLabel: 'Start Over',
+      progressLabel: `Verse 2/${chant.verses.length}`,
+      primaryRoute: {
+        pathname: '/tradition/buddhist-prayer/ar-chant',
+      },
+    });
+  });
+
   it('builds a last-session card for completed chanting', () => {
     expect(
       getHomeSessionCardState({
         chant,
         currentVerseIndex: chant.verses.length - 1,
+        isARMode: false,
         sessionStartedAt: 123,
         sessionCompletedAt: 456,
       }),

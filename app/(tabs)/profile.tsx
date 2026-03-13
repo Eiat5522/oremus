@@ -24,7 +24,10 @@ type SettingItemProps = {
   color: string;
   isLast?: boolean;
   onPress?: () => void;
-  islamMode: boolean;
+  themed?: boolean;
+  themedBorderColor?: string;
+  themedChevronColor?: string;
+  themedTextColor?: string;
 };
 
 export default function ProfileScreen() {
@@ -35,7 +38,10 @@ export default function ProfileScreen() {
   const isIslam = tradition === 'islam';
   const prayerLocationSettings = usePrayerLocationSettings({ enabled: isIslam });
   const isImmersiveTradition =
-    tradition === 'islam' || tradition === 'buddhism' || tradition === 'christianity';
+    tradition === null ||
+    tradition === 'islam' ||
+    tradition === 'buddhism' ||
+    tradition === 'christianity';
   const useTraditionTheme = isImmersiveTradition;
   const backgroundImageStyle = useMemo(
     () => [StyleSheet.absoluteFillObject, isIslam ? styles.islamBackgroundShift : null],
@@ -108,12 +114,16 @@ export default function ProfileScreen() {
             headerShown: true,
             headerTransparent: true,
             headerTitle: isIslam ? 'Account' : 'Profile',
-            headerTintColor: isIslam ? uiTheme.textColor : theme.text,
-            headerTitleStyle: isIslam
+            headerTintColor: useTraditionTheme ? uiTheme.textColor : theme.text,
+            headerTitleStyle: useTraditionTheme
               ? {
                   color: uiTheme.textColor,
-                  fontFamily: Fonts.serif,
-                  fontSize: 28,
+                  ...(isIslam
+                    ? {
+                        fontFamily: Fonts.serif,
+                        fontSize: 28,
+                      }
+                    : null),
                 }
               : undefined,
           }}
@@ -137,7 +147,14 @@ export default function ProfileScreen() {
               {userProfileImage ? (
                 <Image
                   source={{ uri: userProfileImage }}
-                  style={styles.avatar}
+                  style={[
+                    styles.avatar,
+                    {
+                      borderColor: useTraditionTheme
+                        ? uiTheme.actionCardBorderColor
+                        : 'rgba(15, 23, 42, 0.12)',
+                    },
+                  ]}
                   contentFit="cover"
                 />
               ) : (
@@ -145,7 +162,7 @@ export default function ProfileScreen() {
                   style={[
                     styles.avatar,
                     styles.avatarPlaceholder,
-                    useTraditionTheme ? styles.avatarPlaceholderImmersive : null,
+                    useTraditionTheme ? { backgroundColor: uiTheme.actionCardColor } : null,
                   ]}
                 >
                   <IconSymbol
@@ -190,7 +207,7 @@ export default function ProfileScreen() {
                     value={nameDraft}
                     onChangeText={setNameDraft}
                     placeholder="Enter your name"
-                    placeholderTextColor={useTraditionTheme ? 'rgba(232,255,247,0.72)' : '#94a3b8'}
+                    placeholderTextColor={useTraditionTheme ? uiTheme.subtitleColor : '#94a3b8'}
                     autoCapitalize="words"
                     returnKeyType="done"
                     onSubmitEditing={saveName}
@@ -200,7 +217,7 @@ export default function ProfileScreen() {
                         ? {
                             color: uiTheme.actionTextColor,
                             borderColor: uiTheme.actionCardBorderColor,
-                            backgroundColor: 'rgba(8, 52, 40, 0.4)',
+                            backgroundColor: uiTheme.actionCardColor,
                           }
                         : {
                             color: theme.text,
@@ -237,7 +254,7 @@ export default function ProfileScreen() {
                               ? uiTheme.actionIconColor
                               : theme.primary
                             : useTraditionTheme
-                              ? 'rgba(172, 239, 215, 0.24)'
+                              ? uiTheme.actionCardBorderColor
                               : 'rgba(100, 116, 139, 0.6)',
                         },
                       ]}
@@ -338,7 +355,10 @@ export default function ProfileScreen() {
                 title="Change Tradition"
                 color={useTraditionTheme ? uiTheme.actionIconColor : theme.primary}
                 onPress={() => router.push('/onboarding')}
-                islamMode={useTraditionTheme}
+                themed={useTraditionTheme}
+                themedBorderColor={uiTheme.actionCardBorderColor}
+                themedChevronColor={uiTheme.subtitleColor}
+                themedTextColor={uiTheme.actionTextColor}
               />
               <SettingItem
                 icon="shield.lock"
@@ -346,7 +366,10 @@ export default function ProfileScreen() {
                 color={useTraditionTheme ? uiTheme.actionIconColor : '#16a34a'}
                 onPress={() => router.push('/settings/app-blocking')}
                 isLast
-                islamMode={useTraditionTheme}
+                themed={useTraditionTheme}
+                themedBorderColor={uiTheme.actionCardBorderColor}
+                themedChevronColor={uiTheme.subtitleColor}
+                themedTextColor={uiTheme.actionTextColor}
               />
             </View>
           </View>
@@ -390,9 +413,11 @@ export default function ProfileScreen() {
                 <View
                   style={[
                     styles.privacyIconContainer,
-                    useTraditionTheme
-                      ? { backgroundColor: 'rgba(172, 239, 215, 0.18)' }
-                      : { backgroundColor: `${theme.primary}1A` },
+                    {
+                      backgroundColor: useTraditionTheme
+                        ? uiTheme.actionCardBorderColor
+                        : `${theme.primary}1A`,
+                    },
                   ]}
                 >
                   <IconSymbol
@@ -433,7 +458,7 @@ export default function ProfileScreen() {
                     <IconSymbol
                       name="square.and.arrow.up.fill"
                       size={18}
-                      color={useTraditionTheme ? '#0C4B3A' : '#fff'}
+                      color={useTraditionTheme ? uiTheme.actionTextColor : '#fff'}
                     />
                   }
                   style={styles.exportBtn}
@@ -474,27 +499,33 @@ export default function ProfileScreen() {
   );
 }
 
-function SettingItem({ icon, title, color, isLast, onPress, islamMode }: SettingItemProps) {
+function SettingItem({
+  icon,
+  title,
+  color,
+  isLast,
+  onPress,
+  themed = false,
+  themedBorderColor,
+  themedChevronColor,
+  themedTextColor,
+}: SettingItemProps) {
   return (
     <Pressable
       onPress={onPress}
       style={[
         styles.settingItem,
         !isLast ? styles.borderBottom : null,
-        !isLast ? { borderBottomColor: islamMode ? 'rgba(232,255,247,0.24)' : '#f1f5f9' } : null,
+        !isLast ? { borderBottomColor: themed ? themedBorderColor : '#f1f5f9' } : null,
       ]}
     >
       <View style={[styles.settingIconContainer, { backgroundColor: `${color}1A` }]}>
         <IconSymbol name={icon} size={20} color={color} />
       </View>
-      <ThemedText style={[styles.settingTitle, islamMode ? { color: '#EBFFF7' } : null]}>
+      <ThemedText style={[styles.settingTitle, themed ? { color: themedTextColor } : null]}>
         {title}
       </ThemedText>
-      <IconSymbol
-        name="chevron.right"
-        size={20}
-        color={islamMode ? 'rgba(232,255,247,0.72)' : '#64748b'}
-      />
+      <IconSymbol name="chevron.right" size={20} color={themed ? themedChevronColor : '#64748b'} />
     </Pressable>
   );
 }
@@ -531,15 +562,11 @@ const styles = StyleSheet.create({
     height: 112,
     borderRadius: 56,
     borderWidth: 3,
-    borderColor: 'rgba(232,255,247,0.4)',
   },
   avatarPlaceholder: {
     backgroundColor: '#f1f5f9',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  avatarPlaceholderImmersive: {
-    backgroundColor: 'rgba(8, 52, 40, 0.45)',
   },
   editBadge: {
     position: 'absolute',

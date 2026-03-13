@@ -1,6 +1,8 @@
 import type { Href } from 'expo-router';
 
+import { CHANTS } from '@/constants/buddhist-prayer/chants';
 import type { Chant, ChantCategory } from '@/constants/buddhist-prayer/types';
+import { getChantBySlug } from '@/lib/chant-helpers';
 
 export type HomeQuickActionId = 'ar' | 'chant' | 'merit' | 'learn';
 
@@ -16,15 +18,45 @@ export interface HomeSessionCardState {
   primaryRoute: RouteTarget;
 }
 
-export function getQuickActionRoute(actionId: HomeQuickActionId): RouteTarget {
+export function resolveARChantSlug(currentChantSlug?: string | null): string | null {
+  if (currentChantSlug && getChantBySlug(currentChantSlug)) {
+    return currentChantSlug;
+  }
+
+  return CHANTS[0]?.slug ?? null;
+}
+
+export function getARIntroRoute(currentChantSlug?: string | null): RouteTarget {
+  const chantSlug = resolveARChantSlug(currentChantSlug);
+
+  return chantSlug
+    ? {
+        pathname: '/tradition/buddhist-prayer/ar-intro',
+        params: { chantSlug },
+      }
+    : { pathname: '/tradition/buddhist-prayer/ar-intro' };
+}
+
+export function getStandardPreparationRoute(currentChantSlug?: string | null): RouteTarget {
+  const chantSlug = currentChantSlug && getChantBySlug(currentChantSlug) ? currentChantSlug : null;
+
+  return chantSlug
+    ? {
+        pathname: '/tradition/buddhist-prayer/preparation',
+        params: { chantSlug },
+      }
+    : { pathname: '/tradition/buddhist-prayer/preparation' };
+}
+
+export function getQuickActionRoute(
+  actionId: HomeQuickActionId,
+  currentChantSlug?: string | null,
+): RouteTarget {
   switch (actionId) {
     case 'ar':
-      return { pathname: '/tradition/buddhist-prayer/ar-intro' };
+      return getARIntroRoute(currentChantSlug);
     case 'chant':
-      return {
-        pathname: '/tradition/buddhist-prayer/library',
-        params: { category: 'daily' },
-      };
+      return getStandardPreparationRoute(currentChantSlug);
     case 'merit':
       return {
         pathname: '/tradition/buddhist-prayer/preparation',
@@ -48,6 +80,7 @@ export function getCategoryRoute(category: ChantCategory): RouteTarget {
 interface SessionCardArgs {
   chant: Chant | null;
   currentVerseIndex: number;
+  isARMode: boolean;
   sessionStartedAt: number | null;
   sessionCompletedAt: number | null;
 }
@@ -55,6 +88,7 @@ interface SessionCardArgs {
 export function getHomeSessionCardState({
   chant,
   currentVerseIndex,
+  isARMode,
   sessionStartedAt,
   sessionCompletedAt,
 }: SessionCardArgs): HomeSessionCardState | null {
@@ -88,7 +122,9 @@ export function getHomeSessionCardState({
       secondaryLabel: 'Start Over',
       progressLabel: `Verse ${verseNumber}/${chant.verses.length}`,
       primaryRoute: {
-        pathname: '/tradition/buddhist-prayer/session',
+        pathname: isARMode
+          ? '/tradition/buddhist-prayer/ar-chant'
+          : '/tradition/buddhist-prayer/session',
       },
     };
   }

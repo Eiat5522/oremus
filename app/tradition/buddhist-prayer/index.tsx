@@ -15,9 +15,11 @@ import {
 } from '@/constants/buddhist-prayer/theme';
 import { useBuddhistPrayerStore } from '@/hooks/use-buddhist-prayer-store';
 import {
+  getARIntroRoute,
   getCategoryRoute,
   getHomeSessionCardState,
   getQuickActionRoute,
+  getStandardPreparationRoute,
 } from '@/lib/buddhist-prayer-home';
 import { formatDuration, getChantBySlug, getFeaturedChants } from '@/lib/chant-helpers';
 
@@ -36,6 +38,7 @@ export default function BuddhistPrayerHomeScreen() {
   const {
     currentChantSlug,
     currentVerseIndex,
+    isARMode,
     sessionStartedAt,
     sessionCompletedAt,
     resetSession,
@@ -50,10 +53,11 @@ export default function BuddhistPrayerHomeScreen() {
       getHomeSessionCardState({
         chant: currentChant,
         currentVerseIndex,
+        isARMode,
         sessionStartedAt,
         sessionCompletedAt,
       }),
-    [currentChant, currentVerseIndex, sessionCompletedAt, sessionStartedAt],
+    [currentChant, currentVerseIndex, isARMode, sessionCompletedAt, sessionStartedAt],
   );
 
   const handleChantPress = useCallback(
@@ -67,10 +71,10 @@ export default function BuddhistPrayerHomeScreen() {
   );
   const handleQuickActionPress = useCallback(
     (actionId: (typeof QUICK_ACTIONS)[number]['id']) => {
-      const target = getQuickActionRoute(actionId);
+      const target = getQuickActionRoute(actionId, currentChantSlug);
       router.push(target);
     },
-    [router],
+    [currentChantSlug, router],
   );
   const handleCategoryPress = useCallback(
     (category: (typeof CHANT_CATEGORIES)[number]['id']) => {
@@ -112,12 +116,12 @@ export default function BuddhistPrayerHomeScreen() {
           <View style={styles.heroButtons}>
             <GoldButton
               title="Begin AR Prayer"
-              onPress={() => router.push('/tradition/buddhist-prayer/ar-intro')}
+              onPress={() => router.push(getARIntroRoute(currentChantSlug))}
             />
             <GoldButton
-              title="Daily Chant"
+              title="Start Buddhist Prayer"
               variant="outline"
-              onPress={() => router.push('/tradition/buddhist-prayer/library')}
+              onPress={() => router.push(getStandardPreparationRoute(currentChantSlug))}
             />
           </View>
         </GlassCard>

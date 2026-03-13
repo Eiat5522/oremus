@@ -58,7 +58,7 @@ export function useAudioPrayer() {
   }, [isReleasedPlayerError, templeBellPlayer]);
 
   const playTempleBell = useCallback(async () => {
-    if (!isAudioEnabled || !templeBellEnabled) return;
+    if (!templeBellEnabled) return;
 
     try {
       if (templeBellStatus.currentTime > 0) {
@@ -71,7 +71,6 @@ export function useAudioPrayer() {
       }
     }
   }, [
-    isAudioEnabled,
     isReleasedPlayerError,
     templeBellEnabled,
     templeBellPlayer,
@@ -83,10 +82,17 @@ export function useAudioPrayer() {
     if (!isAudioEnabled && chantStatus.playing) {
       safePause();
     }
-    if (!isAudioEnabled && templeBellStatus.playing) {
+    if (!templeBellEnabled && templeBellStatus.playing) {
       safePauseTempleBell();
     }
-  }, [isAudioEnabled, chantStatus.playing, safePause, safePauseTempleBell, templeBellStatus.playing]);
+  }, [
+    isAudioEnabled,
+    chantStatus.playing,
+    safePause,
+    safePauseTempleBell,
+    templeBellEnabled,
+    templeBellStatus.playing,
+  ]);
 
   // Cleanup on unmount
   useEffect(() => {

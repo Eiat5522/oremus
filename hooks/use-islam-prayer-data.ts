@@ -7,6 +7,7 @@ import {
   getCurrentPrayerName,
   getNextPrayer,
   getPrayerTimesForDate,
+  type PrayerTimeEntry,
   type PrayerName,
 } from '@/lib/prayer-times';
 import { recordPrayerCompletion } from '@/lib/focus-gate';
@@ -99,6 +100,25 @@ export function useIslamPrayerData(referenceDate?: Date) {
     () => getNextPrayer(todayPrayers, comparisonNow),
     [todayPrayers, comparisonNow],
   );
+
+  const defaultSessionPrayer = useMemo<PrayerTimeEntry | null>(() => {
+    if (nextPrayer) {
+      return nextPrayer;
+    }
+
+    if (!prayerCoords) {
+      return null;
+    }
+
+    const tomorrow = new Date(effectiveDate);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    return (
+      getPrayerTimesForDate(prayerCoords.latitude, prayerCoords.longitude, tomorrow).find(
+        (prayer) => prayer.name === 'fajr',
+      ) ?? null
+    );
+  }, [effectiveDate, nextPrayer, prayerCoords]);
 
   const currentPrayerName = useMemo(
     () => getCurrentPrayerName(todayPrayers, comparisonNow),
@@ -243,6 +263,7 @@ export function useIslamPrayerData(referenceDate?: Date) {
     now,
     todayPrayers,
     nextPrayer,
+    defaultSessionPrayer,
     currentPrayerName,
     todayCompletion,
     completedCount,

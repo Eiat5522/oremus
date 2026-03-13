@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 
 import {
   ChantTextBlock,
-  ChantOverlay,
+  ProgressPill,
   SacredHeader,
   SessionControls,
 } from '@/components/buddhist-prayer';
@@ -27,7 +27,6 @@ export default function ChantSessionScreen() {
     autoScroll,
     isPlaying,
     showMeaning,
-    progress,
     nextVerse,
     previousVerse,
     replayVerse,

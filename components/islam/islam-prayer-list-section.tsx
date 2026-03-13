@@ -488,7 +488,7 @@ export function IslamPrayerListSection() {
         onBeginSession={() => {
           if (selectedPrayer) {
             router.push({
-              pathname: '/tradition/islam-session',
+              pathname: '/tradition/islam-preparation',
               params: { prayerName: selectedPrayer.name },
             });
           }

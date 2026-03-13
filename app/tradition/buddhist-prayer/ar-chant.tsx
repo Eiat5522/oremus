@@ -3,9 +3,9 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import {
-  ChantOverlay,
   BuddhistAltar3D,
   ChantTextBlock,
+  ProgressPill,
   SacredHeader,
   SessionControls,
 } from '@/components/buddhist-prayer';
@@ -31,7 +31,6 @@ export default function ARChantScreen() {
     autoScroll,
     isPlaying,
     showMeaning,
-    progress,
     nextVerse,
     previousVerse,
     replayVerse,

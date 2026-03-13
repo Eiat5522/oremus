@@ -1,5 +1,12 @@
 import React from 'react';
-import { ActivityIndicator, Animated, Pressable, StyleSheet, View, ViewStyle } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  View,
+  ViewStyle,
+  useWindowDimensions,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { QiblaAlignmentState } from '@/hooks/use-qibla-alignment';
@@ -14,6 +21,7 @@ type CameraViewProps = {
 type CameraViewComponentType = React.ComponentType<CameraViewProps>;
 
 type QiblaCompassPageProps = {
+  mode: 'finder' | 'session';
   showLiveCamera: boolean;
   cameraPermissionStatus: string | null;
   canAskCameraPermission: boolean;
@@ -24,15 +32,25 @@ type QiblaCompassPageProps = {
   onRecenterCalibration: () => void;
   onNudgeCalibrationLeft: () => void;
   onNudgeCalibrationRight: () => void;
-  onBeginPrayer: () => void;
-  prayerLabel: string;
+  prayerLabel?: string;
   calibrationOffset: number;
   alignmentDelta: number | null;
   signedOffset: number;
   alignmentState: QiblaAlignmentState;
+  isTransitioningToPrayer: boolean;
 };
 
+const MAX_ANCHOR_SWEEP_DEGREES = 70;
+const MAX_FOCUS_FEEDBACK_DEGREES = 24;
+
+function getTurnDirectionLabel(offset: number) {
+  if (offset > 1) return 'right';
+  if (offset < -1) return 'left';
+  return 'center';
+}
+
 export function QiblaCompassPage({
+  mode,
   showLiveCamera,
   cameraPermissionStatus,
   canAskCameraPermission,
@@ -43,14 +61,15 @@ export function QiblaCompassPage({
   onRecenterCalibration,
   onNudgeCalibrationLeft,
   onNudgeCalibrationRight,
-  onBeginPrayer,
   prayerLabel,
   calibrationOffset,
   alignmentDelta,
   signedOffset,
   alignmentState,
+  isTransitioningToPrayer,
 }: QiblaCompassPageProps) {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
   const cameraViewRef = React.useRef<CameraViewComponentType | null>(null);
   const [isCameraReady, setIsCameraReady] = React.useState(false);
   const isCameraLoading = showLiveCamera && !isCameraReady;
@@ -81,10 +100,59 @@ export function QiblaCompassPage({
     };
   }, []);
 
-  const arrowAngle = Math.max(-90, Math.min(90, signedOffset));
   const isAligned = alignmentState === 'aligned';
   const isNearAligned = alignmentState === 'nearAligned';
   const SafeCameraView = cameraViewRef.current;
+  const anchorTravel = Math.min(width * 0.34, 150);
+  const clampedSignedOffset = Math.max(
+    -MAX_ANCHOR_SWEEP_DEGREES,
+    Math.min(MAX_ANCHOR_SWEEP_DEGREES, signedOffset),
+  );
+  const kaabaTranslateX = (clampedSignedOffset / MAX_ANCHOR_SWEEP_DEGREES) * anchorTravel;
+  const focusProgress =
+    alignmentDelta === null
+      ? 0
+      : 1 - Math.min(alignmentDelta, MAX_FOCUS_FEEDBACK_DEGREES) / MAX_FOCUS_FEEDBACK_DEGREES;
+  const focusScale = 0.88 + focusProgress * 0.3;
+  const focusGlowOpacity = 0.16 + focusProgress * 0.64;
+  const targetScale = 0.94 + focusProgress * 0.12 + (isAligned ? 0.04 : 0);
+  const targetGlowOpacity = 0.1 + focusProgress * 0.48;
+  const beamWidth = Math.max(Math.abs(kaabaTranslateX) - 38, 0);
+  const beamTranslateX = kaabaTranslateX / 2;
+  const turnDirection = getTurnDirectionLabel(signedOffset);
+  const isSessionMode = mode === 'session';
+
+  const statusTitle = isSessionMode
+    ? isTransitioningToPrayer
+      ? 'Aligned'
+      : isAligned
+        ? 'Qibla Aligned'
+        : isNearAligned
+          ? 'Almost aligned'
+          : 'Facing the Qibla...'
+    : isAligned
+      ? 'Qibla aligned'
+      : isNearAligned
+        ? 'Almost aligned'
+        : 'Qibla Finder';
+
+  const statusSubtitle = isSessionMode
+    ? isTransitioningToPrayer
+      ? `Hold steady. Opening ${prayerLabel ?? 'Prayer Session'}...`
+      : isAligned
+        ? `${prayerLabel ?? 'Prayer Session'} is ready`
+        : alignmentDelta === null
+          ? 'Finding direction...'
+          : turnDirection === 'center'
+            ? `Move the Kaaba into the focus ring. ${Math.round(alignmentDelta)}° remaining`
+            : `Move the Kaaba ${turnDirection}. ${Math.round(alignmentDelta)}° remaining`
+    : alignmentDelta === null
+      ? 'Align to the Qibla. We are finding your direction...'
+      : isAligned
+        ? 'You are facing the Qibla.'
+        : turnDirection === 'center'
+          ? `Align to the Qibla. ${Math.round(alignmentDelta)}° remaining`
+          : `Move the Kaaba ${turnDirection}. ${Math.round(alignmentDelta)}° remaining`;
 
   return (
     <View style={styles.container}>
@@ -127,26 +195,83 @@ export function QiblaCompassPage({
       </View>
 
       <View pointerEvents="none" style={styles.centerZone}>
-        <View style={[styles.reticleRingOuter, isAligned && styles.reticleRingAligned]} />
         <View
-          style={[styles.reticleRingInner, (isNearAligned || isAligned) && styles.reticleRingNear]}
-        />
-
-        <View style={[styles.kaabaBadge, isAligned && styles.kaabaBadgeAligned]}>
-          <IconSymbol name="kaaba" size={28} color={isAligned ? '#362200' : '#161616'} />
-        </View>
-
-        <View style={styles.guideLine} />
-
-        <Animated.View
           style={[
-            styles.directionArrow,
+            styles.focusGlow,
             {
-              transform: [{ rotate: `${arrowAngle}deg` }],
-              opacity: isAligned ? 0.2 : isNearAligned ? 0.45 : 0.95,
+              opacity: focusGlowOpacity,
+              transform: [{ scale: focusScale }],
             },
           ]}
         />
+        <View
+          style={[
+            styles.reticleRingOuter,
+            (isNearAligned || isAligned) && styles.reticleRingNear,
+            isAligned && styles.reticleRingAligned,
+            {
+              transform: [{ scale: focusScale }],
+            },
+          ]}
+        />
+        <View
+          style={[
+            styles.reticleRingInner,
+            (isNearAligned || isAligned) && styles.reticleRingNear,
+            {
+              transform: [{ scale: 0.96 + focusProgress * 0.14 }],
+            },
+          ]}
+        />
+        <View
+          style={[
+            styles.focusCore,
+            {
+              opacity: 0.22 + focusProgress * 0.52,
+              transform: [{ scale: 0.9 + focusProgress * 0.16 }],
+            },
+          ]}
+        />
+
+        {beamWidth > 0 ? (
+          <View
+            style={[
+              styles.bearingBeam,
+              {
+                width: beamWidth,
+                opacity: 0.18 + focusProgress * 0.34,
+                transform: [{ translateX: beamTranslateX }],
+              },
+            ]}
+          />
+        ) : null}
+
+        <View style={styles.kaabaAnchorWrap}>
+          <View
+            style={[
+              styles.kaabaAnchor,
+              {
+                transform: [{ translateX: kaabaTranslateX }, { scale: targetScale }],
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.kaabaGlow,
+                {
+                  opacity: targetGlowOpacity,
+                  transform: [{ scale: 0.94 + focusProgress * 0.34 }],
+                },
+              ]}
+            />
+
+            <View style={[styles.kaabaBadge, isAligned && styles.kaabaBadgeAligned]}>
+              <IconSymbol name="kaaba" size={28} color={isAligned ? '#362200' : '#161616'} />
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.guideLine} />
       </View>
 
       <View pointerEvents="none" style={[styles.carpetWrap, isAligned && styles.carpetWrapAligned]}>
@@ -181,26 +306,23 @@ export function QiblaCompassPage({
       ) : null}
 
       <View style={[styles.statusCard, { bottom: insets.bottom + 24 }]}>
-        <ThemedText style={styles.statusTitle}>
-          {isAligned ? 'Qibla Aligned' : isNearAligned ? 'Almost aligned' : 'Facing the Qibla…'}
-        </ThemedText>
-        <ThemedText style={styles.statusSubtitle}>
-          {isAligned
-            ? prayerLabel
-            : alignmentDelta === null
-              ? 'Finding direction…'
-              : `Rotate ${Math.round(alignmentDelta)}° to align`}
-        </ThemedText>
+        <ThemedText style={styles.statusTitle}>{statusTitle}</ThemedText>
+        <ThemedText style={styles.statusSubtitle}>{statusSubtitle}</ThemedText>
 
-        {isAligned ? (
-          <Pressable
-            onPress={onBeginPrayer}
-            style={styles.beginButton}
-            accessibilityRole="button"
-            accessibilityLabel={`Begin ${prayerLabel}`}
-          >
-            <ThemedText style={styles.beginButtonText}>Begin Prayer</ThemedText>
-          </Pressable>
+        {isSessionMode && (isAligned || isTransitioningToPrayer) ? (
+          <View style={styles.autoAdvanceWrap}>
+            <View style={styles.autoAdvanceTrack}>
+              <View
+                style={[
+                  styles.autoAdvanceFill,
+                  isTransitioningToPrayer && styles.autoAdvanceFillActive,
+                ]}
+              />
+            </View>
+            <ThemedText style={styles.autoAdvanceText}>
+              {isTransitioningToPrayer ? 'Opening prayer session...' : 'Auto-opening prayer session...'}
+            </ThemedText>
+          </View>
         ) : (
           <View style={styles.calibrationRow}>
             <Pressable onPress={onNudgeCalibrationLeft} style={styles.arrowButton}>
@@ -257,6 +379,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingBottom: 110,
   },
+  focusGlow: {
+    position: 'absolute',
+    width: 214,
+    height: 214,
+    borderRadius: 107,
+    backgroundColor: 'rgba(247, 201, 95, 0.24)',
+  },
   reticleRingOuter: {
     position: 'absolute',
     width: 196,
@@ -278,10 +407,38 @@ const styles = StyleSheet.create({
   },
   reticleRingAligned: {
     borderColor: 'rgba(255,223,120,0.96)',
-    shadowColor: '#F7C95F',
-    shadowOpacity: 0.56,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 0 },
+    boxShadow: '0 0 24px rgba(247, 201, 95, 0.56)',
+  },
+  focusCore: {
+    position: 'absolute',
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255,234,184,0.46)',
+  },
+  bearingBeam: {
+    position: 'absolute',
+    height: 2,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,232,183,0.82)',
+  },
+  kaabaAnchorWrap: {
+    position: 'absolute',
+    width: 320,
+    height: 88,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  kaabaAnchor: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  kaabaGlow: {
+    position: 'absolute',
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+    backgroundColor: 'rgba(255,217,125,0.34)',
   },
   kaabaBadge: {
     width: 68,
@@ -304,17 +461,6 @@ const styles = StyleSheet.create({
     borderLeftWidth: 2,
     borderLeftColor: 'rgba(255,255,255,0.8)',
     borderStyle: 'dashed',
-  },
-  directionArrow: {
-    marginTop: 220,
-    width: 0,
-    height: 0,
-    borderLeftWidth: 15,
-    borderRightWidth: 15,
-    borderBottomWidth: 28,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderBottomColor: 'rgba(255,255,255,0.96)',
   },
   carpetWrap: {
     position: 'absolute',
@@ -396,20 +542,35 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 14,
   },
-  beginButton: {
+  autoAdvanceWrap: {
     marginTop: 2,
-    height: 52,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: 'rgba(247,203,103,0.66)',
-    backgroundColor: 'rgba(212,175,55,0.24)',
+    gap: 8,
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  beginButtonText: {
+  autoAdvanceTrack: {
+    width: '100%',
+    height: 10,
+    borderRadius: 999,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(247,203,103,0.28)',
+  },
+  autoAdvanceFill: {
+    height: '100%',
+    width: '72%',
+    borderRadius: 999,
+    backgroundColor: 'rgba(212,175,55,0.36)',
+  },
+  autoAdvanceFillActive: {
+    width: '100%',
+    backgroundColor: 'rgba(247,203,103,0.78)',
+  },
+  autoAdvanceText: {
     color: '#fff0c0',
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   calibrationRow: {
     flexDirection: 'row',

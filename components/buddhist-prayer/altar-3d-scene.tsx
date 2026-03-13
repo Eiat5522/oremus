@@ -87,10 +87,70 @@ function Candle({ position, animated }: { position: [number, number, number]; an
   );
 }
 
+function IncenseSmoke({
+  position,
+  showIncenseSmoke,
+  animated,
+}: {
+  position: [number, number, number];
+  showIncenseSmoke: boolean;
+  animated: boolean;
+}) {
+  const smokeRefs = useRef<(Mesh | null)[]>([]);
+
+  useFrame(({ clock }) => {
+    smokeRefs.current.forEach((mesh, index) => {
+      if (!mesh) {
+        return;
+      }
+
+      const elapsed = clock.getElapsedTime() + index * 0.42;
+      const material = mesh.material;
+      const yOffset = animated ? (elapsed % 2.8) * 0.16 : index * 0.12;
+
+      mesh.position.x = position[0] + Math.sin(elapsed * 0.7) * 0.03;
+      mesh.position.y = position[1] + index * 0.14 + yOffset;
+      mesh.position.z = position[2] + Math.cos(elapsed * 0.45) * 0.02;
+
+      const scale = animated ? 0.7 + index * 0.16 + (elapsed % 1.2) * 0.08 : 0.82 + index * 0.12;
+      mesh.scale.setScalar(scale);
+
+      if (material instanceof MeshStandardMaterial) {
+        material.opacity = showIncenseSmoke ? Math.max(0.08, 0.22 - index * 0.04) : 0;
+      }
+    });
+  });
+
+  return (
+    <>
+      {[0, 1, 2].map((index) => (
+        <mesh
+          key={index}
+          position={[position[0], position[1] + index * 0.14, position[2]]}
+          ref={(mesh) => {
+            smokeRefs.current[index] = mesh;
+          }}
+        >
+          <sphereGeometry args={[0.12 + index * 0.04, 18, 18]} />
+          <meshStandardMaterial
+            color="#EDE7DB"
+            emissive="#F8E8CB"
+            emissiveIntensity={0.12}
+            opacity={showIncenseSmoke ? 0.18 : 0}
+            roughness={1}
+            transparent
+          />
+        </mesh>
+      ))}
+    </>
+  );
+}
+
 function AltarSceneContent({
   scale,
   rotation,
   showHalo,
+  showIncenseSmoke,
   glowIntensity,
   animated,
 }: AltarScene3DProps) {
@@ -195,6 +255,11 @@ function AltarSceneContent({
             <cylinderGeometry args={[0.03, 0.04, 0.48, 12]} />
             <meshStandardMaterial color="#3F2A16" roughness={0.78} />
           </mesh>
+          <IncenseSmoke
+            animated={animated}
+            position={[0, 0.3, 0]}
+            showIncenseSmoke={showIncenseSmoke}
+          />
         </group>
       </group>
     </>

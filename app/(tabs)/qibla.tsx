@@ -5,21 +5,45 @@ import { Linking, View } from 'react-native';
 import { QiblaCompassPage } from '@/components/qibla/qibla-compass-page';
 import { useQiblaAlignment } from '@/hooks/use-qibla-alignment';
 import { useSafeCameraPermissions } from '@/hooks/use-safe-camera-permissions';
+import type { PrayerName } from '@/lib/prayer-times';
 
 const CALIBRATION_STEP_DEGREES = 2;
+const AUTO_ADVANCE_DELAY_MS = 900;
 
 function toTitleCase(value: string) {
   return value.replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+function isPrayerName(value: string | undefined): value is PrayerName {
+  return (
+    value === 'fajr' ||
+    value === 'dhuhr' ||
+    value === 'asr' ||
+    value === 'maghrib' ||
+    value === 'isha'
+  );
+}
+
 export default function QiblaScreen() {
   const router = useRouter();
   const hasAutoRequestedCamera = useRef(false);
+  const autoAdvanceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasAutoAdvancedRef = useRef(false);
   const [cameraPermission, requestCameraPermission] = useSafeCameraPermissions();
   const [isRequestingCameraPermission, setIsRequestingCameraPermission] = useState(false);
+  const [isTransitioningToPrayer, setIsTransitioningToPrayer] = useState(false);
 
-  const { prayerName } = useLocalSearchParams<{ prayerName?: string }>();
-  const prayerLabel = prayerName ? `${toTitleCase(prayerName)} Prayer` : 'Maghrib Prayer';
+  const params = useLocalSearchParams<{
+    prayerName?: string | string[];
+    mode?: string | string[];
+  }>();
+  const prayerNameParam = Array.isArray(params.prayerName)
+    ? params.prayerName[0]
+    : params.prayerName;
+  const modeParam = Array.isArray(params.mode) ? params.mode[0] : params.mode;
+  const mode = modeParam === 'session' ? 'session' : 'finder';
+  const prayerName = isPrayerName(prayerNameParam) ? prayerNameParam : 'fajr';
+  const prayerLabel = `${toTitleCase(prayerName)} Prayer`;
 
   const {
     alignmentOffset,
@@ -48,6 +72,51 @@ export default function QiblaScreen() {
     }
   }, [cameraPermissionStatus, requestCameraPermission]);
 
+  useEffect(() => {
+    if (mode !== 'session') {
+      setIsTransitioningToPrayer(false);
+      if (autoAdvanceTimeoutRef.current) {
+        clearTimeout(autoAdvanceTimeoutRef.current);
+        autoAdvanceTimeoutRef.current = null;
+      }
+      hasAutoAdvancedRef.current = false;
+      return;
+    }
+
+    if (alignmentState === 'aligned') {
+      if (autoAdvanceTimeoutRef.current || hasAutoAdvancedRef.current) {
+        return;
+      }
+
+      setIsTransitioningToPrayer(true);
+      autoAdvanceTimeoutRef.current = setTimeout(() => {
+        autoAdvanceTimeoutRef.current = null;
+        hasAutoAdvancedRef.current = true;
+
+        router.push({
+          pathname: '/tradition/islam-session',
+          params: { prayerName },
+        });
+      }, AUTO_ADVANCE_DELAY_MS);
+
+      return;
+    }
+
+    setIsTransitioningToPrayer(false);
+    if (autoAdvanceTimeoutRef.current) {
+      clearTimeout(autoAdvanceTimeoutRef.current);
+      autoAdvanceTimeoutRef.current = null;
+    }
+  }, [alignmentState, mode, prayerName, router]);
+
+  useEffect(() => {
+    return () => {
+      if (autoAdvanceTimeoutRef.current) {
+        clearTimeout(autoAdvanceTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleCameraPermissionRequest = async () => {
     setIsRequestingCameraPermission(true);
     try {
@@ -68,6 +137,7 @@ export default function QiblaScreen() {
       />
 
       <QiblaCompassPage
+        mode={mode}
         showLiveCamera={showLiveCamera}
         cameraPermissionStatus={cameraPermissionStatus}
         canAskCameraPermission={canAskCameraPermission}
@@ -88,17 +158,12 @@ export default function QiblaScreen() {
         }}
         onNudgeCalibrationLeft={() => nudgeCalibration(-CALIBRATION_STEP_DEGREES)}
         onNudgeCalibrationRight={() => nudgeCalibration(CALIBRATION_STEP_DEGREES)}
-        onBeginPrayer={() => {
-          router.push({
-            pathname: '/tradition/islam-session',
-            params: { prayerName: prayerName ?? 'maghrib' },
-          });
-        }}
-        prayerLabel={prayerLabel}
+        prayerLabel={mode === 'session' ? prayerLabel : undefined}
         calibrationOffset={manualHeadingOffset}
         alignmentDelta={alignmentOffset}
         signedOffset={signedOffset ?? 0}
         alignmentState={alignmentState}
+        isTransitioningToPrayer={isTransitioningToPrayer}
       />
     </View>
   );

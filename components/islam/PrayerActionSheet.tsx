@@ -86,6 +86,30 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
             </ThemedText>
           </View>
 
+          {/* Begin Prayer Session */}
+          {onBeginSession ? (
+            <TouchableOpacity
+              style={[styles.primaryActionButton, styles.sessionActionButton]}
+              onPress={() => {
+                onBeginSession();
+                bottomSheetRef.current?.close();
+              }}
+            >
+              <View style={styles.primaryActionCopy}>
+                <View style={[styles.primaryActionIconWrap, styles.sessionActionIconWrap]}>
+                  <IconSymbol name="play.fill" size={18} color="#FFF8E8" />
+                </View>
+                <View style={styles.primaryActionTextWrap}>
+                  <ThemedText style={styles.primaryActionTitle}>Begin Prayer Session</ThemedText>
+                  <ThemedText style={styles.primaryActionSubtitle}>
+                    Open the guided session for this prayer.
+                  </ThemedText>
+                </View>
+              </View>
+              <IconSymbol name="chevron.right" size={18} color="#FFF2CC" />
+            </TouchableOpacity>
+          ) : null}
+
           {/* Mark Complete/Incomplete Section */}
           <TouchableOpacity
             disabled={isSessionPassed}
@@ -164,23 +188,6 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
               </ThemedText>
             </TouchableOpacity>
           </View>
-
-          {/* Begin Prayer Session */}
-          {onBeginSession ? (
-            <TouchableOpacity
-              style={[styles.optionRow, { borderTopColor: 'rgba(244, 200, 107, 0.14)' }]}
-              onPress={() => {
-                onBeginSession();
-                bottomSheetRef.current?.close();
-              }}
-            >
-              <IconSymbol name="play.fill" size={22} color="#D4AF37" />
-              <ThemedText style={[styles.optionText, { color: '#F4E5A0' }]}>
-                Begin Prayer Session
-              </ThemedText>
-              <IconSymbol name="chevron.right" size={18} color={theme.icon} />
-            </TouchableOpacity>
-          ) : null}
 
           {/* Reschedule Section */}
           <TouchableOpacity
@@ -274,6 +281,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(110, 34, 34, 0.36)',
     borderColor: 'rgba(248, 113, 113, 0.28)',
   },
+  sessionActionButton: {
+    backgroundColor: 'rgba(156, 111, 32, 0.34)',
+    borderColor: 'rgba(244, 200, 107, 0.38)',
+  },
   primaryActionButtonDisabled: {
     opacity: 0.5,
   },
@@ -295,6 +306,9 @@ const styles = StyleSheet.create({
   },
   primaryActionIconWrapDanger: {
     backgroundColor: 'rgba(248, 113, 113, 0.2)',
+  },
+  sessionActionIconWrap: {
+    backgroundColor: 'rgba(244, 200, 107, 0.24)',
   },
   primaryActionTextWrap: {
     flex: 1,

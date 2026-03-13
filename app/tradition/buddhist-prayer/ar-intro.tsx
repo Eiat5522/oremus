@@ -1,7 +1,8 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { Stack, useRouter } from 'expo-router';
-import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GoldButton, SacredHeader } from '@/components/buddhist-prayer';
 import { ALTAR_EXPERIENCE_OPTIONS } from '@/constants/buddhist-prayer/altar-experience';
@@ -14,13 +15,32 @@ import {
   BuddhistPrayerSpacing,
 } from '@/constants/buddhist-prayer/theme';
 import { useBuddhistPrayerStore } from '@/hooks/use-buddhist-prayer-store';
+import { resolveARChantSlug } from '@/lib/buddhist-prayer-home';
 
 export default function ARIntroScreen() {
   const router = useRouter();
-  const altarExperienceMode = useBuddhistPrayerStore((state) => state.altarExperienceMode);
-  const setAltarExperienceMode = useBuddhistPrayerStore((state) => state.setAltarExperienceMode);
+  const { chantSlug: requestedChantSlug } = useLocalSearchParams<{ chantSlug?: string }>();
+  const insets = useSafeAreaInsets();
+  const {
+    altarExperienceMode,
+    currentChantSlug,
+    isARMode,
+    setAltarExperienceMode,
+    startPreparation,
+  } = useBuddhistPrayerStore();
 
   const selectedOption = ALTAR_EXPERIENCE_OPTIONS[altarExperienceMode];
+  const resolvedChantSlug = resolveARChantSlug(requestedChantSlug ?? currentChantSlug);
+
+  useEffect(() => {
+    if (!resolvedChantSlug) {
+      return;
+    }
+
+    if (currentChantSlug !== resolvedChantSlug || !isARMode) {
+      startPreparation(resolvedChantSlug, true);
+    }
+  }, [currentChantSlug, isARMode, resolvedChantSlug, startPreparation]);
 
   return (
     <View style={styles.container}>
@@ -34,7 +54,13 @@ export default function ARIntroScreen() {
 
       <SacredHeader title="AR Buddha Altar" showBackButton onBack={() => router.back()} />
 
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: Math.max(insets.bottom, BuddhistPrayerSpacing.md) + BuddhistPrayerSpacing.xl },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.iconCircle}>
           <IconSymbol name="sparkles" size={44} color={BuddhistPrayerColors.goldPrimary} />
         </View>
@@ -108,11 +134,12 @@ export default function ARIntroScreen() {
         <View style={styles.actions}>
           <GoldButton
             title={selectedOption.actionLabel}
+            disabled={!resolvedChantSlug}
             onPress={() => router.push('/tradition/buddhist-prayer/ar-scan')}
           />
           <GoldButton title="Go Back" variant="ghost" onPress={() => router.back()} />
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -126,10 +153,11 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     paddingHorizontal: BuddhistPrayerSpacing.lg,
+    paddingTop: BuddhistPrayerSpacing.lg,
     gap: BuddhistPrayerSpacing.sm,
   },
   iconCircle: {
@@ -141,6 +169,7 @@ const styles = StyleSheet.create({
     borderColor: BuddhistPrayerColors.goldBorder,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: BuddhistPrayerSpacing.sm,
     marginBottom: BuddhistPrayerSpacing.xs,
   },
   emoji: {

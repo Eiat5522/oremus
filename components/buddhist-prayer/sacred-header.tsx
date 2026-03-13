@@ -1,5 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { BuddhistPrayerColors, BuddhistPrayerSpacing } from '@/constants/buddhist-prayer/theme';
@@ -19,8 +21,15 @@ export function SacredHeader({
   onBack,
   rightElement,
 }: SacredHeaderProps) {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: insets.top + BuddhistPrayerSpacing.sm },
+      ]}
+    >
       <View style={styles.row}>
         {showBackButton ? (
           <Pressable
@@ -47,7 +56,6 @@ export function SacredHeader({
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: BuddhistPrayerSpacing.md,
     paddingBottom: BuddhistPrayerSpacing.sm,
   },
   row: {
