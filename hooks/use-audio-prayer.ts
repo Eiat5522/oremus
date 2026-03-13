@@ -3,16 +3,16 @@ import { useCallback, useEffect } from 'react';
 
 import { useBuddhistPrayerStore } from './use-buddhist-prayer-store';
 
-// TODO: Add actual audio assets to assets/sounds/ and replace placeholders:
-//   namo_tassa: require('@/assets/sounds/namo_tassa.mp3')
-//   temple_bell: require('@/assets/sounds/temple_bell.mp3')
+const CHANT_AUDIO_SOURCE = require('@/assets/audio/namo_tassa.mp3');
+const TEMPLE_BELL_AUDIO_SOURCE = require('@/assets/audio/temple_bell.mp3');
 
 export function useAudioPrayer() {
   const { isAudioEnabled, templeBellEnabled } = useBuddhistPrayerStore();
 
-  // Using existing metta.wav as placeholder for chant audio
-  const chantAudio = useAudioPlayer(require('@/assets/sounds/metta.wav'));
+  const chantAudio = useAudioPlayer(CHANT_AUDIO_SOURCE);
   const chantStatus = useAudioPlayerStatus(chantAudio);
+  const templeBellAudio = useAudioPlayer(TEMPLE_BELL_AUDIO_SOURCE);
+  const templeBellStatus = useAudioPlayerStatus(templeBellAudio);
 
   const isReleasedPlayerError = useCallback((error: unknown): boolean => {
     if (!(error instanceof Error)) return false;
@@ -26,13 +26,16 @@ export function useAudioPrayer() {
   const safePlay = useCallback(async () => {
     if (!isAudioEnabled) return;
     try {
+      if (chantStatus.duration > 0 && chantStatus.currentTime >= chantStatus.duration) {
+        await chantAudio.seekTo(0);
+      }
       chantAudio.play();
     } catch (error) {
       if (!isReleasedPlayerError(error)) {
         console.warn('Could not play chant audio:', error);
       }
     }
-  }, [chantAudio, isAudioEnabled, isReleasedPlayerError]);
+  }, [chantAudio, chantStatus.currentTime, chantStatus.duration, isAudioEnabled, isReleasedPlayerError]);
 
   const safePause = useCallback(() => {
     try {
@@ -44,26 +47,61 @@ export function useAudioPrayer() {
     }
   }, [chantAudio, isReleasedPlayerError]);
 
+  const safePauseTempleBell = useCallback(() => {
+    try {
+      templeBellAudio.pause();
+    } catch (error) {
+      if (!isReleasedPlayerError(error)) {
+        console.warn('Could not pause temple bell audio:', error);
+      }
+    }
+  }, [isReleasedPlayerError, templeBellAudio]);
+
+  const playTempleBell = useCallback(async () => {
+    if (!isAudioEnabled || !templeBellEnabled) return;
+
+    try {
+      if (templeBellStatus.currentTime > 0) {
+        await templeBellAudio.seekTo(0);
+      }
+      templeBellAudio.play();
+    } catch (error) {
+      if (!isReleasedPlayerError(error)) {
+        console.warn('Could not play temple bell audio:', error);
+      }
+    }
+  }, [
+    isAudioEnabled,
+    isReleasedPlayerError,
+    templeBellAudio,
+    templeBellEnabled,
+    templeBellStatus.currentTime,
+  ]);
+
   // Respond to session audio toggle
   useEffect(() => {
     if (!isAudioEnabled && chantStatus.playing) {
       safePause();
     }
-  }, [isAudioEnabled, chantStatus.playing, safePause]);
+    if (!isAudioEnabled && templeBellStatus.playing) {
+      safePauseTempleBell();
+    }
+  }, [isAudioEnabled, chantStatus.playing, safePause, safePauseTempleBell, templeBellStatus.playing]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       safePause();
+      safePauseTempleBell();
     };
-  }, [safePause]);
+  }, [safePause, safePauseTempleBell]);
 
   return {
-    isAudioAvailable: true, // Could check if audio file loaded successfully
+    isAudioAvailable: true,
     isPlaying: chantStatus.playing,
     play: safePlay,
     pause: safePause,
-    // TODO: Add temple bell one-shot play when templeBellEnabled
+    playTempleBell,
     templeBellEnabled,
   };
 }

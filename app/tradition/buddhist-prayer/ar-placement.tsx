@@ -48,7 +48,6 @@ export default function ARPlacementScreen() {
         <BuddhistAltar3D
           scale={placementScale}
           rotation={placementRotation}
-          showHalo={false}
           style={styles.altar}
         />
       </View>
