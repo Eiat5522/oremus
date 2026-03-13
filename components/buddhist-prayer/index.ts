@@ -7,6 +7,7 @@ export { GoldButton } from './gold-button';
 export { IconToggleRow } from './icon-toggle-row';
 export { MeritOptionCard } from './merit-option-card';
 export { PlacementControls } from './placement-controls';
+export { Altar3DPlaceholder } from './altar-3d-placeholder';
 export { ProgressPill } from './progress-pill';
 export { SacredHeader } from './sacred-header';
 export { ScanOverlay } from './scan-overlay';

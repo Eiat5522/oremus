@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { DEFAULT_ALTAR_EXPERIENCE_MODE } from '@/constants/buddhist-prayer/altar-experience';
+import { getChantBySlug } from '@/lib/chant-helpers';
 import type {
   AltarExperienceMode,
   MeritOption,
@@ -112,8 +113,7 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>()(
       updatePlacementScale: (scale) =>
         set({ placementScale: Math.max(0.5, Math.min(3.0, scale)) }),
 
-      updatePlacementRotation: (rotation) =>
-        set({ placementRotation: normalizeRotation(rotation) }),
+      updatePlacementRotation: (rotation) => set({ placementRotation: normalizeRotation(rotation) }),
 
       resetPlacement: () =>
         set({ altarPlaced: false, placementScale: 1.0, placementRotation: 0, scanStatus: 'idle' }),
@@ -121,7 +121,7 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>()(
       startPreparation: (chantSlug, isAR = false) =>
         set({
           currentChantSlug: chantSlug,
-          currentChantId: chantSlug,
+          currentChantId: getChantBySlug(chantSlug)?.id ?? chantSlug,
           currentVerseIndex: 0,
           isARMode: isAR,
           isPlaying: false,
@@ -179,28 +179,6 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>()(
     {
       name: 'buddhist-prayer-store',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state) => ({
-        currentChantSlug: state.currentChantSlug,
-        currentChantId: state.currentChantId,
-        currentVerseIndex: state.currentVerseIndex,
-        isPlaying: state.isPlaying,
-        isPaused: state.isPaused,
-        isAudioEnabled: state.isAudioEnabled,
-        showMeaning: state.showMeaning,
-        autoScroll: state.autoScroll,
-        templeBellEnabled: state.templeBellEnabled,
-        isARMode: state.isARMode,
-        sessionStartedAt: state.sessionStartedAt,
-        sessionCompletedAt: state.sessionCompletedAt,
-        meritOption: state.meritOption,
-        dedicationNote: state.dedicationNote,
-        altarPlaced: state.altarPlaced,
-        placementScale: state.placementScale,
-        placementRotation: state.placementRotation,
-        scanStatus: state.scanStatus,
-        altarExperienceMode: state.altarExperienceMode,
-        error: state.error,
-      }),
     },
   ),
 );
