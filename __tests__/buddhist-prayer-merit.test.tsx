@@ -1,3 +1,7 @@
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
+);
+
 import { fireEvent, render } from '@testing-library/react-native';
 
 import { useBuddhistPrayerStore } from '@/hooks/use-buddhist-prayer-store';

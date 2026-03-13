@@ -154,7 +154,7 @@ export default function ChantLibraryScreen() {
                       router.push({
                         pathname: '/tradition/buddhist-prayer/preparation',
                         params: {
-                          chantId: chant.id,
+                          chantSlug: chant.slug,
                           ...(intent === 'learn' ? { intent: 'learn' } : {}),
                         },
                       })
