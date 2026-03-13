@@ -12,6 +12,11 @@ export function useChantSession() {
     [store.currentChantSlug],
   );
 
+  const currentChantId = useMemo(
+    () => currentChant?.id ?? store.currentChantId,
+    [currentChant?.id, store.currentChantId],
+  );
+
   const currentVerse = useMemo(
     () => currentChant?.verses[store.currentVerseIndex] ?? null,
     [currentChant, store.currentVerseIndex],
@@ -47,6 +52,7 @@ export function useChantSession() {
 
   return {
     ...store,
+    currentChantId,
     currentChant: currentChant ?? null,
     currentVerse,
     hasNextVerse,

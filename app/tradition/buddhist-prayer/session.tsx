@@ -1,5 +1,5 @@
 import { Stack, useRouter } from 'expo-router';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import {
@@ -11,6 +11,7 @@ import {
 import { ThemedText } from '@/components/themed-text';
 import { BuddhistPrayerColors, BuddhistPrayerSpacing } from '@/constants/buddhist-prayer/theme';
 import { useChantAutoAdvance } from '@/hooks/use-chant-auto-advance';
+import { useAudioPrayer } from '@/hooks/use-audio-prayer';
 import { useChantSession } from '@/hooks/use-chant-session';
 
 export default function ChantSessionScreen() {
@@ -33,6 +34,9 @@ export default function ChantSessionScreen() {
     pauseSession,
     resumeSession,
   } = useChantSession();
+  const { play, pause, playTempleBell } = useAudioPrayer();
+  const previousIsPlayingRef = useRef(isPlaying);
+  const previousVerseIndexRef = useRef(currentVerseIndex);
 
   const isLastVerse = !hasNextVerse;
   const autoAdvanceDurationMs = useMemo(() => {
@@ -49,6 +53,8 @@ export default function ChantSessionScreen() {
 
   const handleNext = () => {
     if (isLastVerse) {
+      playTempleBell();
+      pause();
       router.push('/tradition/buddhist-prayer/merit');
     } else {
       nextVerse(totalVerses);
@@ -63,6 +69,42 @@ export default function ChantSessionScreen() {
     durationMs: autoAdvanceDurationMs,
     onAdvance: handleNext,
   });
+
+  // Ambient chant playback tied to session play state
+  useEffect(() => {
+    if (!currentChant || !currentVerse) return;
+
+    if (isPlaying && !previousIsPlayingRef.current) {
+      playTempleBell();
+      void play();
+    }
+
+    if (!isPlaying && previousIsPlayingRef.current) {
+      pause();
+    }
+
+    previousIsPlayingRef.current = isPlaying;
+  }, [currentChant, currentVerse, isPlaying, pause, play, playTempleBell]);
+
+  // Bell + restart on verse transitions while playing
+  useEffect(() => {
+    if (!isPlaying) {
+      previousVerseIndexRef.current = currentVerseIndex;
+      return;
+    }
+
+    if (currentVerseIndex !== previousVerseIndexRef.current) {
+      previousVerseIndexRef.current = currentVerseIndex;
+      playTempleBell();
+      void play();
+    }
+  }, [currentVerseIndex, isPlaying, play, playTempleBell]);
+
+  const handleReplay = () => {
+    playTempleBell();
+    void play();
+    replayVerse();
+  };
 
   if (!currentChant || !currentVerse) {
     return (
@@ -117,7 +159,7 @@ export default function ChantSessionScreen() {
           onPause={pauseSession}
           onPrevious={previousVerse}
           onNext={handleNext}
-          onReplay={replayVerse}
+          onReplay={handleReplay}
         />
         {isLastVerse ? (
           <ThemedText style={styles.lastVerseHint}>Tap ▶▶ to dedicate your merit</ThemedText>

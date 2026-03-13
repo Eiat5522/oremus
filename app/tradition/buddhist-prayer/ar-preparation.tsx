@@ -17,7 +17,7 @@ export default function ARPreparationScreen() {
   const router = useRouter();
 
   const {
-    currentChantId,
+    currentChantSlug,
     placementScale,
     placementRotation,
     showMeaning,

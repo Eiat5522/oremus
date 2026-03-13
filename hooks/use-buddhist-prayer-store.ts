@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { DEFAULT_ALTAR_EXPERIENCE_MODE } from '@/constants/buddhist-prayer/altar-experience';
+import { getChantBySlug } from '@/lib/chant-helpers';
 import type {
   AltarExperienceMode,
   MeritOption,
@@ -12,6 +13,7 @@ import type {
 interface BuddhistPrayerState {
   // Session
   currentChantSlug: string | null;
+  currentChantId: string | null;
   currentVerseIndex: number;
   isPlaying: boolean;
   isPaused: boolean;
@@ -75,6 +77,7 @@ const normalizeRotation = (rotation: number) => ((rotation % 360) + 360) % 360;
 
 const initialState: BuddhistPrayerState = {
   currentChantSlug: null,
+  currentChantId: null,
   currentVerseIndex: 0,
   isPlaying: false,
   isPaused: false,
@@ -109,7 +112,7 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>()(
 
       updatePlacementScale: (scale) => set({ placementScale: Math.max(0.5, Math.min(3.0, scale)) }),
 
-  updatePlacementRotation: (rotation) => set({ placementRotation: normalizeRotation(rotation) }),
+      updatePlacementRotation: (rotation) => set({ placementRotation: normalizeRotation(rotation) }),
 
       resetPlacement: () =>
         set({ altarPlaced: false, placementScale: 1.0, placementRotation: 0, scanStatus: 'idle' }),
@@ -117,6 +120,7 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>()(
       startPreparation: (chantSlug, isAR = false) =>
         set({
           currentChantSlug: chantSlug,
+          currentChantId: getChantBySlug(chantSlug)?.id ?? chantSlug,
           currentVerseIndex: 0,
           isARMode: isAR,
           isPlaying: false,
@@ -166,7 +170,13 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>()(
 
       setDedicationNote: (note) => set({ dedicationNote: note }),
 
-  setAltarExperienceMode: (mode) => set({ altarExperienceMode: mode, error: null }),
+      setAltarExperienceMode: (mode) => set({ altarExperienceMode: mode, error: null }),
 
-  setError: (error) => set({ error }),
-}));
+      setError: (error) => set({ error }),
+    }),
+    {
+      name: 'buddhist-prayer-store',
+      storage: createJSONStorage(() => AsyncStorage),
+    },
+  ),
+);

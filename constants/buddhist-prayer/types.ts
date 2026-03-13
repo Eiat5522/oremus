@@ -12,7 +12,6 @@ export interface ChantVerse {
   english: string;
   transliteration?: string;
   meaning?: string;
-  audioCue?: string;
 }
 
 export interface Chant {
