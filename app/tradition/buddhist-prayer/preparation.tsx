@@ -1,5 +1,5 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { GlassCard, GoldButton, IconToggleRow, SacredHeader } from '@/components/buddhist-prayer';
@@ -10,13 +10,14 @@ import { useBuddhistPrayerStore } from '@/hooks/use-buddhist-prayer-store';
 
 export default function ChantPreparationScreen() {
   const router = useRouter();
-  const { chantId } = useLocalSearchParams<{ chantId?: string }>();
+  const { chantId, intent } = useLocalSearchParams<{ chantId?: string; intent?: string }>();
 
   const {
     showMeaning,
     autoScroll,
     isAudioEnabled,
     templeBellEnabled,
+    setShowMeaning,
     toggleMeaning,
     toggleAutoScroll,
     toggleAudio,
@@ -29,6 +30,12 @@ export default function ChantPreparationScreen() {
     () => (chantId ? CHANTS.find((c) => c.id === chantId) : null) ?? CHANTS[0] ?? null,
     [chantId],
   );
+
+  useEffect(() => {
+    if (intent === 'learn') {
+      setShowMeaning(true);
+    }
+  }, [intent, setShowMeaning]);
 
   const handleBeginChanting = () => {
     if (!chant) return;

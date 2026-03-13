@@ -41,6 +41,7 @@ export interface ChantSessionState {
   sessionStartedAt: number | null;
   sessionCompletedAt: number | null;
   meritOption: MeritOption | null;
+  dedicationNote: string;
   altarPlaced: boolean;
   placementScale: number;
   placementRotation: number;

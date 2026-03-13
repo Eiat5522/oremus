@@ -84,7 +84,7 @@ export default function CompletionScreen() {
         <View style={styles.actions}>
           <GoldButton
             title="Return Home"
-            onPress={() => router.push('/tradition/buddhist-prayer')}
+            onPress={() => router.replace('/tradition/buddhist-prayer')}
           />
           <GoldButton
             title="Meditate"
@@ -95,7 +95,7 @@ export default function CompletionScreen() {
             title="Chant Again"
             variant="ghost"
             onPress={() =>
-              router.push({
+              router.replace({
                 pathname: '/tradition/buddhist-prayer/preparation',
                 params: { chantId: currentChantId ?? '' },
               })

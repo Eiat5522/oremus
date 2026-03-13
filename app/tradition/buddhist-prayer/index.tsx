@@ -1,25 +1,31 @@
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useRouter } from 'expo-router';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { GlassCard, GoldButton, SacredHeader } from '@/components/buddhist-prayer';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { CHANTS } from '@/constants/buddhist-prayer/chants';
+import { CHANT_CATEGORIES, CHANTS } from '@/constants/buddhist-prayer/chants';
 import {
   BuddhistPrayerColors,
   BuddhistPrayerRadius,
   BuddhistPrayerSpacing,
 } from '@/constants/buddhist-prayer/theme';
-import { formatDuration, getFeaturedChants } from '@/lib/chant-helpers';
+import { useBuddhistPrayerStore } from '@/hooks/use-buddhist-prayer-store';
+import {
+  getCategoryRoute,
+  getHomeSessionCardState,
+  getQuickActionRoute,
+} from '@/lib/buddhist-prayer-home';
+import { formatDuration, getChantById, getFeaturedChants } from '@/lib/chant-helpers';
 
 const QUICK_ACTIONS = [
-  { id: 'ar', icon: 'sparkles' as const, label: 'AR Prayer', route: 'ar-intro' },
-  { id: 'chant', icon: 'music.note' as const, label: 'Daily Chant', route: 'library' },
-  { id: 'merit', icon: 'hands.sparkles' as const, label: 'Merit', route: 'merit' },
-  { id: 'learn', icon: 'book.fill' as const, label: 'Learn', route: 'library' },
+  { id: 'ar', icon: 'sparkles' as const, label: 'AR Prayer' },
+  { id: 'chant', icon: 'music.note' as const, label: 'Daily Chant' },
+  { id: 'merit', icon: 'hands.sparkles' as const, label: 'Merit' },
+  { id: 'learn', icon: 'book.fill' as const, label: 'Learn' },
 ] as const;
 
 const _featuredChants = getFeaturedChants();
@@ -27,6 +33,23 @@ const featuredChants = _featuredChants.length > 0 ? _featuredChants : CHANTS.sli
 
 export default function BuddhistPrayerHomeScreen() {
   const router = useRouter();
+  const { currentChantId, currentVerseIndex, sessionStartedAt, sessionCompletedAt, resetSession } =
+    useBuddhistPrayerStore();
+
+  const currentChant = useMemo(
+    () => (currentChantId ? (getChantById(currentChantId) ?? null) : null),
+    [currentChantId],
+  );
+  const sessionCard = useMemo(
+    () =>
+      getHomeSessionCardState({
+        chant: currentChant,
+        currentVerseIndex,
+        sessionStartedAt,
+        sessionCompletedAt,
+      }),
+    [currentChant, currentVerseIndex, sessionCompletedAt, sessionStartedAt],
+  );
 
   const handleChantPress = useCallback(
     (chantId: string) => {
@@ -37,6 +60,26 @@ export default function BuddhistPrayerHomeScreen() {
     },
     [router],
   );
+  const handleQuickActionPress = useCallback(
+    (actionId: (typeof QUICK_ACTIONS)[number]['id']) => {
+      const target = getQuickActionRoute(actionId);
+      router.push(target as never);
+    },
+    [router],
+  );
+  const handleCategoryPress = useCallback(
+    (category: (typeof CHANT_CATEGORIES)[number]['id']) => {
+      router.push(getCategoryRoute(category) as never);
+    },
+    [router],
+  );
+  const handleSessionPress = useCallback(() => {
+    if (!sessionCard) {
+      return;
+    }
+
+    router.push(sessionCard.primaryRoute as never);
+  }, [router, sessionCard]);
 
   return (
     <View style={styles.container}>
@@ -74,6 +117,54 @@ export default function BuddhistPrayerHomeScreen() {
           </View>
         </GlassCard>
 
+        {CHANT_CATEGORIES.length > 0 ? (
+          <>
+            <View style={styles.sectionHeader}>
+              <ThemedText style={styles.sectionTitle}>Practice Categories</ThemedText>
+            </View>
+            <View style={styles.categoryGrid}>
+              {CHANT_CATEGORIES.map((category) => (
+                <Pressable
+                  key={category.id}
+                  style={({ pressed }) => [
+                    styles.categoryCard,
+                    pressed ? styles.cardPressed : null,
+                  ]}
+                  onPress={() => handleCategoryPress(category.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel={category.label}
+                >
+                  <ThemedText style={styles.categoryCardLabel}>{category.label}</ThemedText>
+                  <ThemedText style={styles.categoryCardDescription} numberOfLines={2}>
+                    {category.description}
+                  </ThemedText>
+                </Pressable>
+              ))}
+            </View>
+          </>
+        ) : null}
+
+        {sessionCard ? (
+          <GlassCard style={styles.sessionCard}>
+            <View style={styles.sessionCardHeader}>
+              <ThemedText style={styles.sectionTitle}>{sessionCard.eyebrow}</ThemedText>
+              <View style={styles.sessionBadge}>
+                <ThemedText style={styles.sessionBadgeText}>{sessionCard.progressLabel}</ThemedText>
+              </View>
+            </View>
+            <ThemedText style={styles.sessionTitle}>{sessionCard.title}</ThemedText>
+            <ThemedText style={styles.sessionDescription}>{sessionCard.description}</ThemedText>
+            <View style={styles.sessionActions}>
+              <GoldButton title={sessionCard.primaryLabel} onPress={handleSessionPress} />
+              <GoldButton
+                title={sessionCard.secondaryLabel}
+                variant="ghost"
+                onPress={resetSession}
+              />
+            </View>
+          </GlassCard>
+        ) : null}
+
         {/* Quick Actions */}
         <View style={styles.sectionHeader}>
           <ThemedText style={styles.sectionTitle}>Quick Actions</ThemedText>
@@ -82,8 +173,8 @@ export default function BuddhistPrayerHomeScreen() {
           {QUICK_ACTIONS.map((action) => (
             <Pressable
               key={action.id}
-              style={({ pressed }) => [styles.actionCard, pressed && styles.actionCardPressed]}
-              onPress={() => router.push(`/tradition/buddhist-prayer/${action.route}` as never)}
+              style={({ pressed }) => [styles.actionCard, pressed ? styles.cardPressed : null]}
+              onPress={() => handleQuickActionPress(action.id)}
               accessibilityRole="button"
               accessibilityLabel={action.label}
             >
@@ -173,6 +264,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: BuddhistPrayerSpacing.sm,
   },
+  categoryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: BuddhistPrayerSpacing.sm,
+  },
+  categoryCard: {
+    width: '48%',
+    backgroundColor: BuddhistPrayerColors.card,
+    borderWidth: 1,
+    borderColor: BuddhistPrayerColors.cardBorder,
+    borderRadius: BuddhistPrayerRadius.md,
+    padding: BuddhistPrayerSpacing.md,
+    gap: BuddhistPrayerSpacing.xs,
+  },
+  categoryCardLabel: {
+    color: BuddhistPrayerColors.goldPrimary,
+    fontSize: 13,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+  categoryCardDescription: {
+    color: BuddhistPrayerColors.textSecondary,
+    fontSize: 12,
+    lineHeight: 18,
+  },
   actionCard: {
     flex: 1,
     backgroundColor: BuddhistPrayerColors.card,
@@ -183,7 +300,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: BuddhistPrayerSpacing.xs,
   },
-  actionCardPressed: {
+  cardPressed: {
     opacity: 0.7,
   },
   actionLabel: {
@@ -194,6 +311,39 @@ const styles = StyleSheet.create({
   },
   chantList: {
     gap: BuddhistPrayerSpacing.sm,
+  },
+  sessionCard: {
+    gap: BuddhistPrayerSpacing.sm,
+  },
+  sessionCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: BuddhistPrayerSpacing.sm,
+  },
+  sessionBadge: {
+    backgroundColor: 'rgba(224,185,110,0.12)',
+    borderRadius: BuddhistPrayerRadius.full,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  sessionBadgeText: {
+    color: BuddhistPrayerColors.goldPrimary,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  sessionTitle: {
+    color: BuddhistPrayerColors.textPrimary,
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  sessionDescription: {
+    color: BuddhistPrayerColors.textSecondary,
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  sessionActions: {
+    gap: BuddhistPrayerSpacing.xs,
   },
   chantCard: {
     gap: BuddhistPrayerSpacing.xs,

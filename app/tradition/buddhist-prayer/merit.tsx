@@ -1,6 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { GoldButton, MeritOptionCard, SacredHeader } from '@/components/buddhist-prayer';
 import { ThemedText } from '@/components/themed-text';
@@ -33,7 +33,8 @@ const MERIT_OPTIONS: { option: MeritOption; label: string; description: string }
 
 export default function MeritDedicationScreen() {
   const router = useRouter();
-  const { meritOption, selectMeritOption } = useBuddhistPrayerStore();
+  const { dedicationNote, meritOption, selectMeritOption, setDedicationNote } =
+    useBuddhistPrayerStore();
 
   return (
     <View style={styles.container}>
@@ -59,6 +60,20 @@ export default function MeritDedicationScreen() {
               onSelect={() => selectMeritOption(option)}
             />
           ))}
+        </View>
+
+        <View style={styles.noteSection}>
+          <ThemedText style={styles.noteLabel}>Optional dedication note</ThemedText>
+          <TextInput
+            style={styles.noteInput}
+            value={dedicationNote}
+            onChangeText={setDedicationNote}
+            placeholder="Offer a name, prayer, or intention…"
+            placeholderTextColor={BuddhistPrayerColors.textMuted}
+            multiline
+            numberOfLines={3}
+            textAlignVertical="top"
+          />
         </View>
 
         <GoldButton
@@ -92,5 +107,27 @@ const styles = StyleSheet.create({
   },
   optionsList: {
     gap: BuddhistPrayerSpacing.sm,
+  },
+  noteSection: {
+    gap: BuddhistPrayerSpacing.xs,
+  },
+  noteLabel: {
+    color: BuddhistPrayerColors.textSecondary,
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  noteInput: {
+    minHeight: 112,
+    backgroundColor: BuddhistPrayerColors.card,
+    borderWidth: 1,
+    borderColor: BuddhistPrayerColors.cardBorder,
+    borderRadius: 18,
+    paddingHorizontal: BuddhistPrayerSpacing.md,
+    paddingVertical: BuddhistPrayerSpacing.sm,
+    color: BuddhistPrayerColors.textPrimary,
+    fontSize: 14,
+    lineHeight: 22,
   },
 });
