@@ -34,6 +34,8 @@ export default function ARChantScreen() {
   } = useChantSession();
 
   const isLastVerse = !hasNextVerse;
+  const altarGlowIntensity =
+    1 + progress * 0.3 + ((currentVerseIndex + 1) / Math.max(totalVerses, 1)) * 0.2;
 
   useEffect(() => {
     if (!currentChant) {
@@ -78,7 +80,13 @@ export default function ARChantScreen() {
 
       {/* Altar — top 40% */}
       <View style={styles.altarArea}>
-        <Altar3DPlaceholder showHalo style={styles.altar} />
+        <Altar3DPlaceholder
+          showHalo
+          showIncenseSmoke
+          glowIntensity={altarGlowIntensity}
+          animated={isPlaying}
+          style={styles.altar}
+        />
       </View>
 
       {/* Verse content */}

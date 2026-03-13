@@ -34,9 +34,12 @@ export default function ARPlacementScreen() {
 
       <View style={styles.altarArea}>
         <Altar3DPlaceholder
+          showHalo={false}
+          showIncenseSmoke={false}
+          glowIntensity={0.9}
+          animated={false}
           scale={placementScale}
           rotation={placementRotation}
-          showHalo={false}
           style={styles.altar}
         />
       </View>

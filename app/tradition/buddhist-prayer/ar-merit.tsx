@@ -48,7 +48,13 @@ export default function ARMeritScreen() {
 
       {/* Altar — top 35%, background feel */}
       <View style={styles.altarArea}>
-        <Altar3DPlaceholder showHalo={false} style={styles.altar} />
+        <Altar3DPlaceholder
+          showHalo={false}
+          showIncenseSmoke
+          glowIntensity={0.85}
+          animated={false}
+          style={styles.altar}
+        />
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>

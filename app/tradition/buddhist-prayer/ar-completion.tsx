@@ -53,7 +53,13 @@ export default function ARCompletionScreen() {
 
       {/* Altar — small at top */}
       <View style={styles.altarArea}>
-        <Altar3DPlaceholder showHalo style={styles.altar} />
+        <Altar3DPlaceholder
+          showHalo
+          showIncenseSmoke
+          glowIntensity={1.1}
+          animated
+          style={styles.altar}
+        />
       </View>
 
       <View style={styles.content}>
