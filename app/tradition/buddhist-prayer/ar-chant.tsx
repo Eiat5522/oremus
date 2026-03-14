@@ -200,9 +200,17 @@ const styles = StyleSheet.create({
     width: '100%',
     aspectRatio: 1,
   },
-  overlayArea: {
+  verseContainer: {
     flex: 1,
     justifyContent: 'center',
+    paddingHorizontal: BuddhistPrayerSpacing.md,
+    gap: BuddhistPrayerSpacing.sm,
+  },
+  textBlock: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  controlsContainer: {
     paddingHorizontal: BuddhistPrayerSpacing.md,
     paddingBottom: BuddhistPrayerSpacing.xl,
     gap: BuddhistPrayerSpacing.sm,

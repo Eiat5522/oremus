@@ -6,6 +6,7 @@ import { type SavedPrayerLocation, PRAYER_LOCATION_PRESETS } from '@/lib/islam-p
 
 type PrayerLocationSettingsCardProps = {
   canAskLocationPermission: boolean;
+  isResolvingPrayerTimes?: boolean;
   isRequestingLocationPermission: boolean;
   isUsingDeviceLocation: boolean;
   locationError: string | null;
@@ -21,6 +22,7 @@ type PrayerLocationSettingsCardProps = {
 
 export function PrayerLocationSettingsCard({
   canAskLocationPermission,
+  isResolvingPrayerTimes = false,
   isRequestingLocationPermission,
   isUsingDeviceLocation,
   locationError,
@@ -33,14 +35,19 @@ export function PrayerLocationSettingsCard({
   clearSavedPrayerLocation,
   showPresets = false,
 }: PrayerLocationSettingsCardProps) {
-  const visibleLocationError = savedPrayerLocation && !isUsingDeviceLocation ? null : locationError;
-  const locationCopy = isUsingDeviceLocation
-    ? `Using device location: ${locationText}`
-    : savedPrayerLocation
-      ? `Using saved location: ${savedPrayerLocation.label}`
-      : showPresets
-        ? 'Allow location services for automatic prayer times, or choose a preset city if location access is unavailable.'
-        : 'Allow location services to calculate prayer times on this page. Preset fallback locations are managed from your profile settings.';
+  const visibleLocationError =
+    isResolvingPrayerTimes || (savedPrayerLocation && !isUsingDeviceLocation) ? null : locationError;
+  const locationCopy = isResolvingPrayerTimes
+    ? savedPrayerLocation
+      ? `Calculating exact prayer times for ${savedPrayerLocation.label}...`
+      : 'Calculating exact prayer times for your selected location...'
+    : isUsingDeviceLocation
+      ? `Using device location: ${locationText}`
+      : savedPrayerLocation
+        ? `Using saved location: ${savedPrayerLocation.label}`
+        : showPresets
+          ? 'Allow location services for automatic prayer times, or choose a preset city if location access is unavailable.'
+          : 'Allow location services to calculate prayer times on this page. Preset fallback locations are managed from your profile settings.';
 
   return (
     <View style={styles.card}>

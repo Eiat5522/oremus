@@ -110,10 +110,10 @@ export const useBuddhistPrayerStore = create<BuddhistPrayerStore>()(
 
       placeAltar: () => set({ altarPlaced: true, scanStatus: 'placed' }),
 
-      updatePlacementScale: (scale) =>
-        set({ placementScale: Math.max(0.5, Math.min(3.0, scale)) }),
+      updatePlacementScale: (scale) => set({ placementScale: Math.max(0.5, Math.min(3.0, scale)) }),
 
-      updatePlacementRotation: (rotation) => set({ placementRotation: normalizeRotation(rotation) }),
+      updatePlacementRotation: (rotation) =>
+        set({ placementRotation: normalizeRotation(rotation) }),
 
       resetPlacement: () =>
         set({ altarPlaced: false, placementScale: 1.0, placementRotation: 0, scanStatus: 'idle' }),

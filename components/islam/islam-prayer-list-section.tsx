@@ -37,11 +37,6 @@ type SelectedPrayer = {
 };
 
 function getDisplayStatusText(
-  prayer: {
-    name: PrayerName;
-    label: string;
-    time: Date;
-  },
   status: PrayerRowModel['status'],
   countdownText: string,
 ) {
@@ -108,7 +103,6 @@ export function IslamPrayerListSection() {
     selectSavedPrayerLocation,
     clearSavedPrayerLocation,
     isUsingDeviceLocation,
-    togglePrayerCompletion,
     todayRescheduled,
     reschedulePrayer,
     refreshPrayerData,
@@ -239,15 +233,6 @@ export function IslamPrayerListSection() {
     [isToday, now, todayCompletion, todayPrayers, todayRescheduled],
   );
 
-  const handlePrimaryPress = useCallback(
-    (prayer: SelectedPrayer) => {
-      if (!isPrayerLocked(prayer)) {
-        togglePrayerCompletion(prayer.name);
-      }
-    },
-    [isPrayerLocked, togglePrayerCompletion],
-  );
-
   const handleOpenActions = useCallback((prayer: SelectedPrayer) => {
     shouldOpenActionSheetRef.current = true;
     setSelectedPrayer(prayer);
@@ -311,7 +296,7 @@ export function IslamPrayerListSection() {
         label: prayer.label,
         formattedTime: formatTime(displayTime),
         status,
-        secondaryLabel: getDisplayStatusText(prayer, status, countdownText),
+        secondaryLabel: getDisplayStatusText(status, countdownText),
         isRescheduled: Boolean(rescheduled),
         isReminderActive: Array.from(activeReminders).some((reminderId) =>
           reminderId.startsWith(`${prayer.name}:`),
@@ -335,6 +320,8 @@ export function IslamPrayerListSection() {
     locationPermissionStatus !== 'granted' &&
     !savedPrayerLocation &&
     (locationText === 'Permission required' || locationText === 'Location access required');
+  const isResolvingPrayerTimes =
+    Boolean(savedPrayerLocation) && !isUsingDeviceLocation && todayPrayers.length === 0;
 
   return (
     <PrayerAtmosphere>
@@ -366,6 +353,7 @@ export function IslamPrayerListSection() {
         <PrayerLocationSettingsCard
           canAskLocationPermission={canAskLocationPermission}
           clearSavedPrayerLocation={clearSavedPrayerLocation}
+          isResolvingPrayerTimes={isResolvingPrayerTimes}
           isRequestingLocationPermission={isRequestingLocationPermission}
           isUsingDeviceLocation={isUsingDeviceLocation}
           locationError={locationError}
@@ -392,9 +380,6 @@ export function IslamPrayerListSection() {
                 prayer={row}
                 onActionPress={() =>
                   handleOpenActions({ name: row.name, label: row.label, time: selectedTime })
-                }
-                onStatusPress={() =>
-                  handlePrimaryPress({ name: row.name, label: row.label, time: selectedTime })
                 }
                 onLongPress={() =>
                   handleOpenActions({ name: row.name, label: row.label, time: selectedTime })
@@ -462,9 +447,7 @@ export function IslamPrayerListSection() {
 
       <PrayerActionSheet
         ref={actionSheetRef}
-        prayerName={selectedPrayer?.name}
         prayerLabel={selectedPrayer?.label}
-        isCompleted={selectedPrayer ? (todayCompletion[selectedPrayer.name] ?? false) : false}
         isSessionPassed={selectedPrayer ? isPrayerLocked(selectedPrayer) : false}
         onSetNotification={(minutes) => {
           if (selectedPrayer) {
@@ -474,11 +457,6 @@ export function IslamPrayerListSection() {
         onReschedule={() => {
           if (selectedPrayer) {
             setIsRescheduleModalVisible(true);
-          }
-        }}
-        onToggleComplete={() => {
-          if (selectedPrayer) {
-            handlePrimaryPress(selectedPrayer);
           }
         }}
         onClose={() => {

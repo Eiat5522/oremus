@@ -6,7 +6,6 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors, Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import type { PrayerName } from '@/lib/prayer-times';
 
 const REMINDER_OPTIONS = [5, 10, 15, 20, 25, 30];
 
@@ -16,13 +15,10 @@ export interface PrayerActionSheetRef {
 }
 
 type PrayerActionSheetProps = {
-  prayerName?: PrayerName;
   prayerLabel?: string;
-  isCompleted: boolean;
   isSessionPassed?: boolean;
   onSetNotification: (minutes: number) => void;
   onReschedule: () => void;
-  onToggleComplete: () => void;
   onClose?: () => void;
   /** Navigate to the Islamic Prayer Session screen for this prayer. */
   onBeginSession?: () => void;
@@ -31,13 +27,10 @@ type PrayerActionSheetProps = {
 export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSheetProps>(
   (
     {
-      prayerName,
       prayerLabel,
-      isCompleted,
       isSessionPassed = false,
       onSetNotification,
       onReschedule,
-      onToggleComplete,
       onClose,
       onBeginSession,
     },
@@ -109,44 +102,6 @@ export const PrayerActionSheet = forwardRef<PrayerActionSheetRef, PrayerActionSh
               <IconSymbol name="chevron.right" size={18} color="#FFF2CC" />
             </TouchableOpacity>
           ) : null}
-
-          {/* Mark Complete/Incomplete Section */}
-          <TouchableOpacity
-            disabled={isSessionPassed}
-            style={[
-              styles.primaryActionButton,
-              isCompleted ? styles.primaryActionButtonDanger : styles.primaryActionButtonSuccess,
-              isSessionPassed && styles.primaryActionButtonDisabled,
-            ]}
-            onPress={() => {
-              onToggleComplete();
-              bottomSheetRef.current?.close();
-            }}
-          >
-            <View style={styles.primaryActionCopy}>
-              <View
-                style={[
-                  styles.primaryActionIconWrap,
-                  isCompleted
-                    ? styles.primaryActionIconWrapDanger
-                    : styles.primaryActionIconWrapSuccess,
-                ]}
-              >
-                <IconSymbol name={isCompleted ? 'close' : 'checkmark'} size={18} color="#FFF8E8" />
-              </View>
-              <View style={styles.primaryActionTextWrap}>
-                <ThemedText style={styles.primaryActionTitle}>
-                  {isCompleted ? 'Mark Incomplete' : 'Mark Complete'}
-                </ThemedText>
-                <ThemedText style={styles.primaryActionSubtitle}>
-                  {isCompleted
-                    ? 'Move this prayer back to pending.'
-                    : 'Count this prayer as completed.'}
-                </ThemedText>
-              </View>
-            </View>
-            <IconSymbol name="chevron.right" size={18} color="#FFF2CC" />
-          </TouchableOpacity>
 
           {/* Set Notification Section */}
           <View style={styles.section}>

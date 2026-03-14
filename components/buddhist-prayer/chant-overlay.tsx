@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { Animated, StyleSheet, View, type ViewStyle } from 'react-native';
+import { Animated, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import {
@@ -20,7 +20,7 @@ interface ChantOverlayProps {
   controls: React.ReactNode;
   hint?: string;
   tone?: 'standard' | 'ar';
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 }
 
 /**

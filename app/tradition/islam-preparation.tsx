@@ -30,7 +30,9 @@ export default function IslamPreparationScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ prayerName?: string | string[] }>();
-  const prayerNameParam = Array.isArray(params.prayerName) ? params.prayerName[0] : params.prayerName;
+  const prayerNameParam = Array.isArray(params.prayerName)
+    ? params.prayerName[0]
+    : params.prayerName;
   const { defaultSessionPrayer } = useIslamPrayerData();
 
   const resolvedPrayerName = useMemo<PrayerName>(() => {

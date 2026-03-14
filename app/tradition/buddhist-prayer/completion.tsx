@@ -84,10 +84,7 @@ export default function CompletionScreen() {
 
         {/* Actions */}
         <View style={styles.actions}>
-          <GoldButton
-            title="Return Home"
-            onPress={() => router.replace('/tradition/buddhist-prayer')}
-          />
+          <GoldButton title="Return Home" onPress={() => router.replace('/tradition/buddhist')} />
           <GoldButton
             title="Meditate"
             variant="outline"

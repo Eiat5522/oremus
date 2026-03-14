@@ -39,6 +39,7 @@ export default function ProfileScreen() {
   const prayerLocationSettings = usePrayerLocationSettings({ enabled: isIslam });
   const isImmersiveTradition =
     tradition === null ||
+    tradition === 'general' ||
     tradition === 'islam' ||
     tradition === 'buddhism' ||
     tradition === 'christianity';
@@ -510,6 +511,8 @@ function SettingItem({
   themedChevronColor,
   themedTextColor,
 }: SettingItemProps) {
+  const chevronColor = themed ? (themedChevronColor ?? themedTextColor ?? color) : '#64748b';
+
   return (
     <Pressable
       onPress={onPress}
@@ -525,7 +528,7 @@ function SettingItem({
       <ThemedText style={[styles.settingTitle, themed ? { color: themedTextColor } : null]}>
         {title}
       </ThemedText>
-      <IconSymbol name="chevron.right" size={20} color={themed ? themedChevronColor : '#64748b'} />
+      <IconSymbol name="chevron.right" size={20} color={chevronColor} />
     </Pressable>
   );
 }

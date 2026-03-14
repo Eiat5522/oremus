@@ -145,14 +145,14 @@ export function QiblaCompassPage({
           ? 'Finding direction...'
           : turnDirection === 'center'
             ? `Move the Kaaba into the focus ring. ${Math.round(alignmentDelta)}° remaining`
-            : `Move the Kaaba ${turnDirection}. ${Math.round(alignmentDelta)}° remaining`
+            : `Turn ${turnDirection}. ${Math.round(alignmentDelta)}° remaining`
     : alignmentDelta === null
       ? 'Align to the Qibla. We are finding your direction...'
       : isAligned
         ? 'You are facing the Qibla.'
         : turnDirection === 'center'
           ? `Align to the Qibla. ${Math.round(alignmentDelta)}° remaining`
-          : `Move the Kaaba ${turnDirection}. ${Math.round(alignmentDelta)}° remaining`;
+          : `Turn ${turnDirection}. ${Math.round(alignmentDelta)}° remaining`;
 
   return (
     <View style={styles.container}>
@@ -320,7 +320,9 @@ export function QiblaCompassPage({
               />
             </View>
             <ThemedText style={styles.autoAdvanceText}>
-              {isTransitioningToPrayer ? 'Opening prayer session...' : 'Auto-opening prayer session...'}
+              {isTransitioningToPrayer
+                ? 'Opening prayer session...'
+                : 'Auto-opening prayer session...'}
             </ThemedText>
           </View>
         ) : (

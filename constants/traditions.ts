@@ -1,5 +1,13 @@
 export const TRADITION_OPTIONS = [
   {
+    id: 'general',
+    title: 'General',
+    description: 'Flexible sessions for focus and reflection',
+    icon: 'sparkles',
+    color: '#64748b',
+    bgColor: { light: '#f8fafc', dark: 'rgba(51, 65, 85, 0.22)' },
+  },
+  {
     id: 'christianity',
     title: 'Christianity',
     description: 'Biblical prayers and scripture focus',

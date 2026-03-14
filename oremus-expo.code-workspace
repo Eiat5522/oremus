@@ -8,15 +8,13 @@
     "editor.codeActionsOnSave": {
       "source.fixAll": "explicit",
       "source.organizeImports": "explicit",
-      "source.sortMembers": "explicit"
+      "source.sortMembers": "explicit",
     },
     "sonarlint.connectedMode.project": {
       "connectionId": "eiat5522",
-      "projectKey": "Eiat5522_oremus"
+      "projectKey": "Eiat5522_oremus",
     },
     "emulator.emulatorPathLinux": "/mnt/d/Android/Sdk",
-    "cSpell.words": [
-      "oremus"
-    ]
+    "cSpell.words": ["oremus"],
   },
 }

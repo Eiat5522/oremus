@@ -69,12 +69,14 @@ export default function TabLayout() {
             />
           ),
           tabBarIcon: () => (
-            <View style={[styles.centerIconWrap, { backgroundColor: uiTheme.tabActiveTint }]}>
-              <Image
-                source={require('@/assets/images/app-icon.png')}
-                style={styles.centerLogoIcon}
-                contentFit="contain"
-              />
+            <View style={styles.centerIconOuterRing}>
+              <View style={styles.centerIconWrap}>
+                <Image
+                  source={require('@/assets/images/app-logo-mark.png')}
+                  style={styles.centerLogoIcon}
+                  contentFit="contain"
+                />
+              </View>
             </View>
           ),
           tabBarActiveTintColor: '#ffffff',
@@ -121,22 +123,33 @@ const styles = StyleSheet.create({
   centerTabButton: {
     marginTop: -18,
   },
-  centerIconWrap: {
-    width: 56,
-    height: 56,
+  centerIconOuterRing: {
+    width: 62,
+    height: 62,
     borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.24)',
+  },
+  centerIconWrap: {
+    width: 54,
+    height: 54,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FBF6EE',
+    borderWidth: 1,
+    borderColor: 'rgba(39, 60, 107, 0.08)',
     // iOS shadow
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.22,
-    shadowRadius: 9,
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
     // Android shadow
     elevation: 8,
   },
   centerLogoIcon: {
-    width: 30,
-    height: 30,
+    width: 34,
+    height: 34,
   },
 });

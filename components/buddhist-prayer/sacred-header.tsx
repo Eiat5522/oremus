@@ -24,12 +24,7 @@ export function SacredHeader({
   const insets = useSafeAreaInsets();
 
   return (
-    <View
-      style={[
-        styles.container,
-        { paddingTop: insets.top + BuddhistPrayerSpacing.sm },
-      ]}
-    >
+    <View style={[styles.container, { paddingTop: insets.top + BuddhistPrayerSpacing.sm }]}>
       <View style={styles.row}>
         {showBackButton ? (
           <Pressable

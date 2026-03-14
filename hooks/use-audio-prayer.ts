@@ -35,7 +35,13 @@ export function useAudioPrayer() {
         console.warn('Could not play chant audio:', error);
       }
     }
-  }, [chantAudio, chantStatus.currentTime, chantStatus.duration, isAudioEnabled, isReleasedPlayerError]);
+  }, [
+    chantAudio,
+    chantStatus.currentTime,
+    chantStatus.duration,
+    isAudioEnabled,
+    isReleasedPlayerError,
+  ]);
 
   const safePause = useCallback(() => {
     try {
@@ -70,12 +76,7 @@ export function useAudioPrayer() {
         console.warn('Could not play temple bell audio:', error);
       }
     }
-  }, [
-    isReleasedPlayerError,
-    templeBellEnabled,
-    templeBellPlayer,
-    templeBellStatus.currentTime,
-  ]);
+  }, [isReleasedPlayerError, templeBellEnabled, templeBellPlayer, templeBellStatus.currentTime]);
 
   // Respond to session audio toggle
   useEffect(() => {

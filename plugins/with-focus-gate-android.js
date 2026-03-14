@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -6,49 +6,57 @@ var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __export = (target, all) => {
-  for (var name in all)
-    __defProp(target, name, { get: all[name], enumerable: true });
+  for (var name in all) __defProp(target, name, { get: all[name], enumerable: true });
 };
 var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
+  if ((from && typeof from === 'object') || typeof from === 'function') {
     for (let key of __getOwnPropNames(from))
       if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+        __defProp(to, key, {
+          get: () => from[key],
+          enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable,
+        });
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var __toESM = (mod, isNodeMode, target) => (
+  (target = mod != null ? __create(__getProtoOf(mod)) : {}),
+  __copyProps(
+    // If the importer is in node compatibility mode or this is not an ESM
+    // file that has been converted to a CommonJS file using a Babel-
+    // compatible transform (i.e. "__esModule" has not been set), then set
+    // "default" to the CommonJS "module.exports" for node compatibility.
+    isNodeMode || !mod || !mod.__esModule
+      ? __defProp(target, 'default', { value: mod, enumerable: true })
+      : target,
+    mod,
+  )
+);
+var __toCommonJS = (mod) => __copyProps(__defProp({}, '__esModule', { value: true }), mod);
 var with_focus_gate_android_exports = {};
 __export(with_focus_gate_android_exports, {
-  default: () => with_focus_gate_android_default
+  default: () => with_focus_gate_android_default,
 });
 module.exports = __toCommonJS(with_focus_gate_android_exports);
-var import_config_plugins = require("expo/config-plugins");
-var import_promises = __toESM(require("fs/promises"));
-var import_path = __toESM(require("path"));
-const FOCUS_PACKAGE = "focus";
-const FOCUS_GATE_SERVICE_DESCRIPTION_KEY = "focus_gate_service_description";
-const FOCUS_GATE_SERVICE_DESCRIPTION = "Focus Gate monitors when selected apps are opened so it can block distractions until you complete a prayer session.";
+var import_config_plugins = require('expo/config-plugins');
+var import_promises = __toESM(require('fs/promises'));
+var import_path = __toESM(require('path'));
+const FOCUS_PACKAGE = 'focus';
+const FOCUS_GATE_SERVICE_DESCRIPTION_KEY = 'focus_gate_service_description';
+const FOCUS_GATE_SERVICE_DESCRIPTION =
+  'Focus Gate monitors when selected apps are opened so it can block distractions until you complete a prayer session.';
 const FOCUS_GATE_BACKGROUND_ASSETS = {
-  focus_gate_block_islam: ["docs", "Oremus", "App Blocking", "Islam - Blocking BG.jpg"],
+  focus_gate_block_islam: ['docs', 'Oremus', 'App Blocking', 'Islam - Blocking BG.jpg'],
   focus_gate_block_christianity: [
-    "docs",
-    "Oremus",
-    "App Blocking",
-    "Christainity - Blocking BG.jpg"
+    'docs',
+    'Oremus',
+    'App Blocking',
+    'Christainity - Blocking BG.jpg',
   ],
-  focus_gate_block_buddhism: ["docs", "Oremus", "App Blocking", "Buddhist - Blocking BG.jpg"]
+  focus_gate_block_buddhism: ['docs', 'Oremus', 'App Blocking', 'Buddhist - Blocking BG.jpg'],
 };
 const focusFiles = {
-  "FocusGatePrefs.kt": `package __PACKAGE__.focus
+  'FocusGatePrefs.kt': `package __PACKAGE__.focus
 
 import android.content.Context
 import org.json.JSONObject
@@ -119,7 +127,7 @@ object FocusGatePrefs {
   }
 }
 `,
-  "FocusGateModule.kt": `package __PACKAGE__.focus
+  'FocusGateModule.kt': `package __PACKAGE__.focus
 
 import android.content.Context
 import android.content.Intent
@@ -272,7 +280,7 @@ class FocusGateModule(private val reactContext: ReactApplicationContext) :
   }
 }
 `,
-  "FocusGatePackage.kt": `package __PACKAGE__.focus
+  'FocusGatePackage.kt': `package __PACKAGE__.focus
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule
@@ -291,7 +299,7 @@ class FocusGatePackage : ReactPackage {
   }
 }
 `,
-  "SocialAppBlockerAccessibilityService.kt": `package __PACKAGE__.focus
+  'SocialAppBlockerAccessibilityService.kt': `package __PACKAGE__.focus
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
@@ -340,7 +348,7 @@ class SocialAppBlockerAccessibilityService : AccessibilityService() {
   override fun onInterrupt() {}
 }
 `,
-  "SocialBlockerActivity.kt": `package __PACKAGE__.focus
+  'SocialBlockerActivity.kt': `package __PACKAGE__.focus
 
 import android.app.Activity
 import android.content.Intent
@@ -665,7 +673,7 @@ class SocialBlockerActivity : Activity() {
     val footerColor: Int,
   )
 }
-`
+`,
 };
 const serviceXml = `<?xml version="1.0" encoding="utf-8"?>
 <accessibility-service
@@ -678,63 +686,65 @@ const serviceXml = `<?xml version="1.0" encoding="utf-8"?>
     android:accessibilityFlags="flagReportViewIds" />
 `;
 const ensurePermission = (manifest, name, extra = {}) => {
-  const key = "uses-permission";
+  const key = 'uses-permission';
   manifest[key] = manifest[key] ?? [];
-  const exists = manifest[key].some((entry) => entry?.$?.["android:name"] === name);
+  const exists = manifest[key].some((entry) => entry?.$?.['android:name'] === name);
   if (!exists) {
-    manifest[key].push({ $: { "android:name": name, ...extra } });
+    manifest[key].push({ $: { 'android:name': name, ...extra } });
   }
 };
 const removePermission = (manifest, name) => {
-  const key = "uses-permission";
+  const key = 'uses-permission';
   if (!Array.isArray(manifest[key])) {
     return;
   }
-  manifest[key] = manifest[key].filter((entry) => entry?.$?.["android:name"] !== name);
+  manifest[key] = manifest[key].filter((entry) => entry?.$?.['android:name'] !== name);
 };
 const ensureQueryForLauncherApps = (manifest) => {
   manifest.queries = manifest.queries ?? [];
-  const hasLauncherQuery = manifest.queries.some(
-    (query) => (query.intent ?? []).some((intent) => {
-      const actions = (intent.action ?? []).map((item) => item?.$?.["android:name"]);
-      const categories = (intent.category ?? []).map((item) => item?.$?.["android:name"]);
-      return actions.includes("android.intent.action.MAIN") && categories.includes("android.intent.category.LAUNCHER");
-    })
+  const hasLauncherQuery = manifest.queries.some((query) =>
+    (query.intent ?? []).some((intent) => {
+      const actions = (intent.action ?? []).map((item) => item?.$?.['android:name']);
+      const categories = (intent.category ?? []).map((item) => item?.$?.['android:name']);
+      return (
+        actions.includes('android.intent.action.MAIN') &&
+        categories.includes('android.intent.category.LAUNCHER')
+      );
+    }),
   );
   if (!hasLauncherQuery) {
     manifest.queries.push({
       intent: [
         {
-          action: [{ $: { "android:name": "android.intent.action.MAIN" } }],
-          category: [{ $: { "android:name": "android.intent.category.LAUNCHER" } }]
-        }
-      ]
+          action: [{ $: { 'android:name': 'android.intent.action.MAIN' } }],
+          category: [{ $: { 'android:name': 'android.intent.category.LAUNCHER' } }],
+        },
+      ],
     });
   }
 };
 const ensureMetaData = (target, name, resource) => {
-  target["meta-data"] = target["meta-data"] ?? [];
-  const existing = target["meta-data"].find((entry) => entry?.$?.["android:name"] === name);
+  target['meta-data'] = target['meta-data'] ?? [];
+  const existing = target['meta-data'].find((entry) => entry?.$?.['android:name'] === name);
   if (existing) {
-    existing.$["android:resource"] = resource;
+    existing.$['android:resource'] = resource;
   } else {
-    target["meta-data"].push({ $: { "android:name": name, "android:resource": resource } });
+    target['meta-data'].push({ $: { 'android:name': name, 'android:resource': resource } });
   }
 };
 const writeIfChanged = async (filePath, content) => {
   try {
-    const current = await import_promises.default.readFile(filePath, "utf8");
+    const current = await import_promises.default.readFile(filePath, 'utf8');
     if (current === content) {
       return;
     }
-  } catch {
-  }
-  await import_promises.default.writeFile(filePath, content, "utf8");
+  } catch {}
+  await import_promises.default.writeFile(filePath, content, 'utf8');
 };
 const copyBinaryIfChanged = async (sourcePath, targetPath) => {
   const [source, current] = await Promise.all([
     import_promises.default.readFile(sourcePath),
-    import_promises.default.readFile(targetPath).catch(() => null)
+    import_promises.default.readFile(targetPath).catch(() => null),
   ]);
   if (current && Buffer.compare(source, current) === 0) {
     return;
@@ -743,10 +753,11 @@ const copyBinaryIfChanged = async (sourcePath, targetPath) => {
 };
 const removeConflictingDrawables = async (resourceBasePath) => {
   await Promise.all(
-    [".png", ".jpg", ".jpeg", ".webp"].map(async (extension) => {
-      await import_promises.default.rm(`${resourceBasePath}${extension}`, { force: true }).catch(() => {
-      });
-    })
+    ['.png', '.jpg', '.jpeg', '.webp'].map(async (extension) => {
+      await import_promises.default
+        .rm(`${resourceBasePath}${extension}`, { force: true })
+        .catch(() => {});
+    }),
   );
 };
 const BLOCKER_THEME_XML = `  <style name="Theme.App.Blocker" parent="Theme.AppCompat.DayNight.NoActionBar">
@@ -761,56 +772,60 @@ const BLOCKER_THEME_XML = `  <style name="Theme.App.Blocker" parent="Theme.AppCo
   </style>
 `;
 const ensureBlockerThemeInStylesXml = async (stylesPath) => {
-  const current = await import_promises.default.readFile(stylesPath, "utf8");
+  const current = await import_promises.default.readFile(stylesPath, 'utf8');
   if (current.includes('name="Theme.App.Blocker"')) {
     return;
   }
-  if (!current.includes("</resources>")) {
+  if (!current.includes('</resources>')) {
     throw new Error(`Unable to add Theme.App.Blocker to ${stylesPath}.`);
   }
-  const next = current.replace("</resources>", `${BLOCKER_THEME_XML}</resources>`);
-  await import_promises.default.writeFile(stylesPath, next, "utf8");
+  const next = current.replace('</resources>', `${BLOCKER_THEME_XML}</resources>`);
+  await import_promises.default.writeFile(stylesPath, next, 'utf8');
 };
 const withFocusGateAndroid = (config) => {
   config = (0, import_config_plugins.withAndroidManifest)(config, (mod) => {
     const manifest = mod.modResults.manifest;
     manifest.$ = manifest.$ ?? {};
-    manifest.$["xmlns:tools"] = manifest.$["xmlns:tools"] ?? "http://schemas.android.com/tools";
-    ensurePermission(manifest, "android.permission.PACKAGE_USAGE_STATS", {
-      "tools:ignore": "ProtectedPermissions"
+    manifest.$['xmlns:tools'] = manifest.$['xmlns:tools'] ?? 'http://schemas.android.com/tools';
+    ensurePermission(manifest, 'android.permission.PACKAGE_USAGE_STATS', {
+      'tools:ignore': 'ProtectedPermissions',
     });
-    removePermission(manifest, "android.permission.QUERY_ALL_PACKAGES");
+    removePermission(manifest, 'android.permission.QUERY_ALL_PACKAGES');
     ensureQueryForLauncherApps(manifest);
     const app = manifest.application?.[0];
     if (app) {
       app.activity = app.activity ?? [];
-      if (!app.activity.some((entry) => entry?.$?.["android:name"] === ".focus.SocialBlockerActivity")) {
+      if (
+        !app.activity.some((entry) => entry?.$?.['android:name'] === '.focus.SocialBlockerActivity')
+      ) {
         app.activity.push({
           $: {
-            "android:name": ".focus.SocialBlockerActivity",
-            "android:exported": "false",
-            "android:excludeFromRecents": "true",
-            "android:launchMode": "singleTask",
-            "android:theme": "@style/Theme.App.Blocker"
-          }
+            'android:name': '.focus.SocialBlockerActivity',
+            'android:exported': 'false',
+            'android:excludeFromRecents': 'true',
+            'android:launchMode': 'singleTask',
+            'android:theme': '@style/Theme.App.Blocker',
+          },
         });
       }
       app.service = app.service ?? [];
       let service = app.service.find(
-        (entry) => entry?.$?.["android:name"] === ".focus.SocialAppBlockerAccessibilityService"
+        (entry) => entry?.$?.['android:name'] === '.focus.SocialAppBlockerAccessibilityService',
       );
       if (!service) {
-        service = { $: { "android:name": ".focus.SocialAppBlockerAccessibilityService" } };
+        service = { $: { 'android:name': '.focus.SocialAppBlockerAccessibilityService' } };
         app.service.push(service);
       }
       service.$ = service.$ ?? {};
-      service.$["android:enabled"] = "true";
-      service.$["android:exported"] = "false";
-      service.$["android:permission"] = "android.permission.BIND_ACCESSIBILITY_SERVICE";
-      service["intent-filter"] = service["intent-filter"] ?? [
-        { action: [{ $: { "android:name": "android.accessibilityservice.AccessibilityService" } }] }
+      service.$['android:enabled'] = 'true';
+      service.$['android:exported'] = 'false';
+      service.$['android:permission'] = 'android.permission.BIND_ACCESSIBILITY_SERVICE';
+      service['intent-filter'] = service['intent-filter'] ?? [
+        {
+          action: [{ $: { 'android:name': 'android.accessibilityservice.AccessibilityService' } }],
+        },
       ];
-      ensureMetaData(service, "android.accessibilityservice", "@xml/social_blocker_service");
+      ensureMetaData(service, 'android.accessibilityservice', '@xml/social_blocker_service');
     }
     return mod;
   });
@@ -822,16 +837,19 @@ const withFocusGateAndroid = (config) => {
     let contents = mod.modResults.contents;
     const importLine = `import ${androidPackage}.focus.FocusGatePackage`;
     if (!contents.includes(importLine)) {
-      const importAnchor = "import expo.modules.ReactNativeHostWrapper";
+      const importAnchor = 'import expo.modules.ReactNativeHostWrapper';
       if (contents.includes(importAnchor)) {
-        contents = contents.replace(importAnchor, `${importAnchor}
-${importLine}`);
+        contents = contents.replace(
+          importAnchor,
+          `${importAnchor}
+${importLine}`,
+        );
       }
     }
-    if (!contents.includes("add(FocusGatePackage())")) {
+    if (!contents.includes('add(FocusGatePackage())')) {
       contents = contents.replace(
         /PackageList\(this\)\.packages\.apply \{\n/,
-        "PackageList(this).packages.apply {\n              add(FocusGatePackage())\n"
+        'PackageList(this).packages.apply {\n              add(FocusGatePackage())\n',
       );
     }
     mod.modResults.contents = contents;
@@ -846,7 +864,7 @@ ${importLine}`);
     } else {
       strings.push({
         $: { name: FOCUS_GATE_SERVICE_DESCRIPTION_KEY },
-        _: FOCUS_GATE_SERVICE_DESCRIPTION
+        _: FOCUS_GATE_SERVICE_DESCRIPTION,
       });
     }
     resources.string = strings;
@@ -854,38 +872,45 @@ ${importLine}`);
     return mod;
   });
   config = (0, import_config_plugins.withDangerousMod)(config, [
-    "android",
+    'android',
     async (mod) => {
       const androidPackage = config.android?.package;
       if (!androidPackage) {
-        throw new Error("android.package is required to configure Focus Gate native files.");
+        throw new Error('android.package is required to configure Focus Gate native files.');
       }
-      const packagePath = androidPackage.split(".").join(import_path.default.sep);
+      const packagePath = androidPackage.split('.').join(import_path.default.sep);
       const javaDir = import_path.default.join(
         mod.modRequest.platformProjectRoot,
-        "app",
-        "src",
-        "main",
-        "java",
+        'app',
+        'src',
+        'main',
+        'java',
         packagePath,
-        FOCUS_PACKAGE
+        FOCUS_PACKAGE,
       );
-      const xmlDir = import_path.default.join(mod.modRequest.platformProjectRoot, "app", "src", "main", "res", "xml");
+      const xmlDir = import_path.default.join(
+        mod.modRequest.platformProjectRoot,
+        'app',
+        'src',
+        'main',
+        'res',
+        'xml',
+      );
       const valuesDir = import_path.default.join(
         mod.modRequest.platformProjectRoot,
-        "app",
-        "src",
-        "main",
-        "res",
-        "values"
+        'app',
+        'src',
+        'main',
+        'res',
+        'values',
       );
       const drawableDir = import_path.default.join(
         mod.modRequest.platformProjectRoot,
-        "app",
-        "src",
-        "main",
-        "res",
-        "drawable-nodpi"
+        'app',
+        'src',
+        'main',
+        'res',
+        'drawable-nodpi',
       );
       await import_promises.default.mkdir(javaDir, { recursive: true });
       await import_promises.default.mkdir(xmlDir, { recursive: true });
@@ -893,24 +918,27 @@ ${importLine}`);
       await import_promises.default.mkdir(drawableDir, { recursive: true });
       await Promise.all(
         Object.entries(focusFiles).map(async ([filename, template]) => {
-          const content = template.replaceAll("__PACKAGE__", androidPackage);
+          const content = template.replaceAll('__PACKAGE__', androidPackage);
           await writeIfChanged(import_path.default.join(javaDir, filename), content);
-        })
+        }),
       );
       await Promise.all(
         Object.entries(FOCUS_GATE_BACKGROUND_ASSETS).map(async ([resourceName, sourceParts]) => {
           const sourcePath = import_path.default.join(mod.modRequest.projectRoot, ...sourceParts);
-          const targetExtension = import_path.default.extname(sourcePath) || ".png";
+          const targetExtension = import_path.default.extname(sourcePath) || '.png';
           const targetBasePath = import_path.default.join(drawableDir, resourceName);
           const targetPath = `${targetBasePath}${targetExtension}`;
           await removeConflictingDrawables(targetBasePath);
           await copyBinaryIfChanged(sourcePath, targetPath);
-        })
+        }),
       );
-      await writeIfChanged(import_path.default.join(xmlDir, "social_blocker_service.xml"), serviceXml);
-      await ensureBlockerThemeInStylesXml(import_path.default.join(valuesDir, "styles.xml"));
+      await writeIfChanged(
+        import_path.default.join(xmlDir, 'social_blocker_service.xml'),
+        serviceXml,
+      );
+      await ensureBlockerThemeInStylesXml(import_path.default.join(valuesDir, 'styles.xml'));
       return mod;
-    }
+    },
   ]);
   return config;
 };

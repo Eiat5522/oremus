@@ -7,6 +7,6 @@ module.exports = defineConfig([
   expoConfig,
   prettierConfig,
   {
-    ignores: ['dist/**', '.agents/**', 'home/eiat/.codex/**'],
+    ignores: ['dist/**', '.agents/**', 'home/eiat/.codex/**', 'plugins/with-focus-gate-android.js'],
   },
 ]);

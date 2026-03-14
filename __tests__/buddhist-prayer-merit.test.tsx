@@ -1,15 +1,12 @@
-jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
-);
-
+import AsyncStorageMock from '@react-native-async-storage/async-storage/jest/async-storage-mock';
 import { fireEvent, render } from '@testing-library/react-native';
 
-import { useBuddhistPrayerStore } from '@/hooks/use-buddhist-prayer-store';
 import MeritDedicationScreen from '@/app/tradition/buddhist-prayer/merit';
+import { useBuddhistPrayerStore } from '@/hooks/use-buddhist-prayer-store';
+
+jest.mock('@react-native-async-storage/async-storage', () => AsyncStorageMock);
 
 jest.mock('expo-router', () => {
-  const React = require('react');
-
   return {
     Stack: {
       Screen: () => null,

@@ -43,10 +43,15 @@ export function useAltarExperience(callbacks?: AltarExperienceCallbacks) {
     startScan();
     // TODO: [NATIVE AR SWAP-IN] In nativeARReady mode, start a native AR session here
     // and replace the timeout with a real plane-detection callback from the AR module.
-    scanSimulationTimeoutRef.current = setTimeout(() => {
-      surfaceDetected();
-      callbacksRef.current?.onSurfaceDetected?.();
-    }, altarExperienceMode === 'immersive3D' ? IMMERSIVE_3D_SCAN_DURATION_MS : NATIVE_AR_SCAN_DURATION_MS);
+    scanSimulationTimeoutRef.current = setTimeout(
+      () => {
+        surfaceDetected();
+        callbacksRef.current?.onSurfaceDetected?.();
+      },
+      altarExperienceMode === 'immersive3D'
+        ? IMMERSIVE_3D_SCAN_DURATION_MS
+        : NATIVE_AR_SCAN_DURATION_MS,
+    );
   }, [altarExperienceMode, startScan, surfaceDetected]);
 
   const confirmPlacement = useCallback(() => {

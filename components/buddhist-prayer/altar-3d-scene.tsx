@@ -2,7 +2,7 @@
 import { Canvas, useFrame } from '@react-three/fiber/native';
 import React, { memo, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import type { Group, Mesh, MeshStandardMaterial } from 'three';
+import type { Group, Mesh } from 'three';
 
 import { BuddhistPrayerColors } from '@/constants/buddhist-prayer/theme';
 import type { AltarProps } from '@/constants/buddhist-prayer/types';
@@ -54,7 +54,7 @@ function Candle({ position, animated }: { position: [number, number, number]; an
 
   useFrame(({ clock }) => {
     const material = flameRef.current?.material;
-    if (!(material instanceof MeshStandardMaterial)) {
+    if (!(material instanceof THREE.MeshStandardMaterial)) {
       return;
     }
 
@@ -115,7 +115,7 @@ function IncenseSmoke({
       const scale = animated ? 0.7 + index * 0.16 + (elapsed % 1.2) * 0.08 : 0.82 + index * 0.12;
       mesh.scale.setScalar(scale);
 
-      if (material instanceof MeshStandardMaterial) {
+      if (material instanceof THREE.MeshStandardMaterial) {
         material.opacity = showIncenseSmoke ? Math.max(0.08, 0.22 - index * 0.04) : 0;
       }
     });
@@ -170,7 +170,7 @@ function AltarSceneContent({
     altarRef.current.position.y = animated ? Math.sin(elapsed * 0.8) * 0.04 : 0;
 
     const haloMaterial = haloRef.current?.material;
-    if (haloMaterial instanceof MeshStandardMaterial) {
+    if (haloMaterial instanceof THREE.MeshStandardMaterial) {
       haloMaterial.opacity = showHalo ? Math.min(0.36, 0.14 + glowIntensity * 0.08) : 0;
       haloMaterial.emissiveIntensity = showHalo ? Math.min(2.4, glowIntensity * 1.5) : 0;
     }

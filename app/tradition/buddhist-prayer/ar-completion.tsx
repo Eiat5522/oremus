@@ -97,10 +97,7 @@ export default function ARCompletionScreen() {
 
         {/* Actions */}
         <View style={styles.actions}>
-          <GoldButton
-            title="Return Home"
-            onPress={() => router.push('/tradition/buddhist-prayer')}
-          />
+          <GoldButton title="Return Home" onPress={() => router.replace('/tradition/buddhist')} />
           <GoldButton
             title="Meditate"
             variant="outline"

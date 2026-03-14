@@ -15,7 +15,7 @@ import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 export default function OnboardingScreen() {
   const { tradition, setTradition } = useTradition();
   const [selectedTradition, setSelectedTradition] = useState<Tradition>(
-    tradition || 'christianity',
+    tradition || 'general',
   );
   const [cameraPermission, requestCameraPermission] = useSafeCameraPermissions();
   const router = useRouter();

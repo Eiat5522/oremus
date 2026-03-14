@@ -11,6 +11,7 @@ import { PrayerSessionControls } from '@/components/islam/session/prayer-session
 import { PrayerSessionTimer } from '@/components/islam/session/prayer-session-timer';
 import { ThemedText } from '@/components/themed-text';
 import { usePrayerSessionVisibilityControls } from '@/hooks/use-prayer-session-visibility-controls';
+import type { PrayerName } from '@/lib/prayer-times';
 import { addSessionLogEntry } from '@/lib/session-log';
 
 // ---------------------------------------------------------------------------
@@ -20,6 +21,16 @@ import { addSessionLogEntry } from '@/lib/session-log';
 /** Capitalize first letter of each word (e.g. "fajr" → "Fajr"). */
 function toTitleCase(str: string): string {
   return str.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function isPrayerName(value: string | undefined): value is PrayerName {
+  return (
+    value === 'fajr' ||
+    value === 'dhuhr' ||
+    value === 'asr' ||
+    value === 'maghrib' ||
+    value === 'isha'
+  );
 }
 
 /** useNativeDriver must be false on web (Expo Router web support). */
@@ -38,7 +49,8 @@ export default function IslamPrayerSessionScreen() {
   const { width, height } = useWindowDimensions();
 
   // Prayer name may be passed as a route param from the prayer list.
-  const { prayerName } = useLocalSearchParams<{ prayerName?: string }>();
+  const params = useLocalSearchParams<{ prayerName?: string | string[] }>();
+  const prayerName = Array.isArray(params.prayerName) ? params.prayerName[0] : params.prayerName;
   const displayName = prayerName ? `${toTitleCase(prayerName)} Prayer` : 'Prayer Session';
 
   // Visibility hook – auto-hides controls after 3 s of idle.
@@ -93,7 +105,7 @@ export default function IslamPrayerSessionScreen() {
 
     void addSessionLogEntry({
       tradition: 'islam',
-      prayerName: prayerName && prayerName !== '' ? prayerName : undefined,
+      prayerName: isPrayerName(prayerName) ? prayerName : undefined,
       startedAtMs: sessionStartedAtRef.current,
       completedAtMs,
       durationSeconds,
@@ -102,7 +114,7 @@ export default function IslamPrayerSessionScreen() {
     router.replace({
       pathname: '/tradition/islam-completion',
       params: {
-        prayerName: prayerName && prayerName !== '' ? prayerName : undefined,
+        prayerName: isPrayerName(prayerName) ? prayerName : undefined,
         durationSeconds: String(durationSeconds),
       },
     });

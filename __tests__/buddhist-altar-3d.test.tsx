@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { act, render, waitFor } from '@testing-library/react-native';
 import { AccessibilityInfo, Animated, View } from 'react-native';
 
@@ -16,7 +16,7 @@ describe('buddhist altar 3D placeholder', () => {
       .spyOn(AccessibilityInfo, 'addEventListener')
       .mockReturnValue({ remove: jest.fn() } as never);
     __setAltarSceneLoaderForTests(async () => ({
-      AltarScene3D: ({
+      AltarScene3D: memo(function MockAltarScene3D({
         animated,
         glowIntensity,
         onReady,
@@ -32,7 +32,7 @@ describe('buddhist altar 3D placeholder', () => {
         scale: number;
         showHalo: boolean;
         showIncenseSmoke: boolean;
-      }) => {
+      }) {
         React.useEffect(() => {
           onReady?.();
         }, [onReady]);
@@ -54,7 +54,7 @@ describe('buddhist altar 3D placeholder', () => {
             })}
           />
         );
-      },
+      }),
     }));
   });
 

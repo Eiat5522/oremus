@@ -57,7 +57,10 @@ export default function ARIntroScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.content,
-          { paddingBottom: Math.max(insets.bottom, BuddhistPrayerSpacing.md) + BuddhistPrayerSpacing.xl },
+          {
+            paddingBottom:
+              Math.max(insets.bottom, BuddhistPrayerSpacing.md) + BuddhistPrayerSpacing.xl,
+          },
         ]}
         showsVerticalScrollIndicator={false}
       >

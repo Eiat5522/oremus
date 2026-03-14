@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -22,7 +22,6 @@ export type PrayerRowModel = {
 type PrayerDayRowProps = {
   prayer: PrayerRowModel;
   onActionPress: () => void;
-  onStatusPress: () => void;
   onLongPress: () => void;
 };
 
@@ -90,7 +89,6 @@ function getStatusStyles(status: PrayerRowStatus) {
 export function PrayerDayRow({
   prayer,
   onActionPress,
-  onStatusPress,
   onLongPress,
 }: PrayerDayRowProps) {
   const palette = getStatusStyles(prayer.status);
@@ -142,16 +140,7 @@ export function PrayerDayRow({
                 <IconSymbol name="timer" size={12} color="#F4C86B" />
               </View>
             ) : null}
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={
-                prayer.status === 'completed'
-                  ? `Mark ${prayer.label} incomplete`
-                  : `Mark ${prayer.label} complete`
-              }
-              disabled={prayer.isLocked}
-              hitSlop={8}
-              onPress={onStatusPress}
+            <View
               style={[
                 styles.statusCircle,
                 showCheck ? styles.statusCircleDone : null,
@@ -163,7 +152,7 @@ export function PrayerDayRow({
               ]}
             >
               {showCheck ? <IconSymbol name="checkmark" size={15} color="#FFF8E8" /> : null}
-            </Pressable>
+            </View>
           </View>
         </View>
       </View>
