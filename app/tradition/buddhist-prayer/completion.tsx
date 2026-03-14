@@ -13,6 +13,7 @@ import {
 } from '@/constants/buddhist-prayer/theme';
 import { useChantSession } from '@/hooks/use-chant-session';
 import { formatDuration } from '@/lib/chant-helpers';
+import { recordPrayerCompletion } from '@/lib/focus-gate';
 
 export default function CompletionScreen() {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function CompletionScreen() {
     if (!completedRef.current) {
       completedRef.current = true;
       completeSession();
+      void recordPrayerCompletion();
     }
   }, [completeSession]);
 
