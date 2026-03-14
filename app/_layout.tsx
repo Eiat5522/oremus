@@ -9,6 +9,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { TraditionProvider, useTradition } from '@/hooks/use-tradition';
 import { UserProvider } from '@/hooks/use-user';
+import { configureNotifications } from '@/lib/notifications';
 
 export const unstable_settings = {
   initialRouteName: 'onboarding/index',
@@ -50,10 +51,7 @@ function RootLayoutNav() {
           name="tradition/buddhist-prayer"
           options={{ presentation: 'fullScreenModal' }}
         />
-        <Stack.Screen
-          name="tradition/christian"
-          options={{ presentation: 'fullScreenModal' }}
-        />
+        <Stack.Screen name="tradition/christian" options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen
           name="tradition/christian-preparation"
           options={{ presentation: 'fullScreenModal' }}
@@ -74,6 +72,10 @@ function RootLayoutNav() {
           name="tradition/islam-preparation"
           options={{ presentation: 'fullScreenModal' }}
         />
+        <Stack.Screen
+          name="tradition/islam-completion"
+          options={{ presentation: 'fullScreenModal' }}
+        />
         <Stack.Screen name="tradition/general" options={{ presentation: 'modal' }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
@@ -83,6 +85,10 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    configureNotifications();
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <UserProvider>

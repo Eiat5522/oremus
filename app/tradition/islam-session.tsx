@@ -11,6 +11,7 @@ import { PrayerSessionControls } from '@/components/islam/session/prayer-session
 import { PrayerSessionTimer } from '@/components/islam/session/prayer-session-timer';
 import { ThemedText } from '@/components/themed-text';
 import { usePrayerSessionVisibilityControls } from '@/hooks/use-prayer-session-visibility-controls';
+import { addSessionLogEntry } from '@/lib/session-log';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -52,6 +53,7 @@ export default function IslamPrayerSessionScreen() {
   const masterFade = useRef(new Animated.Value(0)).current;
   const helperFade = useRef(new Animated.Value(0)).current;
   const helperTranslate = useRef(new Animated.Value(8)).current;
+  const sessionStartedAtRef = useRef(Date.now());
 
   useEffect(() => {
     // Fade in the whole scene.
@@ -83,9 +85,27 @@ export default function IslamPrayerSessionScreen() {
 
   // ---- Handlers ----
   const handleEndSession = () => {
-    // TODO: If a proper session-tracking service is introduced, call its
-    // completion handler here before navigating away.
-    router.back();
+    const completedAtMs = Date.now();
+    const durationSeconds = Math.max(
+      0,
+      Math.floor((completedAtMs - sessionStartedAtRef.current) / 1000),
+    );
+
+    void addSessionLogEntry({
+      tradition: 'islam',
+      prayerName: prayerName && prayerName !== '' ? prayerName : undefined,
+      startedAtMs: sessionStartedAtRef.current,
+      completedAtMs,
+      durationSeconds,
+    });
+
+    router.replace({
+      pathname: '/tradition/islam-completion',
+      params: {
+        prayerName: prayerName && prayerName !== '' ? prayerName : undefined,
+        durationSeconds: String(durationSeconds),
+      },
+    });
   };
 
   const handleEmergencyExit = () => {
