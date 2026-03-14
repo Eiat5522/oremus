@@ -14,6 +14,7 @@ import {
 import { useChantSession } from '@/hooks/use-chant-session';
 import { useBuddhistPrayerStore } from '@/hooks/use-buddhist-prayer-store';
 import { formatDuration } from '@/lib/chant-helpers';
+import { recordPrayerCompletion } from '@/lib/focus-gate';
 
 export default function ARCompletionScreen() {
   const router = useRouter();
@@ -27,6 +28,7 @@ export default function ARCompletionScreen() {
     if (!completedRef.current) {
       completedRef.current = true;
       completeSession();
+      void recordPrayerCompletion();
     }
   }, [completeSession]);
 
