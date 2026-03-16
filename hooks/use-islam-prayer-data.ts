@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { usePrayerLocationSettings } from '@/hooks/use-prayer-location-settings';
 import {
+  type DailyPrayerCompletion,
   getDefaultCompletionState,
   getLocalDateKey,
   loadPrayerCompletions as loadStoredPrayerCompletions,

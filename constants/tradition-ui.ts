@@ -91,7 +91,7 @@ const THEMES: Record<TraditionThemeKey, TraditionUiTheme> = {
     greeting: 'Welcome Back',
     subtitle: 'Take a moment for prayer.',
     ctaLabel: 'Open Christian Prayer',
-    ctaRoute: '/tradition/christian',
+    ctaRoute: '/christian',
     textColor: '#FFF7EB',
     subtitleColor: 'rgba(255, 240, 220, 0.9)',
     ctaGradient: ['#7A533B', '#4B2F20'],
@@ -106,7 +106,7 @@ const THEMES: Record<TraditionThemeKey, TraditionUiTheme> = {
     tabActiveTint: '#FFF0DC',
     tabInactiveTint: 'rgba(244, 211, 171, 0.7)',
     actions: [
-      { id: 'bible', label: 'Bible', icon: 'book.fill', route: '/tradition/christian' },
+      { id: 'bible', label: 'Bible', icon: 'book.fill', route: '/christian' },
       {
         id: 'reflection',
         label: 'Daily Reflection',

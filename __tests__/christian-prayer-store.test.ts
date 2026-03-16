@@ -1,67 +1,106 @@
 import mockAsyncStorage from '@react-native-async-storage/async-storage/jest/async-storage-mock';
 
 import { useChristianPrayerStore } from '@/hooks/use-christian-prayer-store';
+import { buildChristianSessionSummary } from '@/features/christian-prayer/services/christianSession.service';
+import { getChristianModeContent } from '@/features/christian-prayer/services/christianContent.service';
 
 jest.mock('@react-native-async-storage/async-storage', () => mockAsyncStorage);
 
 describe('christian prayer store', () => {
   beforeEach(() => {
-    useChristianPrayerStore.getState().clearSessionHistory();
+    useChristianPrayerStore.getState().resetSession();
   });
 
-  it('tracks lifecycle transitions through a prayer session', () => {
+  it('creates a draft, updates setup selections, and tracks AR placement state', () => {
     const store = useChristianPrayerStore.getState();
 
-    store.startPreparation('peace-in-christ');
-    store.startSession();
-    store.nextStage(5);
-    store.pauseSession();
-    store.resumeSession();
-
-    let state = useChristianPrayerStore.getState();
-    expect(state.selectedTemplateId).toBe('peace-in-christ');
-    expect(state.currentStageIndex).toBe(1);
-    expect(state.isPlaying).toBe(true);
-    expect(state.isPaused).toBe(false);
-    expect(state.sessionStartedAt).not.toBeNull();
-    expect(state.sessionCompletedAt).toBeNull();
-
-    store.completeSession();
-
-    state = useChristianPrayerStore.getState();
-    expect(state.sessionCompletedAt).not.toBeNull();
-    expect(state.isPlaying).toBe(false);
-    expect(state.isPaused).toBe(false);
-  });
-
-  it('preserves preferences when resetting session progress', () => {
-    const store = useChristianPrayerStore.getState();
-
-    store.setAutoAdvance(false);
-    store.setAmbientAudioEnabled(true);
-    store.setShowScriptureFirst(false);
-    store.startPreparation('seeking-guidance');
-    store.startSession();
-    store.nextStage(5);
-
-    store.resetSession();
+    store.createDraftSession('peace');
+    store.updateSetupSelections({
+      durationMinutes: 10,
+      audioSettings: {
+        ambientEnabled: true,
+        narrationEnabled: false,
+      },
+    });
+    store.initializeArEngine('mock');
+    store.placePrayerCorner({ rotation: 24, scale: 1.12 });
 
     const state = useChristianPrayerStore.getState();
-    expect(state.selectedTemplateId).toBeNull();
-    expect(state.currentStageIndex).toBe(0);
-    expect(state.autoAdvance).toBe(false);
-    expect(state.ambientAudioEnabled).toBe(true);
-    expect(state.showScriptureFirst).toBe(false);
+
+    expect(state.mode).toBe('peace');
+    expect(state.durationMinutes).toBe(10);
+    expect(state.audioSettings.ambientEnabled).toBe(true);
+    expect(state.audioSettings.narrationEnabled).toBe(false);
+    expect(state.arEngine).toBe('mock');
+    expect(state.arInitialized).toBe(true);
+    expect(state.arPlacement.isPlaced).toBe(true);
+    expect(state.arPlacement.transform.rotation).toBe(24);
+    expect(state.arPlacement.transform.scale).toBe(1.12);
   });
 
-  it('increments the replay token when replaying the same stage', () => {
+  it('advances phases, saves reflection state, and marks interruptions', () => {
     const store = useChristianPrayerStore.getState();
 
-    store.startPreparation('rest-for-the-weary');
-    const initialToken = useChristianPrayerStore.getState().stageReplayToken;
+    store.createDraftSession('gratitude');
+    store.markSessionStarted('openingStillness');
+    store.advancePrayerPhase();
+    store.advancePrayerPhase();
+    store.saveReflectionDraft({
+      text: 'I noticed grace in ordinary things.',
+      tags: ['gratitude', 'peace'],
+      silentTimerMinutes: 2,
+    });
+    store.abandonSession('sessionInterrupted');
+    store.resumeSession();
 
-    store.replayStage();
+    const state = useChristianPrayerStore.getState();
 
-    expect(useChristianPrayerStore.getState().stageReplayToken).toBe(initialToken + 1);
+    expect(state.currentPhase).toBe('reflection');
+    expect(state.phaseHistory).toEqual(['openingStillness', 'scripture', 'reflection']);
+    expect(state.reflectionDraft.text).toContain('grace');
+    expect(state.reflectionDraft.tags).toEqual(['gratitude', 'peace']);
+    expect(state.reflectionDraft.silentTimerMinutes).toBe(2);
+    expect(state.isInterrupted).toBe(false);
+    expect(state.lastErrorCode).toBeNull();
+  });
+
+  it('completes and resets while preserving user preferences', () => {
+    const store = useChristianPrayerStore.getState();
+    const modeContent = getChristianModeContent('guidedPrayer');
+
+    store.createDraftSession('guidedPrayer');
+    store.updateSetupSelections({
+      audioSettings: {
+        ambientEnabled: true,
+        reflectionPromptsEnabled: false,
+      },
+    });
+    store.markSessionStarted('openingStillness');
+
+    const startedAtMs = useChristianPrayerStore.getState().sessionStartedAtMs ?? Date.now();
+    const summary = buildChristianSessionSummary({
+      sessionId: useChristianPrayerStore.getState().sessionId ?? 'missing',
+      mode: 'guidedPrayer',
+      title: modeContent.title,
+      verse: modeContent.heroVerse,
+      durationMinutes: 5,
+      startedAtMs,
+      completedAtMs: startedAtMs + 90_000,
+      reflectionPreview: 'A short reflection',
+    });
+
+    store.completeSession(summary);
+    let state = useChristianPrayerStore.getState();
+    expect(state.isCompleted).toBe(true);
+    expect(state.completionSummary?.title).toBe(modeContent.title);
+    expect(state.currentPhase).toBe('complete');
+
+    store.resetSession();
+    state = useChristianPrayerStore.getState();
+
+    expect(state.mode).toBeNull();
+    expect(state.isCompleted).toBe(false);
+    expect(state.audioSettings.ambientEnabled).toBe(true);
+    expect(state.audioSettings.reflectionPromptsEnabled).toBe(false);
   });
 });

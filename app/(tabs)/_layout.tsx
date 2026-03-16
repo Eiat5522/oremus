@@ -71,11 +71,18 @@ export default function TabLayout() {
           tabBarIcon: () => (
             <View style={styles.centerIconOuterRing}>
               <View style={styles.centerIconWrap}>
-                <Image
-                  source={require('@/assets/images/app-logo-mark.png')}
-                  style={styles.centerLogoIcon}
-                  contentFit="contain"
-                />
+                <View style={styles.centerLogoStack}>
+                  <Image
+                    source={require('@/assets/images/app-logo-tab.png')}
+                    style={styles.centerLogoIconUnderlay}
+                    contentFit="contain"
+                  />
+                  <Image
+                    source={require('@/assets/images/app-logo-tab.png')}
+                    style={styles.centerLogoIcon}
+                    contentFit="contain"
+                  />
+                </View>
               </View>
             </View>
           ),
@@ -149,7 +156,20 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   centerLogoIcon: {
-    width: 34,
-    height: 34,
+    width: 38,
+    height: 38,
+  },
+  centerLogoIconUnderlay: {
+    position: 'absolute',
+    width: 42,
+    height: 42,
+    opacity: 0.88,
+    tintColor: '#2A457B',
+  },
+  centerLogoStack: {
+    width: 42,
+    height: 42,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

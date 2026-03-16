@@ -1,12 +1,12 @@
 import 'react-native-reanimated';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { TraditionProvider, useTradition } from '@/hooks/use-tradition';
 import { UserProvider } from '@/hooks/use-user';
 import { configureNotifications } from '@/lib/notifications';
@@ -19,7 +19,6 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
   const { tradition, isLoading } = useTradition();
 
   useEffect(() => {
@@ -33,53 +32,60 @@ function RootLayoutNav() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack
-        screenOptions={{ headerShown: false }}
-        initialRouteName={tradition ? '(tabs)' : 'onboarding/index'}
-      >
-        <Stack.Screen name="onboarding/index" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="active-session/index" options={{ presentation: 'fullScreenModal' }} />
-        <Stack.Screen name="tradition/qibla" />
-        <Stack.Screen name="tradition/buddhist" options={{ presentation: 'fullScreenModal' }} />
-        <Stack.Screen
-          name="tradition/buddhist-session"
-          options={{ presentation: 'fullScreenModal' }}
-        />
-        <Stack.Screen
-          name="tradition/buddhist-prayer"
-          options={{ presentation: 'fullScreenModal' }}
-        />
-        <Stack.Screen name="tradition/christian" options={{ presentation: 'fullScreenModal' }} />
-        <Stack.Screen
-          name="tradition/christian-preparation"
-          options={{ presentation: 'fullScreenModal' }}
-        />
-        <Stack.Screen
-          name="tradition/christian-session"
-          options={{ presentation: 'fullScreenModal' }}
-        />
-        <Stack.Screen
-          name="tradition/christian-completion"
-          options={{ presentation: 'fullScreenModal' }}
-        />
-        <Stack.Screen
-          name="tradition/islam-session"
-          options={{ presentation: 'fullScreenModal' }}
-        />
-        <Stack.Screen
-          name="tradition/islam-preparation"
-          options={{ presentation: 'fullScreenModal' }}
-        />
-        <Stack.Screen
-          name="tradition/islam-completion"
-          options={{ presentation: 'fullScreenModal' }}
-        />
-        <Stack.Screen name="tradition/general" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
+    <ThemeProvider value={DarkTheme}>
+      <View style={{ flex: 1, backgroundColor: '#000000' }}>
+        <Stack
+          screenOptions={{ headerShown: false }}
+          initialRouteName={tradition ? '(tabs)' : 'onboarding/index'}
+        >
+          <Stack.Screen name="onboarding/index" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="active-session/index" options={{ presentation: 'fullScreenModal' }} />
+          <Stack.Screen name="tradition/qibla" />
+          <Stack.Screen name="tradition/buddhist" options={{ presentation: 'fullScreenModal' }} />
+          <Stack.Screen
+            name="tradition/buddhist-session"
+            options={{ presentation: 'fullScreenModal' }}
+          />
+          <Stack.Screen
+            name="tradition/buddhist-prayer"
+            options={{ presentation: 'fullScreenModal' }}
+          />
+          <Stack.Screen
+            name="tradition/christian"
+            options={{ presentation: 'fullScreenModal' }}
+          />
+          <Stack.Screen
+            name="tradition/christian-preparation"
+            options={{ presentation: 'fullScreenModal' }}
+          />
+          <Stack.Screen
+            name="tradition/christian-session"
+            options={{ presentation: 'fullScreenModal' }}
+          />
+          <Stack.Screen
+            name="tradition/christian-completion"
+            options={{ presentation: 'fullScreenModal' }}
+          />
+          <Stack.Screen name="christian" options={{ presentation: 'fullScreenModal' }} />
+          <Stack.Screen name="christian-2d" options={{ presentation: 'fullScreenModal' }} />
+          <Stack.Screen
+            name="tradition/islam-session"
+            options={{ presentation: 'fullScreenModal' }}
+          />
+          <Stack.Screen
+            name="tradition/islam-preparation"
+            options={{ presentation: 'fullScreenModal' }}
+          />
+          <Stack.Screen
+            name="tradition/islam-completion"
+            options={{ presentation: 'fullScreenModal' }}
+          />
+          <Stack.Screen name="tradition/general" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        </Stack>
+        <StatusBar style="light" />
+      </View>
     </ThemeProvider>
   );
 }

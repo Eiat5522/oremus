@@ -1,55 +1,64 @@
 import type { Href } from 'expo-router';
 
 import type {
-  ChristianPrayerTemplate,
-  ChristianSessionCardState,
-} from '@/constants/christian-prayer';
+  ChristianPrayerPhase,
+  ChristianSessionMode,
+} from '@/features/christian-prayer/constants';
+import { getChristianModeContent } from '@/features/christian-prayer/services/christianContent.service';
+import { getChristianPhaseRoute } from '@/features/christian-prayer/services/christianSession.service';
+
+export interface ChristianHomeSessionCardState {
+  eyebrow: string;
+  title: string;
+  description: string;
+  primaryLabel: string;
+  secondaryLabel: string;
+  progressLabel: string;
+  primaryRoute: Href;
+}
 
 type ChristianSessionCardInput = {
-  template: ChristianPrayerTemplate | null;
-  currentStageIndex: number;
-  sessionStartedAt: number | null;
-  sessionCompletedAt: number | null;
+  mode: ChristianSessionMode | null;
+  currentPhase: ChristianPrayerPhase;
+  experienceMode: 'ar' | 'fallback2d';
+  sessionStartedAtMs: number | null;
+  sessionCompletedAtMs: number | null;
 };
 
 export function getChristianHomeSessionCardState({
-  template,
-  currentStageIndex,
-  sessionStartedAt,
-  sessionCompletedAt,
-}: ChristianSessionCardInput): ChristianSessionCardState | null {
-  if (!template) {
+  mode,
+  currentPhase,
+  experienceMode,
+  sessionStartedAtMs,
+  sessionCompletedAtMs,
+}: ChristianSessionCardInput): ChristianHomeSessionCardState | null {
+  if (!mode) {
     return null;
   }
 
-  if (sessionCompletedAt) {
+  const content = getChristianModeContent(mode);
+
+  if (sessionCompletedAtMs) {
     return {
       eyebrow: 'Last Prayer',
-      title: template.title,
-      description: `Completed ${template.stages.length} stages in your most recent prayer.`,
-      primaryLabel: 'Pray Again',
-      secondaryLabel: 'Clear',
+      title: content.title,
+      description: 'Your most recent Christian prayer corner session is ready to revisit.',
+      primaryLabel: 'View Completion',
+      secondaryLabel: 'Start Over',
       progressLabel: 'Completed',
-      primaryRoute: {
-        pathname: '/tradition/christian-preparation',
-        params: { templateId: template.id },
-      } as Href,
+      primaryRoute: '/christian/complete' as Href,
     };
   }
 
-  if (sessionStartedAt) {
-    const stageNumber = currentStageIndex + 1;
+  if (sessionStartedAtMs) {
     return {
       eyebrow: 'Continue Prayer',
-      title: template.title,
-      description: `Resume from stage ${stageNumber} of ${template.stages.length}.`,
+      title: content.title,
+      description: `Resume from ${currentPhase === 'idle' ? 'your setup' : currentPhase}.`,
       primaryLabel: 'Continue',
       secondaryLabel: 'Start Over',
-      progressLabel: `Stage ${stageNumber}/${template.stages.length}`,
-      primaryRoute: {
-        pathname: '/tradition/christian-session',
-        params: { templateId: template.id },
-      } as Href,
+      progressLabel: currentPhase === 'idle' ? 'Setup' : currentPhase,
+      primaryRoute: getChristianPhaseRoute(currentPhase, experienceMode) as Href,
     };
   }
 

@@ -295,6 +295,19 @@ export default function AppBlockingSettingsScreen() {
     };
   }, [hasPermissions, isAndroid, remainingMinutes, remainingMs, selectedAppCount, settingsEnabled]);
   const statusAccentStyle = useMemo(() => {
+    if (hasBlockingBackground) {
+      switch (blockingStatus.tone) {
+        case 'success':
+          return styles.statusAccentSuccessBlocking;
+        case 'warning':
+          return styles.statusAccentWarningBlocking;
+        case 'info':
+          return styles.statusAccentInfoBlocking;
+        default:
+          return styles.statusAccentNeutralBlocking;
+      }
+    }
+
     switch (blockingStatus.tone) {
       case 'success':
         return styles.statusAccentSuccess;
@@ -305,7 +318,7 @@ export default function AppBlockingSettingsScreen() {
       default:
         return styles.statusAccentNeutral;
     }
-  }, [blockingStatus.tone]);
+  }, [blockingStatus.tone, hasBlockingBackground]);
   const statusDotStyle = useMemo(() => {
     switch (blockingStatus.tone) {
       case 'success':
@@ -916,6 +929,22 @@ const styles = StyleSheet.create({
   statusAccentWarning: {
     borderColor: '#fed7aa',
     backgroundColor: '#fff7ed',
+  },
+  statusAccentNeutralBlocking: {
+    borderColor: 'rgba(216, 255, 240, 0.28)',
+    backgroundColor: 'rgba(9, 35, 28, 0.52)',
+  },
+  statusAccentInfoBlocking: {
+    borderColor: 'rgba(166, 223, 255, 0.28)',
+    backgroundColor: 'rgba(7, 41, 55, 0.56)',
+  },
+  statusAccentSuccessBlocking: {
+    borderColor: 'rgba(169, 245, 210, 0.3)',
+    backgroundColor: 'rgba(9, 61, 46, 0.56)',
+  },
+  statusAccentWarningBlocking: {
+    borderColor: 'rgba(255, 213, 161, 0.3)',
+    backgroundColor: 'rgba(74, 39, 16, 0.58)',
   },
   windowRow: { flexDirection: 'row', gap: 8 },
   windowChip: {
