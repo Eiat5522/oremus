@@ -1,7 +1,7 @@
 import { Stack, useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useCameraPermissions } from 'expo-camera';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 
 import {
   BuddhistAltar3D,
@@ -20,7 +20,13 @@ export default function ARScanScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const altarExperienceMode = useBuddhistPrayerStore((state) => state.altarExperienceMode);
   const setAltarExperienceMode = useBuddhistPrayerStore((state) => state.setAltarExperienceMode);
-  const { isSurfaceDetected, beginScan, resetAltarPlacement } = useAltarExperience();
+  const {
+    isSurfaceDetected,
+    beginScan,
+    resetAltarPlacement,
+    handleCameraReady,
+    handleCameraMountError,
+  } = useAltarExperience();
   const modeOption = ALTAR_EXPERIENCE_OPTIONS[altarExperienceMode];
 
   useEffect(() => {
@@ -84,8 +90,8 @@ export default function ARScanScreen() {
               Camera access is needed for room scan
             </ThemedText>
             <ThemedText style={styles.permissionText}>
-              Native AR ready mode uses the camera-led placement flow. Grant access to keep the room
-              scan experience, or switch to immersive 3D if you prefer the fallback scene.
+              Native AR mode uses the camera to detect surfaces in your space. Grant access to
+              continue with the AR experience, or switch to immersive 3D for the fallback scene.
             </ThemedText>
             <View style={styles.permissionActions}>
               <GoldButton title="Allow Camera" onPress={() => requestPermission()} />
@@ -99,14 +105,22 @@ export default function ARScanScreen() {
         ) : (
           <>
             {isNativeMode ? (
-              <ScanOverlay
-                isDetected={isSurfaceDetected}
-                instructionText={
-                  isSurfaceDetected
-                    ? 'Anchor found. Continue to fine-tune your altar placement.'
-                    : 'Move your phone slowly so the room scan can find a flat surface'
-                }
-              />
+              <View style={styles.cameraContainer}>
+                <CameraView
+                  style={StyleSheet.absoluteFill}
+                  facing="back"
+                  onCameraReady={handleCameraReady}
+                  onMountError={handleCameraMountError}
+                />
+                <ScanOverlay
+                  isDetected={isSurfaceDetected}
+                  instructionText={
+                    isSurfaceDetected
+                      ? 'Surface detected — continue to place your altar.'
+                      : 'Move your phone slowly to find a flat surface'
+                  }
+                />
+              </View>
             ) : (
               <View style={styles.immersiveScene}>
                 <BuddhistAltar3D showHalo style={styles.immersiveAltar} />
@@ -136,7 +150,7 @@ export default function ARScanScreen() {
         )}
         <ThemedText style={styles.modeFootnote}>
           {isNativeMode
-            ? 'Native AR ready mode prepares the camera-based placement experience for future AR features.'
+            ? 'Native AR mode uses the camera to detect real surfaces for altar placement.'
             : 'Immersive 3D mode skips the camera and keeps the altar experience intentional on unsupported devices.'}
         </ThemedText>
       </View>
@@ -195,6 +209,14 @@ const styles = StyleSheet.create({
   },
   permissionActions: {
     gap: BuddhistPrayerSpacing.sm,
+  },
+  cameraContainer: {
+    width: '100%',
+    aspectRatio: 3 / 4,
+    borderRadius: 20,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   immersiveScene: {
     width: '100%',
