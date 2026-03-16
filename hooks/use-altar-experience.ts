@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-import type { ARSessionState } from './use-ar-session';
 import { useARSession } from './use-ar-session';
 import { useBuddhistPrayerStore } from './use-buddhist-prayer-store';
 
@@ -127,7 +126,7 @@ export function useAltarExperience(callbacks?: AltarExperienceCallbacks) {
     resetAltarPlacement,
     setError,
     // AR session – wire into CameraView on the scan screen
-    arSessionState: arSessionState as ARSessionState,
+    arSessionState,
     handleCameraReady,
     handleCameraMountError,
   };
