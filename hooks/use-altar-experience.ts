@@ -1,13 +1,9 @@
 import { useCallback, useEffect, useRef } from 'react';
 
+import { useARSession } from './use-ar-session';
 import { useBuddhistPrayerStore } from './use-buddhist-prayer-store';
 
-// TODO: [NATIVE AR SWAP-IN] Replace this with an actual AR session manager
-// when integrating ViroReact or Expo AR native module.
-// The abstraction below keeps the same interface so screens don't need to change.
-
 const IMMERSIVE_3D_SCAN_DURATION_MS = 1400;
-const NATIVE_AR_SCAN_DURATION_MS = 2500;
 
 export type AltarExperienceCallbacks = {
   onSurfaceDetected?: () => void;
@@ -29,30 +25,52 @@ export function useAltarExperience(callbacks?: AltarExperienceCallbacks) {
     updatePlacementRotation,
     resetPlacement,
     setError,
+    setAltarExperienceMode,
   } = useBuddhistPrayerStore();
 
   // Refs to hold latest callbacks without re-running effects
   const callbacksRef = useRef(callbacks);
   callbacksRef.current = callbacks;
 
-  // In immersive3D mode, simulate surface detection with a timer
-  // TODO: [NATIVE AR SWAP-IN] Replace this simulation with real AR plane detection callback
+  // Native AR session – driven by real camera callbacks from expo-camera.
+  const {
+    sessionState: arSessionState,
+    startSession: startARSession,
+    stopSession: stopARSession,
+    handleCameraReady,
+    handleMountError: handleCameraMountError,
+  } = useARSession({
+    onPlaneDetected: () => {
+      surfaceDetected();
+      callbacksRef.current?.onSurfaceDetected?.();
+    },
+    onError: (error) => {
+      setError(error);
+      // Automatically fall back to the immersive scene so the user can
+      // still complete the flow when the camera is unavailable.
+      setAltarExperienceMode('immersive3D');
+      callbacksRef.current?.onError?.(error);
+    },
+  });
+
+  // In immersive3D mode the scan is simulated with a short timer.
   const scanSimulationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const beginScan = useCallback(() => {
     startScan();
-    // TODO: [NATIVE AR SWAP-IN] In nativeARReady mode, start a native AR session here
-    // and replace the timeout with a real plane-detection callback from the AR module.
-    scanSimulationTimeoutRef.current = setTimeout(
-      () => {
+
+    if (altarExperienceMode === 'nativeARReady') {
+      // Start the native AR camera session – surface detection will
+      // be signalled by the CameraView's onCameraReady callback.
+      startARSession();
+    } else {
+      // immersive3D: brief simulated detection for the fallback scene.
+      scanSimulationTimeoutRef.current = setTimeout(() => {
         surfaceDetected();
         callbacksRef.current?.onSurfaceDetected?.();
-      },
-      altarExperienceMode === 'immersive3D'
-        ? IMMERSIVE_3D_SCAN_DURATION_MS
-        : NATIVE_AR_SCAN_DURATION_MS,
-    );
-  }, [altarExperienceMode, startScan, surfaceDetected]);
+      }, IMMERSIVE_3D_SCAN_DURATION_MS);
+    }
+  }, [altarExperienceMode, startARSession, startScan, surfaceDetected]);
 
   const confirmPlacement = useCallback(() => {
     placeAltar();
@@ -77,6 +95,13 @@ export function useAltarExperience(callbacks?: AltarExperienceCallbacks) {
     resetPlacement();
   }, [resetPlacement]);
 
+  // Stop the AR session when falling back to immersive3D.
+  useEffect(() => {
+    if (altarExperienceMode !== 'nativeARReady') {
+      stopARSession();
+    }
+  }, [altarExperienceMode, stopARSession]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -100,5 +125,9 @@ export function useAltarExperience(callbacks?: AltarExperienceCallbacks) {
     adjustRotation,
     resetAltarPlacement,
     setError,
+    // AR session – wire into CameraView on the scan screen
+    arSessionState,
+    handleCameraReady,
+    handleCameraMountError,
   };
 }

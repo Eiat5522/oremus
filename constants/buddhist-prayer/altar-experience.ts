@@ -21,17 +21,11 @@ export const ALTAR_EXPERIENCE_OPTIONS: Record<
     requiresCamera: false,
   },
   nativeARReady: {
-    title: 'Native AR Ready',
-    subtitle: 'Camera placement flow',
+    title: 'Native AR',
+    subtitle: 'Camera surface detection',
     description:
-      'Keeps the camera-based room scanning journey and marks the exact swap points for a future native AR session manager.',
+      'Uses the device camera to detect a real surface in your space and places the altar on it.',
     actionLabel: 'Continue with Camera Scan',
     requiresCamera: true,
   },
 };
-
-export const ALTAR_NATIVE_SWAP_POINTS = [
-  'hooks/use-altar-experience.ts beginScan(): replace the simulated detection with a native plane-detection session.',
-  'app/tradition/buddhist-prayer/ar-scan.tsx: replace the permission + guidance surface with a live camera preview/native AR view.',
-  'components/buddhist-prayer/buddhist-altar-3d.tsx: keep as the immersive fallback scene when native AR is unavailable.',
-] as const;
