@@ -1,8 +1,8 @@
 /* eslint-disable react/no-unknown-property */
 import { Canvas, useFrame } from '@react-three/fiber/native';
 import React, { memo, useMemo, useRef } from 'react';
-import * as THREE from 'three';
 import type { Group, Mesh } from 'three';
+import * as THREE from 'three';
 
 import { BuddhistPrayerColors } from '@/constants/buddhist-prayer/theme';
 import type { AltarProps } from '@/constants/buddhist-prayer/types';
@@ -178,7 +178,6 @@ function AltarSceneContent({
 
   return (
     <>
-      <color attach="background" args={['transparent']} />
       <ambientLight intensity={0.95} />
       <directionalLight color="#FFF4D7" intensity={1.45} position={[3.6, 4.8, 2.4]} />
       <pointLight

@@ -1,0 +1,27 @@
+oremus@1.0.0 /home/eiat/projects/oremus-expo
+├─┬ @react-three/drei@10.7.7
+│ ├─┬ @monogrid/gainmap-js@3.4.0
+│ │ └── three@0.166.1 deduped
+│ ├─┬ camera-controls@3.1.2
+│ │ └── three@0.166.1 deduped
+│ ├─┬ maath@0.10.8
+│ │ └── three@0.166.1 deduped
+│ ├─┬ meshline@3.3.1
+│ │ └── three@0.166.1 deduped
+│ ├─┬ stats-gl@2.4.2
+│ │ └── three@0.170.0
+│ ├─┬ three-mesh-bvh@0.8.3
+│ │ └── three@0.166.1 deduped
+│ ├─┬ three-stdlib@2.36.1
+│ │ └── three@0.166.1 deduped
+│ ├── three@0.166.1 deduped
+│ └─┬ troika-three-text@0.52.4
+│   ├── three@0.166.1 deduped
+│   └─┬ troika-three-utils@0.52.4
+│     └── three@0.166.1 deduped
+├─┬ @react-three/fiber@9.5.0
+│ └── three@0.166.1 deduped
+├─┬ expo-three@8.0.0
+│ └── three@0.166.1 deduped
+└── three@0.166.1
+

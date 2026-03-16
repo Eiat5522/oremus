@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -23,6 +23,7 @@ type PrayerDayRowProps = {
   prayer: PrayerRowModel;
   onActionPress: () => void;
   onLongPress: () => void;
+  onReminderPress: () => void;
 };
 
 function getPrayerIcon(name: PrayerName) {
@@ -90,17 +91,16 @@ export function PrayerDayRow({
   prayer,
   onActionPress,
   onLongPress,
+  onReminderPress,
 }: PrayerDayRowProps) {
   const palette = getStatusStyles(prayer.status);
-  const showCheck = prayer.status === 'completed';
 
   return (
-    <TouchableOpacity
+    <Pressable
       accessibilityRole="button"
-      activeOpacity={0.94}
       onPress={onActionPress}
       onLongPress={onLongPress}
-      style={styles.pressable}
+      style={({ pressed }) => [styles.pressable, pressed ? styles.pressablePressed : null]}
     >
       <View
         style={[
@@ -140,23 +140,36 @@ export function PrayerDayRow({
                 <IconSymbol name="timer" size={12} color="#F4C86B" />
               </View>
             ) : null}
-            <View
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                prayer.isReminderActive
+                  ? `Turn off notification for ${prayer.label}`
+                  : `Turn on notification for ${prayer.label}`
+              }
+              accessibilityState={{ disabled: prayer.isLocked }}
+              disabled={prayer.isLocked}
+              hitSlop={8}
+              onPress={(event) => {
+                event.stopPropagation();
+                onReminderPress();
+              }}
               style={[
-                styles.statusCircle,
-                showCheck ? styles.statusCircleDone : null,
-                prayer.status === 'current' || prayer.status === 'next'
-                  ? styles.statusCircleActive
-                  : null,
-                prayer.status === 'missed' ? styles.statusCircleMissed : null,
-                prayer.isLocked ? styles.statusCircleDisabled : null,
+                styles.reminderButton,
+                prayer.isReminderActive ? styles.reminderButtonActive : null,
+                prayer.isLocked ? styles.reminderButtonDisabled : null,
               ]}
             >
-              {showCheck ? <IconSymbol name="checkmark" size={15} color="#FFF8E8" /> : null}
-            </View>
+              <IconSymbol
+                name={prayer.isReminderActive ? 'bell.fill' : 'bell'}
+                size={16}
+                color={prayer.isReminderActive ? '#F4C86B' : 'rgba(247, 239, 219, 0.82)'}
+              />
+            </Pressable>
           </View>
         </View>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -164,6 +177,9 @@ const styles = StyleSheet.create({
   pressable: {
     borderRadius: 22,
     overflow: 'hidden',
+  },
+  pressablePressed: {
+    opacity: 0.94,
   },
   card: {
     minHeight: 88,
@@ -229,27 +245,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(244, 200, 107, 0.18)',
   },
-  statusCircle: {
+  reminderButton: {
     width: 28,
     height: 28,
     borderRadius: 999,
     borderWidth: 1.5,
     borderColor: 'rgba(244, 200, 107, 0.5)',
-    backgroundColor: 'transparent',
-  },
-  statusCircleDone: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(244, 200, 107, 0.18)',
+    backgroundColor: 'rgba(12, 29, 24, 0.36)',
+  },
+  reminderButtonActive: {
+    backgroundColor: 'rgba(244, 200, 107, 0.14)',
     borderColor: 'rgba(244, 200, 107, 0.9)',
   },
-  statusCircleActive: {
-    borderColor: 'rgba(244, 200, 107, 0.82)',
-  },
-  statusCircleMissed: {
-    borderColor: 'rgba(255,255,255,0.2)',
-  },
-  statusCircleDisabled: {
+  reminderButtonDisabled: {
     opacity: 0.45,
   },
 });

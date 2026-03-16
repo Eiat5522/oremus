@@ -157,7 +157,9 @@ export default function ChantSessionScreen() {
         />
 
         {isLastVerse ? (
-          <ThemedText style={styles.lastVerseHint}>Tap ▶▶ to dedicate your merit</ThemedText>
+          <ThemedText style={styles.lastVerseHint}>
+            Tap ▶▶ to continue and close your session
+          </ThemedText>
         ) : null}
       </View>
     </View>

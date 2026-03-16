@@ -159,7 +159,7 @@ export default function IslamPrayerSessionScreen() {
                 style={{ opacity: helperFade, transform: [{ translateY: helperTranslate }] }}
               >
                 <ThemedText style={styles.helperText}>
-                  Face the Qibla and begin when ready.
+                  Continue your prayer while facing the Qibla.
                 </ThemedText>
               </Animated.View>
             </Animated2.View>

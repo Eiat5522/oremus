@@ -36,10 +36,25 @@ type SelectedPrayer = {
   time: Date;
 };
 
-function getDisplayStatusText(
-  status: PrayerRowModel['status'],
-  countdownText: string,
-) {
+function getAdjustedPrayerReminder(prayer: SelectedPrayer, minutesBefore: number) {
+  const prayerTime = new Date(prayer.time);
+  const scheduleDate = new Date(prayerTime);
+
+  scheduleDate.setMinutes(scheduleDate.getMinutes() - minutesBefore);
+
+  if (scheduleDate.getTime() <= Date.now()) {
+    scheduleDate.setDate(scheduleDate.getDate() + 1);
+    prayerTime.setDate(prayerTime.getDate() + 1);
+  }
+
+  return {
+    prayerTime,
+    scheduleDate,
+    reminderKey: `${prayer.name}:${prayerTime.toISOString()}`,
+  };
+}
+
+function getDisplayStatusText(status: PrayerRowModel['status'], countdownText: string) {
   if (status === 'completed') return 'Completed';
   if (status === 'current') return 'Now';
   if (status === 'next') return countdownText;
@@ -114,13 +129,17 @@ export function IslamPrayerListSection() {
   const fetchActiveReminders = useCallback(async () => {
     try {
       const pending = await Notifications.getAllScheduledNotificationsAsync();
-      const reminderIds = new Set(
+      const reminderKeys = new Set(
         pending
           .filter((notification) => notification.content.data?.feature === 'islam-prayer-session')
-          .map((notification) => notification.content.data?.reminderId as string)
-          .filter(Boolean),
+          .map((notification) => {
+            const prayerName = notification.content.data?.prayer;
+            const prayerTime = notification.content.data?.prayerTime;
+            return prayerName && prayerTime ? `${prayerName}:${prayerTime}` : null;
+          })
+          .filter((value): value is string => Boolean(value)),
       );
-      setActiveReminders(reminderIds);
+      setActiveReminders(reminderKeys);
     } catch (error) {
       console.error('Failed to fetch active reminders:', error);
     }
@@ -137,7 +156,7 @@ export function IslamPrayerListSection() {
     }, [fetchActiveReminders, refreshPrayerData]),
   );
 
-  const ensureReminderPermission = async () => {
+  const ensureReminderPermission = useCallback(async () => {
     await Notifications.setNotificationChannelAsync('prayer-reminders', {
       name: 'Prayer reminders',
       importance: Notifications.AndroidImportance.HIGH,
@@ -151,68 +170,127 @@ export function IslamPrayerListSection() {
     }
 
     return finalStatus === 'granted';
-  };
+  }, []);
 
-  const schedulePrayerReminder = async (prayer: SelectedPrayer, minutesBefore = 15) => {
-    setReminderStatusMessage(null);
+  const schedulePrayerReminder = useCallback(
+    async (prayer: SelectedPrayer, minutesBefore = 15) => {
+      setReminderStatusMessage(null);
 
-    try {
-      const granted = await ensureReminderPermission();
-      if (!granted) {
-        setReminderStatusMessage('Notifications are blocked. Enable notifications in settings.');
-        return;
+      try {
+        const granted = await ensureReminderPermission();
+        if (!granted) {
+          setReminderStatusMessage('Notifications are blocked. Enable notifications in settings.');
+          return;
+        }
+
+        const { prayerTime, scheduleDate, reminderKey: prayerReminderKey } =
+          getAdjustedPrayerReminder(prayer, minutesBefore);
+        const reminderId = `${prayer.name}:${scheduleDate.toISOString().slice(0, 10)}:${minutesBefore}`;
+        const pending = await Notifications.getAllScheduledNotificationsAsync();
+        const matchingReminders = pending.filter(
+          (notification) =>
+            notification.content.data?.feature === 'islam-prayer-session' &&
+            notification.content.data?.prayer === prayer.name &&
+            notification.content.data?.prayerTime === prayerTime.toISOString(),
+        );
+        const hasSameReminder = matchingReminders.some(
+          (notification) => notification.content.data?.reminderMinutes === minutesBefore,
+        );
+
+        if (matchingReminders.length > 0) {
+          await Promise.all(
+            matchingReminders.map((notification) =>
+              Notifications.cancelScheduledNotificationAsync(notification.identifier),
+            ),
+          );
+          await fetchActiveReminders();
+
+          if (hasSameReminder) {
+            setReminderStatusMessage(`Reminder cancelled for ${prayer.label}.`);
+            return;
+          }
+        }
+
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: `${prayer.label} prayer reminder`,
+            body: `${prayer.label} is in ${minutesBefore} minutes.`,
+            sound: 'default',
+            data: {
+              feature: 'islam-prayer-session',
+              prayer: prayer.name,
+              reminderId,
+              reminderMinutes: minutesBefore,
+              reminderTriggerTime: scheduleDate.toISOString(),
+              prayerTime: prayerTime.toISOString(),
+            },
+          },
+          trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            date: scheduleDate,
+          },
+        });
+
+        setActiveReminders((current) => new Set(current).add(prayerReminderKey));
+        await fetchActiveReminders();
+        setReminderStatusMessage(`Reminder set for ${prayer.label} (${minutesBefore} min before).`);
+      } catch (error) {
+        console.error('Failed to schedule prayer reminder:', error);
+        setReminderStatusMessage('Could not set reminder right now. Please try again.');
       }
+    },
+    [ensureReminderPermission, fetchActiveReminders],
+  );
 
-      const scheduleDate = new Date(prayer.time);
-      scheduleDate.setMinutes(scheduleDate.getMinutes() - minutesBefore);
+  const cancelPrayerReminder = useCallback(
+    async (prayer: SelectedPrayer) => {
+      setReminderStatusMessage(null);
 
-      if (scheduleDate.getTime() <= new Date().getTime()) {
-        scheduleDate.setDate(scheduleDate.getDate() + 1);
-      }
+      try {
+        const reminderMinutes = todayRescheduled[prayer.name]?.reminderMinutes ?? 15;
+        const { prayerTime } = getAdjustedPrayerReminder(prayer, reminderMinutes);
+        const pending = await Notifications.getAllScheduledNotificationsAsync();
+        const matchingReminders = pending.filter(
+          (notification) =>
+            notification.content.data?.feature === 'islam-prayer-session' &&
+            notification.content.data?.prayer === prayer.name &&
+            notification.content.data?.prayerTime === prayerTime.toISOString(),
+        );
 
-      const reminderId = `${prayer.name}:${scheduleDate.toISOString().slice(0, 10)}:${minutesBefore}`;
-      const pending = await Notifications.getAllScheduledNotificationsAsync();
-      const existingReminder = pending.find(
-        (notification) =>
-          notification.content.data?.feature === 'islam-prayer-session' &&
-          notification.content.data?.prayer === prayer.name &&
-          notification.content.data?.reminderMinutes === minutesBefore,
-      );
+        if (matchingReminders.length === 0) {
+          setReminderStatusMessage(`No reminder is currently active for ${prayer.label}.`);
+          return;
+        }
 
-      if (existingReminder) {
-        await Notifications.cancelScheduledNotificationAsync(existingReminder.identifier);
+        await Promise.all(
+          matchingReminders.map((notification) =>
+            Notifications.cancelScheduledNotificationAsync(notification.identifier),
+          ),
+        );
         await fetchActiveReminders();
         setReminderStatusMessage(`Reminder cancelled for ${prayer.label}.`);
+      } catch (error) {
+        console.error('Failed to cancel prayer reminder:', error);
+        setReminderStatusMessage('Could not update reminder right now. Please try again.');
+      }
+    },
+    [fetchActiveReminders, todayRescheduled],
+  );
+
+  const togglePrayerReminder = useCallback(
+    (prayer: SelectedPrayer) => {
+      const reminderMinutes = todayRescheduled[prayer.name]?.reminderMinutes ?? 15;
+      const { reminderKey } = getAdjustedPrayerReminder(prayer, reminderMinutes);
+
+      if (activeReminders.has(reminderKey)) {
+        void cancelPrayerReminder(prayer);
         return;
       }
 
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: `${prayer.label} prayer reminder`,
-          body: `${prayer.label} is in ${minutesBefore} minutes.`,
-          sound: 'default',
-          data: {
-            feature: 'islam-prayer-session',
-            prayer: prayer.name,
-            reminderId,
-            reminderMinutes: minutesBefore,
-            reminderTriggerTime: scheduleDate.toISOString(),
-            prayerTime: prayer.time.toISOString(),
-          },
-        },
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.DATE,
-          date: scheduleDate,
-        },
-      });
-
-      await fetchActiveReminders();
-      setReminderStatusMessage(`Reminder set for ${prayer.label} (${minutesBefore} min before).`);
-    } catch (error) {
-      console.error('Failed to schedule prayer reminder:', error);
-      setReminderStatusMessage('Could not set reminder right now. Please try again.');
-    }
-  };
+      void schedulePrayerReminder(prayer, reminderMinutes);
+    },
+    [activeReminders, cancelPrayerReminder, schedulePrayerReminder, todayRescheduled],
+  );
 
   const isPrayerLocked = useCallback(
     (prayer: { name: PrayerName; time: Date }) => {
@@ -298,8 +376,11 @@ export function IslamPrayerListSection() {
         status,
         secondaryLabel: getDisplayStatusText(status, countdownText),
         isRescheduled: Boolean(rescheduled),
-        isReminderActive: Array.from(activeReminders).some((reminderId) =>
-          reminderId.startsWith(`${prayer.name}:`),
+        isReminderActive: activeReminders.has(
+          getAdjustedPrayerReminder(
+            { name: prayer.name, label: prayer.label, time: displayTime },
+            rescheduled?.reminderMinutes ?? 15,
+          ).reminderKey,
         ),
         isLocked,
       };
@@ -383,6 +464,9 @@ export function IslamPrayerListSection() {
                 }
                 onLongPress={() =>
                   handleOpenActions({ name: row.name, label: row.label, time: selectedTime })
+                }
+                onReminderPress={() =>
+                  togglePrayerReminder({ name: row.name, label: row.label, time: selectedTime })
                 }
               />
             );

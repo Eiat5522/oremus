@@ -49,6 +49,7 @@ const MAPPING = {
   pencil: 'edit',
   'slider.horizontal.3': 'tune',
   'doc.text': 'description',
+  bell: 'notifications-none',
   'bell.fill': 'notifications-active',
   'square.and.arrow.up.fill': 'ios-share',
   'trash.fill': 'delete-forever',

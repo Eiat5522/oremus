@@ -3,6 +3,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { usePrayerLocationSettings } from '@/hooks/use-prayer-location-settings';
 import {
+  getDefaultCompletionState,
+  getLocalDateKey,
+  loadPrayerCompletions as loadStoredPrayerCompletions,
+  savePrayerCompletions,
+  type PrayerCompletionStore,
+} from '@/lib/islam-prayer-completion';
+import {
   formatTime,
   getCurrentPrayerName,
   getNextPrayer,
@@ -12,11 +19,7 @@ import {
 } from '@/lib/prayer-times';
 import { recordPrayerCompletion } from '@/lib/focus-gate';
 
-const PRAYER_COMPLETION_STORAGE_KEY = '@oremus/islam-prayer-completion-v1';
 const PRAYER_RESCHEDULE_STORAGE_KEY = '@oremus/islam-prayer-rescheduled-v1';
-
-type DailyPrayerCompletion = Record<PrayerName, boolean>;
-type PrayerCompletionStore = Record<string, DailyPrayerCompletion>;
 
 export interface RescheduledPrayerData {
   time: string; // ISO string
@@ -26,23 +29,6 @@ export interface RescheduledPrayerData {
 
 type DailyRescheduledPrayers = Record<PrayerName, RescheduledPrayerData>;
 type PrayerRescheduleStore = Record<string, DailyRescheduledPrayers>;
-
-function getDefaultCompletionState(): DailyPrayerCompletion {
-  return {
-    fajr: false,
-    dhuhr: false,
-    asr: false,
-    maghrib: false,
-    isha: false,
-  };
-}
-
-function getLocalDateKey(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
 
 function getComparisonTimeForDate(selectedDate: Date, now: Date): Date {
   const comparison = new Date(selectedDate);
@@ -147,16 +133,7 @@ export function useIslamPrayerData(referenceDate?: Date) {
     : 'No more prayers today';
 
   const loadPrayerCompletions = useCallback(async () => {
-    try {
-      const stored = await AsyncStorage.getItem(PRAYER_COMPLETION_STORAGE_KEY);
-      if (!stored) {
-        setPrayerCompletions({});
-        return;
-      }
-      setPrayerCompletions(JSON.parse(stored) as PrayerCompletionStore);
-    } catch {
-      setPrayerCompletions({});
-    }
+    setPrayerCompletions(await loadStoredPrayerCompletions());
   }, []);
 
   const loadRescheduledPrayers = useCallback(async () => {
@@ -200,7 +177,7 @@ export function useIslamPrayerData(referenceDate?: Date) {
         void recordPrayerCompletion();
       }
       setPrayerCompletions(() => nextState);
-      void AsyncStorage.setItem(PRAYER_COMPLETION_STORAGE_KEY, JSON.stringify(nextState));
+      void savePrayerCompletions(nextState);
     },
     [prayerCompletions, todayKey],
   );

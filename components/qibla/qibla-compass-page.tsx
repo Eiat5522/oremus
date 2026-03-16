@@ -32,6 +32,7 @@ type QiblaCompassPageProps = {
   onRecenterCalibration: () => void;
   onNudgeCalibrationLeft: () => void;
   onNudgeCalibrationRight: () => void;
+  onStartPrayerNow: () => void;
   prayerLabel?: string;
   calibrationOffset: number;
   alignmentDelta: number | null;
@@ -61,6 +62,7 @@ export function QiblaCompassPage({
   onRecenterCalibration,
   onNudgeCalibrationLeft,
   onNudgeCalibrationRight,
+  onStartPrayerNow,
   prayerLabel,
   calibrationOffset,
   alignmentDelta,
@@ -305,7 +307,7 @@ export function QiblaCompassPage({
         </View>
       ) : null}
 
-      <View style={[styles.statusCard, { bottom: insets.bottom + 24 }]}>
+      <View style={[styles.statusCard, { bottom: insets.bottom + (isSessionMode ? 108 : 24) }]}>
         <ThemedText style={styles.statusTitle}>{statusTitle}</ThemedText>
         <ThemedText style={styles.statusSubtitle}>{statusSubtitle}</ThemedText>
 
@@ -324,6 +326,18 @@ export function QiblaCompassPage({
                 ? 'Opening prayer session...'
                 : 'Auto-opening prayer session...'}
             </ThemedText>
+            {!isTransitioningToPrayer ? (
+              <Pressable
+                onPress={onStartPrayerNow}
+                style={styles.startNowButton}
+                accessibilityRole="button"
+                accessibilityLabel={`Start ${prayerLabel ?? 'prayer session'} now`}
+              >
+                <ThemedText style={styles.startNowButtonText}>
+                  Start {prayerLabel ?? 'prayer session'} now
+                </ThemedText>
+              </Pressable>
+            ) : null}
           </View>
         ) : (
           <View style={styles.calibrationRow}>
@@ -572,6 +586,24 @@ const styles = StyleSheet.create({
     color: '#fff0c0',
     fontSize: 14,
     fontWeight: '600',
+    textAlign: 'center',
+  },
+  startNowButton: {
+    minHeight: 48,
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 16,
+    backgroundColor: '#f7cb67',
+    borderWidth: 1,
+    borderColor: 'rgba(255,245,214,0.58)',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  startNowButtonText: {
+    color: '#241500',
+    fontSize: 15,
+    fontWeight: '800',
     textAlign: 'center',
   },
   calibrationRow: {

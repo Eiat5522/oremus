@@ -1,10 +1,10 @@
-import AsyncStorageMock from '@react-native-async-storage/async-storage/jest/async-storage-mock';
+import mockAsyncStorage from '@react-native-async-storage/async-storage/jest/async-storage-mock';
 import { act, renderHook } from '@testing-library/react-native';
 
 import { useAudioPrayer } from '@/hooks/use-audio-prayer';
 import { useBuddhistPrayerStore } from '@/hooks/use-buddhist-prayer-store';
 
-jest.mock('@react-native-async-storage/async-storage', () => AsyncStorageMock);
+jest.mock('@react-native-async-storage/async-storage', () => mockAsyncStorage);
 
 const mockChantPlay = jest.fn();
 const mockChantPause = jest.fn();

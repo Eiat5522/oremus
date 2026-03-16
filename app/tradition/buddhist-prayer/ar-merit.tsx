@@ -103,6 +103,16 @@ export default function ARMeritScreen() {
           onPress={() => router.push('/tradition/buddhist-prayer/ar-completion')}
           disabled={!meritOption}
         />
+        <GoldButton
+          title="Continue without Merit"
+          variant="outline"
+          onPress={() => router.push('/tradition/buddhist-prayer/ar-completion')}
+        />
+        <GoldButton
+          title="Return Home"
+          variant="ghost"
+          onPress={() => router.replace('/tradition/buddhist')}
+        />
       </ScrollView>
     </View>
   );

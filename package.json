@@ -95,7 +95,8 @@
     }
   },
   "overrides": {
-    "fast-xml-parser": "^5.3.3"
+    "fast-xml-parser": "^5.3.3",
+    "three": "^0.166.1"
   },
   "private": true,
   "jest": {

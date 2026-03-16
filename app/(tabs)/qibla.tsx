@@ -58,6 +58,21 @@ export default function QiblaScreen() {
   const canAskCameraPermission = cameraPermission?.canAskAgain ?? true;
   const showLiveCamera = cameraPermissionStatus === 'granted';
 
+  const openPrayerSession = React.useCallback(() => {
+    if (autoAdvanceTimeoutRef.current) {
+      clearTimeout(autoAdvanceTimeoutRef.current);
+      autoAdvanceTimeoutRef.current = null;
+    }
+
+    setIsTransitioningToPrayer(true);
+    hasAutoAdvancedRef.current = true;
+
+    router.push({
+      pathname: '/tradition/islam-session',
+      params: { prayerName },
+    });
+  }, [prayerName, router]);
+
   useEffect(() => {
     if (hasAutoRequestedCamera.current) {
       return;
@@ -91,12 +106,7 @@ export default function QiblaScreen() {
       setIsTransitioningToPrayer(true);
       autoAdvanceTimeoutRef.current = setTimeout(() => {
         autoAdvanceTimeoutRef.current = null;
-        hasAutoAdvancedRef.current = true;
-
-        router.push({
-          pathname: '/tradition/islam-session',
-          params: { prayerName },
-        });
+        openPrayerSession();
       }, AUTO_ADVANCE_DELAY_MS);
 
       return;
@@ -107,7 +117,7 @@ export default function QiblaScreen() {
       clearTimeout(autoAdvanceTimeoutRef.current);
       autoAdvanceTimeoutRef.current = null;
     }
-  }, [alignmentState, mode, prayerName, router]);
+  }, [alignmentState, mode, openPrayerSession]);
 
   useEffect(() => {
     return () => {
@@ -164,6 +174,7 @@ export default function QiblaScreen() {
         signedOffset={signedOffset ?? 0}
         alignmentState={alignmentState}
         isTransitioningToPrayer={isTransitioningToPrayer}
+        onStartPrayerNow={openPrayerSession}
       />
     </View>
   );

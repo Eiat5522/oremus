@@ -1,12 +1,14 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { formatDuration } from '@/lib/chant-helpers';
 import { recordPrayerCompletion } from '@/lib/focus-gate';
+import { markPrayerComplete } from '@/lib/islam-prayer-completion';
+import type { PrayerName } from '@/lib/prayer-times';
 
 type CompletionParams = {
   prayerName?: string | string[];
@@ -17,10 +19,25 @@ function toTitleCase(value: string): string {
   return value.replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+function isPrayerName(value: string | undefined): value is PrayerName {
+  return (
+    value === 'fajr' ||
+    value === 'dhuhr' ||
+    value === 'asr' ||
+    value === 'maghrib' ||
+    value === 'isha'
+  );
+}
+
 export default function IslamCompletionScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<CompletionParams>();
   const completionRecordedRef = useRef(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  const prayerNameParam = Array.isArray(params.prayerName)
+    ? params.prayerName[0]
+    : params.prayerName;
 
   useEffect(() => {
     if (completionRecordedRef.current) {
@@ -28,12 +45,14 @@ export default function IslamCompletionScreen() {
     }
 
     completionRecordedRef.current = true;
-    void recordPrayerCompletion();
-  }, []);
+    void (async () => {
+      if (isPrayerName(prayerNameParam)) {
+        await markPrayerComplete(prayerNameParam);
+      }
+      await recordPrayerCompletion();
+    })();
+  }, [prayerNameParam]);
 
-  const prayerNameParam = Array.isArray(params.prayerName)
-    ? params.prayerName[0]
-    : params.prayerName;
   const durationParam = Array.isArray(params.durationSeconds)
     ? params.durationSeconds[0]
     : params.durationSeconds;
@@ -44,6 +63,22 @@ export default function IslamCompletionScreen() {
     () => `May your ${prayerLabel.toLowerCase()} bring you peace and steadfastness.`,
     [prayerLabel],
   );
+
+  const handleReturnToPrayerList = async () => {
+    if (isNavigating) {
+      return;
+    }
+
+    setIsNavigating(true);
+    try {
+      if (isPrayerName(prayerNameParam)) {
+        await markPrayerComplete(prayerNameParam);
+      }
+      await recordPrayerCompletion();
+    } finally {
+      router.replace('/(tabs)/prayers');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -82,7 +117,8 @@ export default function IslamCompletionScreen() {
           </Pressable>
 
           <Pressable
-            onPress={() => router.replace('/(tabs)/prayers')}
+            disabled={isNavigating}
+            onPress={() => void handleReturnToPrayerList()}
             style={styles.secondaryButton}
           >
             <ThemedText style={styles.secondaryButtonText}>Return to Prayer List</ThemedText>

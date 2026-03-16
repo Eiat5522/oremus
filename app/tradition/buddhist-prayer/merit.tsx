@@ -82,6 +82,16 @@ export default function MeritDedicationScreen() {
           onPress={() => router.push('/tradition/buddhist-prayer/completion')}
           disabled={!meritOption}
         />
+        <GoldButton
+          title="Continue without Merit"
+          variant="outline"
+          onPress={() => router.push('/tradition/buddhist-prayer/completion')}
+        />
+        <GoldButton
+          title="Return Home"
+          variant="ghost"
+          onPress={() => router.replace('/tradition/buddhist')}
+        />
       </ScrollView>
     </View>
   );

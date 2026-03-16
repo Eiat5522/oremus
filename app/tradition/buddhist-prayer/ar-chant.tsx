@@ -169,7 +169,9 @@ export default function ARChantScreen() {
           onReplay={handleReplay}
         />
         {isLastVerse ? (
-          <ThemedText style={styles.lastVerseHint}>Tap ▶▶ to dedicate your merit</ThemedText>
+          <ThemedText style={styles.lastVerseHint}>
+            Tap ▶▶ to continue and close your session
+          </ThemedText>
         ) : null}
       </View>
     </View>
