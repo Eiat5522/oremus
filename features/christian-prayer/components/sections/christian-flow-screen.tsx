@@ -3,7 +3,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { ChristianPrayerPalette, ChristianPrayerSpacing } from '@/features/christian-prayer/constants';
+import {
+  ChristianPrayerPalette,
+  ChristianPrayerSpacing,
+} from '@/features/christian-prayer/constants';
 
 const CHRISTIAN_BACKGROUND = require('@/assets/images/background/christianity-waterpaint.png');
 
@@ -12,13 +15,14 @@ interface ChristianFlowScreenProps {
   scrollable?: boolean;
 }
 
-export function ChristianFlowScreen({
-  children,
-  scrollable = true,
-}: ChristianFlowScreenProps) {
+export function ChristianFlowScreen({ children, scrollable = true }: ChristianFlowScreenProps) {
   return (
     <View style={styles.container}>
-      <Image source={CHRISTIAN_BACKGROUND} style={StyleSheet.absoluteFillObject} contentFit="cover" />
+      <Image
+        source={CHRISTIAN_BACKGROUND}
+        style={StyleSheet.absoluteFillObject}
+        contentFit="cover"
+      />
       <LinearGradient
         colors={[
           ChristianPrayerPalette.overlayTop,

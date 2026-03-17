@@ -1,7 +1,11 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { ChristianPrayerPalette, ChristianPrayerRadius, ChristianPrayerSpacing } from '@/features/christian-prayer/constants';
+import {
+  ChristianPrayerPalette,
+  ChristianPrayerRadius,
+  ChristianPrayerSpacing,
+} from '@/features/christian-prayer/constants';
 
 interface BottomSheetContainerProps {
   children: React.ReactNode;

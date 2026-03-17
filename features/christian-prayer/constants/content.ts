@@ -175,7 +175,8 @@ export const CHRISTIAN_MODE_CONTENT: Record<ChristianSessionMode, ChristianModeC
       praise: 'Lord, You remain steady when I feel depleted.',
       confession: 'Forgive the ways I have confused striving with faithfulness.',
       thanksgiving: 'Thank You for mercy that meets me even in weakness.',
-      intercession: 'Strengthen those who are weary, sick, discouraged, or carrying hidden burdens.',
+      intercession:
+        'Strengthen those who are weary, sick, discouraged, or carrying hidden burdens.',
       surrender: 'I entrust my limits to You and receive the grace for one faithful step.',
     },
   },

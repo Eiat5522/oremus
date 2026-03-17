@@ -183,8 +183,11 @@ export function IslamPrayerListSection() {
           return;
         }
 
-        const { prayerTime, scheduleDate, reminderKey: prayerReminderKey } =
-          getAdjustedPrayerReminder(prayer, minutesBefore);
+        const {
+          prayerTime,
+          scheduleDate,
+          reminderKey: prayerReminderKey,
+        } = getAdjustedPrayerReminder(prayer, minutesBefore);
         const reminderId = `${prayer.name}:${scheduleDate.toISOString().slice(0, 10)}:${minutesBefore}`;
         const pending = await Notifications.getAllScheduledNotificationsAsync();
         const matchingReminders = pending.filter(

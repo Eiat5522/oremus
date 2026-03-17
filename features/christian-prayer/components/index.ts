@@ -25,4 +25,5 @@ export { TopOverlayHeader } from './overlays/top-overlay-header';
 export { StillnessOverlay } from './overlays/stillness-overlay';
 export { PrayerCornerScene } from './scenes/prayer-corner-scene';
 export { ChristianArViewport } from './scenes/christian-ar-viewport';
+export { PrayerCorner3DStage } from './scenes/prayer-corner-3d-stage';
 export { ChristianFlowScreen } from './sections/christian-flow-screen';

@@ -73,10 +73,9 @@ describe('useARSession', () => {
     const firstCallback = jest.fn();
     const secondCallback = jest.fn();
 
-    const { result, rerender } = renderHook(
-      ({ cb }) => useARSession({ onPlaneDetected: cb }),
-      { initialProps: { cb: firstCallback } },
-    );
+    const { result, rerender } = renderHook(({ cb }) => useARSession({ onPlaneDetected: cb }), {
+      initialProps: { cb: firstCallback },
+    });
 
     act(() => {
       result.current.startSession();

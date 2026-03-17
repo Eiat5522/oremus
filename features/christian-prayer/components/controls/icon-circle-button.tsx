@@ -20,16 +20,18 @@ export function IconCircleButton({
   accessibilityState,
   ...pressableProps
 }: IconCircleButtonProps) {
+  const isDisabled = disabled === true;
+
   return (
     <Pressable
       {...pressableProps}
       accessibilityRole={accessibilityRole ?? 'button'}
-      accessibilityState={{ ...accessibilityState, disabled }}
-      disabled={disabled}
+      accessibilityState={{ ...accessibilityState, disabled: isDisabled }}
+      disabled={isDisabled}
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        disabled ? styles.disabled : null,
+        isDisabled ? styles.disabled : null,
         pressed ? styles.pressed : null,
       ]}
     >

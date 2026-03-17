@@ -11,6 +11,7 @@ import {
 interface PrayerCornerSceneProps {
   sceneStyle: ChristianArSceneStyle;
   floatingPrompts?: string[];
+  centerpiece?: React.ReactNode;
   children?: React.ReactNode;
 }
 
@@ -28,6 +29,7 @@ const PARTICLE_LAYOUT = [
 export function PrayerCornerScene({
   sceneStyle,
   floatingPrompts = [],
+  centerpiece,
   children,
 }: PrayerCornerSceneProps) {
   const visiblePrompts = floatingPrompts.slice(0, 5);
@@ -68,16 +70,22 @@ export function PrayerCornerScene({
       ))}
 
       <View style={styles.sceneCenter}>
-        <View style={styles.crossVertical} />
-        <View style={styles.crossHorizontal} />
-        <View style={styles.bibleRow}>
-          <View style={styles.bibleLeft} />
-          <View style={styles.bibleRight} />
-        </View>
-        <View style={styles.candleRow}>
-          <View style={[styles.candle, { opacity: sceneStyle.candleIntensity }]} />
-          <View style={[styles.candle, { opacity: sceneStyle.candleIntensity }]} />
-        </View>
+        {centerpiece ? (
+          centerpiece
+        ) : (
+          <>
+            <View style={styles.crossVertical} />
+            <View style={styles.crossHorizontal} />
+            <View style={styles.bibleRow}>
+              <View style={styles.bibleLeft} />
+              <View style={styles.bibleRight} />
+            </View>
+            <View style={styles.candleRow}>
+              <View style={[styles.candle, { opacity: sceneStyle.candleIntensity }]} />
+              <View style={[styles.candle, { opacity: sceneStyle.candleIntensity }]} />
+            </View>
+          </>
+        )}
       </View>
 
       {children}

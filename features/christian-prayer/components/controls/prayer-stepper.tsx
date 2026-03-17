@@ -21,7 +21,13 @@ export function PrayerStepper({ phases, currentPhase }: PrayerStepperProps) {
         const completed = phases.indexOf(currentPhase) > index;
         return (
           <View key={phase} style={styles.step}>
-            <View style={[styles.dot, active ? styles.dotActive : null, completed ? styles.dotComplete : null]} />
+            <View
+              style={[
+                styles.dot,
+                active ? styles.dotActive : null,
+                completed ? styles.dotComplete : null,
+              ]}
+            />
             <ThemedText style={[styles.label, active ? styles.labelActive : null]}>
               {phase}
             </ThemedText>

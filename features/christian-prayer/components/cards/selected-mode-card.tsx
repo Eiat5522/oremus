@@ -3,7 +3,10 @@ import { StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { GlassCard } from '@/features/christian-prayer/components/cards/glass-card';
-import { ChristianPrayerPalette, type ChristianModeContent } from '@/features/christian-prayer/constants';
+import {
+  ChristianPrayerPalette,
+  type ChristianModeContent,
+} from '@/features/christian-prayer/constants';
 
 interface SelectedModeCardProps {
   content: ChristianModeContent;

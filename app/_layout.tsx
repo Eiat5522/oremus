@@ -51,10 +51,7 @@ function RootLayoutNav() {
             name="tradition/buddhist-prayer"
             options={{ presentation: 'fullScreenModal' }}
           />
-          <Stack.Screen
-            name="tradition/christian"
-            options={{ presentation: 'fullScreenModal' }}
-          />
+          <Stack.Screen name="tradition/christian" options={{ presentation: 'fullScreenModal' }} />
           <Stack.Screen
             name="tradition/christian-preparation"
             options={{ presentation: 'fullScreenModal' }}

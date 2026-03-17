@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "tradition": "christian",
+  "profile": "mobile-prayer-corner-v1",
+  "format": "glb",
+  "notes": "Drop exported GLB files into this directory and map each asset id in the model module registry.",
+  "assets": [
+    {
+      "id": "cross_wood_a",
+      "fileName": "cross_wood_a.glb",
+      "pivot": "bottomCenter",
+      "role": "hero",
+      "maxTriangles": 8000,
+      "maxTextureSize": 1024,
+      "scaleHint": 1
+    },
+    {
+      "id": "bible_open_a",
+      "fileName": "bible_open_a.glb",
+      "pivot": "bottomCenter",
+      "role": "hero",
+      "maxTriangles": 8000,
+      "maxTextureSize": 1024,
+      "scaleHint": 1
+    },
+    {
+      "id": "candle_tall_a",
+      "fileName": "candle_tall_a.glb",
+      "pivot": "bottomCenter",
+      "role": "support",
+      "maxTriangles": 2500,
+      "maxTextureSize": 512,
+      "scaleHint": 1
+    },
+    {
+      "id": "candle_short_a",
+      "fileName": "candle_short_a.glb",
+      "pivot": "bottomCenter",
+      "role": "support",
+      "maxTriangles": 2500,
+      "maxTextureSize": 512,
+      "scaleHint": 1
+    },
+    {
+      "id": "corner_base_cloth_a",
+      "fileName": "corner_base_cloth_a.glb",
+      "pivot": "bottomCenter",
+      "role": "base",
+      "maxTriangles": 6000,
+      "maxTextureSize": 1024,
+      "scaleHint": 1
+    }
+  ]
+}

@@ -102,6 +102,7 @@
   "private": true,
   "jest": {
     "preset": "jest-expo",
+    "watchman": false,
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/$1"
     }

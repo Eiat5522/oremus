@@ -1,0 +1,14 @@
+import type { ChristianPrayerCornerAssetId } from '@/features/christian-prayer/constants/model-manifest';
+
+export type ChristianPrayerCornerModuleRegistry = Record<ChristianPrayerCornerAssetId, number | null>;
+
+// Keep this map intentionally explicit so adding a new GLB is a one-line change.
+// Example:
+// cross_wood_a: require('@/assets/models/christian/cross_wood_a.glb')
+export const CHRISTIAN_PRAYER_CORNER_MODEL_MODULES: ChristianPrayerCornerModuleRegistry = {
+  cross_wood_a: null,
+  bible_open_a: null,
+  candle_tall_a: null,
+  candle_short_a: null,
+  corner_base_cloth_a: null,
+};

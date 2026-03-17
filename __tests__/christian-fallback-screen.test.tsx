@@ -36,6 +36,10 @@ jest.mock('expo-speech', () => ({
 jest.mock('expo-camera', () => ({
   CameraView: () => null,
 }));
+jest.mock('expo-three', () => ({
+  __esModule: true,
+  default: {},
+}));
 jest.mock('expo-image', () => ({
   Image: (props: object) => {
     const { View } = require('react-native');

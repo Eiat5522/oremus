@@ -4,7 +4,10 @@ import { useCallback } from 'react';
 import type { ChristianPrayerPhase } from '@/features/christian-prayer/constants';
 import { trackChristianAnalyticsEvent } from '@/features/christian-prayer/services/christianAnalytics.service';
 import { triggerChristianPhaseChangeHaptic } from '@/features/christian-prayer/services/christianHaptics.service';
-import { getChristianPhaseRoute, getChristianNextPhase } from '@/features/christian-prayer/services/christianSession.service';
+import {
+  getChristianPhaseRoute,
+  getChristianNextPhase,
+} from '@/features/christian-prayer/services/christianSession.service';
 import { useChristianSessionStore } from '@/features/christian-prayer/store/useChristianSessionStore';
 
 export function useChristianPhaseNavigation() {

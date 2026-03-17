@@ -51,6 +51,7 @@ import {
   saveCompletedChristianSession,
   saveFavoriteChristianVerse,
 } from '@/features/christian-prayer/services/christianPersistence.service';
+import { preloadChristianPrayerCornerModels } from '@/features/christian-prayer/services/christianModels.service';
 import {
   buildChristianSessionSummary,
   getChristianResumeRoute,
@@ -225,6 +226,38 @@ export function ChristianPrayerSetupScreen() {
   const router = useRouter();
   const mode = useChristianModeGuard();
   const session = useChristianPrayerSession();
+  const preloadTrackedRef = useRef(false);
+
+  useEffect(() => {
+    if (!mode || preloadTrackedRef.current) {
+      return;
+    }
+
+    preloadTrackedRef.current = true;
+    void trackChristianAnalyticsEvent({
+      type: 'model_preload_started',
+      sessionId: session.sessionId,
+      mode: session.mode,
+      phase: session.currentPhase,
+      payload: { source: 'setup' },
+    });
+
+    void preloadChristianPrayerCornerModels().then((snapshot) => {
+      if (snapshot.error || snapshot.failedAssetIds.length > 0) {
+        void trackChristianAnalyticsEvent({
+          type: 'model_preload_failed',
+          sessionId: session.sessionId,
+          mode: session.mode,
+          phase: session.currentPhase,
+          payload: {
+            source: 'setup',
+            error: snapshot.error ?? null,
+            failedCount: snapshot.failedAssetIds.length,
+          },
+        });
+      }
+    });
+  }, [mode, session.currentPhase, session.mode, session.sessionId]);
 
   if (!mode || !session.modeContent || !session.selectedVerse) {
     return null;
@@ -297,6 +330,7 @@ export function ChristianArIntroScreen() {
   useChristianRouteSync('/christian/ar-intro');
   const router = useRouter();
   const mode = useChristianModeGuard();
+  const session = useChristianPrayerSession();
   const setCameraPermission = useChristianSessionStore((state) => state.setCameraPermission);
   const setExperienceMode = useChristianSessionStore((state) => state.setExperienceMode);
   const [permission, requestPermission] = useSafeCameraPermissions();
@@ -306,6 +340,28 @@ export function ChristianArIntroScreen() {
       setCameraPermission(permission.status);
     }
   }, [permission?.status, setCameraPermission]);
+
+  useEffect(() => {
+    if (!mode) {
+      return;
+    }
+
+    void preloadChristianPrayerCornerModels().then((snapshot) => {
+      if (snapshot.error || snapshot.failedAssetIds.length > 0) {
+        void trackChristianAnalyticsEvent({
+          type: 'model_preload_failed',
+          sessionId: session.sessionId,
+          mode: session.mode,
+          phase: session.currentPhase,
+          payload: {
+            source: 'ar_intro',
+            error: snapshot.error ?? null,
+            failedCount: snapshot.failedAssetIds.length,
+          },
+        });
+      }
+    });
+  }, [mode, session.currentPhase, session.mode, session.sessionId]);
 
   if (!mode) {
     return null;
@@ -351,7 +407,7 @@ export function ChristianArIntroScreen() {
           label="Use 2D Sanctuary"
           onPress={() => {
             setExperienceMode('fallback2d');
-            router.replace('/christian-2d/index' as never);
+            router.replace('/christian-2d' as never);
           }}
         />
       </View>
@@ -376,7 +432,7 @@ export function ChristianArScanScreen() {
     const boot = async () => {
       if (session.cameraPermission !== 'granted') {
         setExperienceMode('fallback2d');
-        router.replace('/christian-2d/index' as never);
+        router.replace('/christian-2d' as never);
         return;
       }
 
@@ -391,7 +447,7 @@ export function ChristianArScanScreen() {
       }
 
       setExperienceMode('fallback2d');
-      router.replace('/christian-2d/index' as never);
+      router.replace('/christian-2d' as never);
     };
 
     if (mode) {
@@ -461,7 +517,7 @@ export function ChristianArScanScreen() {
               label="Use 2D Sanctuary"
               onPress={() => {
                 setExperienceMode('fallback2d');
-                router.replace('/christian-2d/index' as never);
+                router.replace('/christian-2d' as never);
               }}
             />
           </View>
@@ -645,7 +701,7 @@ export function ChristianArReadyScreen() {
 }
 
 export function ChristianFallbackStartScreen() {
-  useChristianRouteSync('/christian-2d/index');
+  useChristianRouteSync('/christian-2d');
   const mode = useChristianModeGuard();
   const session = useChristianPrayerSession();
   const setExperienceMode = useChristianSessionStore((state) => state.setExperienceMode);

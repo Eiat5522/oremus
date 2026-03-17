@@ -40,7 +40,9 @@ export function createChristianSessionId(): string {
   return `christian-${Date.now()}`;
 }
 
-export function buildChristianDraftState(mode: ChristianSessionMode | null): Pick<
+export function buildChristianDraftState(
+  mode: ChristianSessionMode | null,
+): Pick<
   ChristianSessionState,
   'sessionId' | 'mode' | 'selectedVerse' | 'isDraft' | 'currentPhase'
 > {
@@ -78,14 +80,16 @@ export function getChristianPhaseRoute(
       return `${basePath}/complete`;
     case 'idle':
     default:
-      return experienceMode === 'fallback2d' ? '/christian-2d/index' : '/christian/index';
+      return experienceMode === 'fallback2d' ? '/christian-2d' : '/christian';
   }
 }
 
-export function getChristianResumeRoute(state: Pick<
-  ChristianSessionState,
-  'currentRoute' | 'experienceMode' | 'currentPhase' | 'isCompleted' | 'isDraft'
->): string {
+export function getChristianResumeRoute(
+  state: Pick<
+    ChristianSessionState,
+    'currentRoute' | 'experienceMode' | 'currentPhase' | 'isCompleted' | 'isDraft'
+  >,
+): string {
   if (state.isCompleted) {
     return state.experienceMode === 'fallback2d' ? '/christian-2d/complete' : '/christian/complete';
   }
@@ -98,7 +102,7 @@ export function getChristianResumeRoute(state: Pick<
     return getChristianPhaseRoute(state.currentPhase, state.experienceMode);
   }
 
-  return state.experienceMode === 'fallback2d' ? '/christian-2d/index' : '/christian/index';
+  return state.experienceMode === 'fallback2d' ? '/christian-2d' : '/christian';
 }
 
 export function getChristianNextPhase(currentPhase: ChristianPrayerPhase): ChristianPrayerPhase {
@@ -137,7 +141,8 @@ export function normalizePrayerCornerTransform(
   const nextScale = transform.scale ?? current.scale;
   const nextRotation = transform.rotation ?? current.rotation;
 
-  const normalizeAxis = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+  const normalizeAxis = (value: number, min: number, max: number) =>
+    Math.min(max, Math.max(min, value));
 
   return {
     scale: normalizeAxis(nextScale, 0.8, 1.45),
@@ -148,7 +153,9 @@ export function normalizePrayerCornerTransform(
   };
 }
 
-export function resolveChristianModeFromLegacyTemplate(templateId?: string | null): ChristianSessionMode {
+export function resolveChristianModeFromLegacyTemplate(
+  templateId?: string | null,
+): ChristianSessionMode {
   if (templateId && LEGACY_CHRISTIAN_TEMPLATE_TO_MODE[templateId]) {
     return LEGACY_CHRISTIAN_TEMPLATE_TO_MODE[templateId];
   }

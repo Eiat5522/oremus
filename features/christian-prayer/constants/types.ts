@@ -69,7 +69,11 @@ export type ChristianAnalyticsEventType =
   | 'phase_completed'
   | 'session_completed'
   | 'journal_saved'
-  | 'session_abandoned';
+  | 'session_abandoned'
+  | 'model_preload_started'
+  | 'model_preload_failed'
+  | 'model_slot_missing'
+  | '3d_stage_activated';
 
 export interface ChristianVerse {
   id: string;

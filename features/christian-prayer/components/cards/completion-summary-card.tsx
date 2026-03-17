@@ -3,7 +3,10 @@ import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { GlassCard } from '@/features/christian-prayer/components/cards/glass-card';
-import { ChristianPrayerPalette, type ChristianSessionSummary } from '@/features/christian-prayer/constants';
+import {
+  ChristianPrayerPalette,
+  type ChristianSessionSummary,
+} from '@/features/christian-prayer/constants';
 
 interface CompletionSummaryCardProps {
   summary: ChristianSessionSummary;

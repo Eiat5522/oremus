@@ -26,14 +26,20 @@ export function getChristianModeOptions(): ChristianModeContent[] {
   return Object.values(CHRISTIAN_MODE_CONTENT);
 }
 
-export function getSuggestedChristianVerse(mode: ChristianSessionMode, date: Date = new Date()): ChristianVerse {
+export function getSuggestedChristianVerse(
+  mode: ChristianSessionMode,
+  date: Date = new Date(),
+): ChristianVerse {
   if (mode === 'dailyScripture') {
     return getDailyChristianVerse(date);
   }
   return getChristianModeContent(mode).heroVerse;
 }
 
-export function getChristianVersePreview(mode: ChristianSessionMode, date: Date = new Date()): ChristianVerse {
+export function getChristianVersePreview(
+  mode: ChristianSessionMode,
+  date: Date = new Date(),
+): ChristianVerse {
   return getSuggestedChristianVerse(mode, date);
 }
 

@@ -36,7 +36,9 @@ export function PrayerLocationSettingsCard({
   showPresets = false,
 }: PrayerLocationSettingsCardProps) {
   const visibleLocationError =
-    isResolvingPrayerTimes || (savedPrayerLocation && !isUsingDeviceLocation) ? null : locationError;
+    isResolvingPrayerTimes || (savedPrayerLocation && !isUsingDeviceLocation)
+      ? null
+      : locationError;
   const locationCopy = isResolvingPrayerTimes
     ? savedPrayerLocation
       ? `Calculating exact prayer times for ${savedPrayerLocation.label}...`
