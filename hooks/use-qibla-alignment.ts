@@ -126,7 +126,7 @@ export function useQiblaAlignment() {
       setLocationPermissionStatus(Location.PermissionStatus.DENIED);
       setCanAskLocationPermission(false);
       setLocationPermissionFlowState('blocked');
-      setLocationError('Compass data is unavailable on this device.');
+      setLocationError('Unable to access location services.');
     },
     [clearLiveLocationState],
   );

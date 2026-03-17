@@ -20,6 +20,7 @@ export type IslamicSessionAnalyticsEventType =
   | 'location_permission_state_failed'
   | 'alignment_reached'
   | 'alignment_stable_confirmed'
+  | 'alignment_stability_interrupted'
   | 'auto_start_triggered'
   | 'manual_start_triggered'
   | 'session_start_failed'
@@ -118,6 +119,7 @@ function inferFunnelStep(type: IslamicSessionAnalyticsEventType): IslamicSession
       return 'location_permission';
     case 'alignment_reached':
     case 'alignment_stable_confirmed':
+    case 'alignment_stability_interrupted':
       return 'alignment';
     case 'auto_start_triggered':
     case 'manual_start_triggered':

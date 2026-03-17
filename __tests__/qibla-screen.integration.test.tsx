@@ -245,9 +245,11 @@ describe('QiblaScreen integration', () => {
 
     fireEvent.press(getByTestId('open-camera-settings'));
     appStateChangeListener?.('active');
+    appStateChangeListener?.('active');
 
     expect(openSettingsSpy).toHaveBeenCalledTimes(1);
     expect(mockRefreshCameraPermission).toHaveBeenCalledWith('settingsReturn');
+    expect(mockRefreshCameraPermission).toHaveBeenCalledTimes(1);
   });
 
   it('auto-requests camera permission when status is undetermined', () => {
@@ -327,6 +329,27 @@ describe('QiblaScreen integration', () => {
     mockAlignmentRef.current.canAskLocationPermission = false;
     mockAlignmentRef.current.locationError =
       'Location access is blocked. Enable it in settings to continue.';
+
+    render(<QiblaScreen />);
+
+    act(() => {
+      jest.advanceTimersByTime(1500);
+    });
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it('does not auto-open while camera permission is blocked even if alignment stays locked', () => {
+    mockRouteParams.mode = 'session';
+    mockRouteParams.prayerName = 'isha';
+    mockCameraPermissionRef.current = {
+      status: 'denied',
+      canAskAgain: false,
+      expires: 'never',
+      granted: false,
+    };
+    mockAlignmentRef.current.alignmentState = 'aligned';
+    mockAlignmentRef.current.alignmentOffset = 0;
+    mockAlignmentRef.current.signedOffset = 0;
 
     render(<QiblaScreen />);
 

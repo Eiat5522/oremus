@@ -118,10 +118,12 @@ export default function QiblaScreen() {
         | 'session_start_failed',
       details: Record<string, string | number | boolean | null>,
     ) => {
-      console.error('[QiblaSessionFlow]', {
-        type,
-        ...details,
-      });
+      if (__DEV__) {
+        console.error('[QiblaSessionFlow]', {
+          type,
+          ...details,
+        });
+      }
 
       if (mode !== 'session') {
         return;
@@ -445,6 +447,26 @@ export default function QiblaScreen() {
       return;
     }
 
+    const hadPendingStabilityWindow =
+      sessionStartState === 'stabilizing' &&
+      alignedAtRef.current !== null &&
+      !hasTrackedAlignmentStableRef.current;
+
+    if (hadPendingStabilityWindow) {
+      void trackIslamicSessionEvent('alignment_stability_interrupted', {
+        alignmentOffsetDegrees: alignmentOffset,
+        extra: {
+          stableDurationMs: Date.now() - alignedAtRef.current,
+          interruptionReason:
+            alignmentState !== 'aligned'
+              ? 'alignment_lost'
+              : cameraPermissionFlowState !== 'granted'
+                ? 'camera_permission_not_granted'
+                : 'location_permission_not_granted',
+        },
+      });
+    }
+
     setSessionStartState('idle');
     if (autoAdvanceTimeoutRef.current) {
       clearTimeout(autoAdvanceTimeoutRef.current);
@@ -452,7 +474,17 @@ export default function QiblaScreen() {
     }
     alignedAtRef.current = null;
     hasTrackedAlignmentStableRef.current = false;
-  }, [canAutoStartSession, mode, openPrayerSession, trackIslamicSessionEvent]);
+  }, [
+    alignmentOffset,
+    alignmentState,
+    cameraPermissionFlowState,
+    canAutoStartSession,
+    locationPermissionFlowState,
+    mode,
+    openPrayerSession,
+    sessionStartState,
+    trackIslamicSessionEvent,
+  ]);
 
   useEffect(() => {
     return () => {

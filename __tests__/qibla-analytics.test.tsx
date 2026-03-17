@@ -292,6 +292,43 @@ describe('QiblaScreen analytics', () => {
     });
   });
 
+  it('records interrupted stability windows when alignment jitters away', async () => {
+    mockCameraPermissionState = {
+      status: 'granted',
+      canAskAgain: true,
+      granted: true,
+      expires: 'never',
+    };
+    mockCameraPermissionMeta = {
+      permissionFlowState: 'granted',
+      permissionSyncSource: 'coldStart',
+      isRequestingPermission: false,
+      lastPermissionFailure: null,
+    };
+    const { rerender } = render(<QiblaScreen />);
+
+    act(() => {
+      jest.advanceTimersByTime(450);
+    });
+
+    mockQiblaAlignmentState = {
+      ...mockQiblaAlignmentState,
+      alignmentOffset: 9,
+      signedOffset: 9,
+      alignmentState: 'notAligned',
+    };
+    rerender(<QiblaScreen />);
+
+    await waitFor(async () => {
+      const events = await loadIslamicSessionAnalyticsEvents();
+      const interruptedEvent = events.find(
+        (event) => event.type === 'alignment_stability_interrupted',
+      );
+      expect(interruptedEvent).toBeDefined();
+      expect(interruptedEvent?.payload.interruptionReason).toBe('alignment_lost');
+    });
+  });
+
   it('records location permission state failures from the alignment hook', async () => {
     mockQiblaAlignmentState = {
       ...mockQiblaAlignmentState,

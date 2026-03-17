@@ -8,7 +8,7 @@ export type QiblaPermissionFlowState =
 export type QiblaPermissionSyncSource = 'coldStart' | 'prompt' | 'settingsReturn';
 
 type GetQiblaPermissionFlowStateInput = {
-  status: string | null;
+  status: 'granted' | 'denied' | 'undetermined' | null;
   canAskAgain: boolean;
   isRequesting: boolean;
 };
