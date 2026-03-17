@@ -26,8 +26,14 @@ type QiblaCompassPageProps = {
   cameraPermissionStatus: string | null;
   canAskCameraPermission: boolean;
   isRequestingCameraPermission: boolean;
+  showLocationRecoveryNotice: boolean;
+  locationError: string | null;
+  canAskLocationPermission: boolean;
+  isRequestingLocationPermission: boolean;
   onRequestCameraPermission: () => void;
+  onRequestLocationPermission: () => void;
   onOpenCameraSettings: () => void;
+  onOpenLocationSettings: () => void;
   onClose: () => void;
   onRecenterCalibration: () => void;
   onNudgeCalibrationLeft: () => void;
@@ -56,8 +62,14 @@ export function QiblaCompassPage({
   cameraPermissionStatus,
   canAskCameraPermission,
   isRequestingCameraPermission,
+  showLocationRecoveryNotice,
+  locationError,
+  canAskLocationPermission,
+  isRequestingLocationPermission,
   onRequestCameraPermission,
+  onRequestLocationPermission,
   onOpenCameraSettings,
+  onOpenLocationSettings,
   onClose,
   onRecenterCalibration,
   onNudgeCalibrationLeft,
@@ -143,18 +155,22 @@ export function QiblaCompassPage({
       ? `Hold steady. Opening ${prayerLabel ?? 'Prayer Session'}...`
       : isAligned
         ? `${prayerLabel ?? 'Prayer Session'} is ready`
-        : alignmentDelta === null
-          ? 'Finding direction...'
+        : showLocationRecoveryNotice
+          ? (locationError ?? 'Location access is required to continue.')
+          : alignmentDelta === null
+            ? 'Finding direction...'
+            : turnDirection === 'center'
+              ? `Move the Kaaba into the focus ring. ${Math.round(alignmentDelta)}° remaining`
+              : `Turn ${turnDirection}. ${Math.round(alignmentDelta)}° remaining`
+    : showLocationRecoveryNotice
+      ? (locationError ?? 'Location access is required to continue.')
+      : alignmentDelta === null
+        ? 'Align to the Qibla. We are finding your direction...'
+        : isAligned
+          ? 'You are facing the Qibla.'
           : turnDirection === 'center'
-            ? `Move the Kaaba into the focus ring. ${Math.round(alignmentDelta)}° remaining`
-            : `Turn ${turnDirection}. ${Math.round(alignmentDelta)}° remaining`
-    : alignmentDelta === null
-      ? 'Align to the Qibla. We are finding your direction...'
-      : isAligned
-        ? 'You are facing the Qibla.'
-        : turnDirection === 'center'
-          ? `Align to the Qibla. ${Math.round(alignmentDelta)}° remaining`
-          : `Turn ${turnDirection}. ${Math.round(alignmentDelta)}° remaining`;
+            ? `Align to the Qibla. ${Math.round(alignmentDelta)}° remaining`
+            : `Turn ${turnDirection}. ${Math.round(alignmentDelta)}° remaining`;
 
   return (
     <View style={styles.container}>
@@ -304,6 +320,32 @@ export function QiblaCompassPage({
               <ThemedText style={styles.permissionSettingsButtonText}>Open settings</ThemedText>
             </Pressable>
           ) : null}
+        </View>
+      ) : null}
+
+      {showLocationRecoveryNotice ? (
+        <View
+          style={[styles.permissionNoticeWrap, { top: insets.top + (showLiveCamera ? 76 : 220) }]}
+        >
+          <ThemedText style={styles.permissionNoticeTitle}>Location required</ThemedText>
+          <ThemedText style={styles.permissionNoticeBody}>
+            {locationError ?? 'Location access is required to calculate the Qibla direction.'}
+          </ThemedText>
+          {canAskLocationPermission ? (
+            <Pressable
+              disabled={isRequestingLocationPermission}
+              onPress={onRequestLocationPermission}
+              style={styles.permissionButton}
+            >
+              <ThemedText style={styles.permissionButtonText}>
+                {isRequestingLocationPermission ? 'Requesting permission...' : 'Enable location'}
+              </ThemedText>
+            </Pressable>
+          ) : (
+            <Pressable onPress={onOpenLocationSettings} style={styles.permissionSettingsButton}>
+              <ThemedText style={styles.permissionSettingsButtonText}>Open settings</ThemedText>
+            </Pressable>
+          )}
         </View>
       ) : null}
 

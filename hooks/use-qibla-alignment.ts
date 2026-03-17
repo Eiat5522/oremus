@@ -44,6 +44,8 @@ export function useQiblaAlignment() {
   const [coords, setCoords] = useState<Location.LocationObjectCoords | null>(null);
   const [locationPermissionStatus, setLocationPermissionStatus] =
     useState<Location.PermissionStatus | null>(null);
+  const [canAskLocationPermission, setCanAskLocationPermission] = useState(true);
+  const [isRequestingLocationPermission, setIsRequestingLocationPermission] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [savedPrayerLocation, setSavedPrayerLocation] = useState<SavedPrayerLocation | null>(null);
   const [rawHeading, setRawHeading] = useState(0);
@@ -53,6 +55,37 @@ export function useQiblaAlignment() {
 
   const alignmentStateRef = useRef<QiblaAlignmentState>('notAligned');
   const hasAlignedHapticRef = useRef(false);
+  const isMountedRef = useRef(true);
+  const headingSubscriptionRef = useRef<Location.LocationSubscription | null>(null);
+
+  const syncGrantedLocationState = useCallback(async () => {
+    const current = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Balanced,
+    });
+    if (!isMountedRef.current) return;
+    setCoords(current.coords);
+
+    const heading = await Location.getHeadingAsync();
+    if (!isMountedRef.current) return;
+
+    const initialHeading = heading.trueHeading >= 0 ? heading.trueHeading : heading.magHeading;
+    setRawHeading(initialHeading);
+    setSmoothedHeading(initialHeading);
+
+    headingSubscriptionRef.current?.remove();
+    headingSubscriptionRef.current = await Location.watchHeadingAsync((nextHeading) => {
+      if (!isMountedRef.current) return;
+
+      const liveHeading =
+        nextHeading.trueHeading >= 0 ? nextHeading.trueHeading : nextHeading.magHeading;
+
+      setRawHeading(liveHeading);
+      setSmoothedHeading((prev) => {
+        const delta = shortestSignedAngle(prev, liveHeading);
+        return normalizeDegrees(prev + delta * HEADING_SMOOTHING_ALPHA);
+      });
+    });
+  }, []);
 
   const prayerCoords = useMemo(() => {
     if (coords) {
@@ -114,6 +147,7 @@ export function useQiblaAlignment() {
   }, [alignmentState]);
 
   useEffect(() => {
+    isMountedRef.current = true;
     let mounted = true;
 
     const loadSavedPrayerLocation = async () => {
@@ -150,49 +184,28 @@ export function useQiblaAlignment() {
   }, []);
 
   useEffect(() => {
-    let mounted = true;
-    let headingSubscription: Location.LocationSubscription | null = null;
-
     const setup = async () => {
       try {
+        setIsRequestingLocationPermission(true);
         const permission = await Location.requestForegroundPermissionsAsync();
-        if (!mounted) return;
+        if (!isMountedRef.current) return;
 
         setLocationPermissionStatus(permission.status);
+        setCanAskLocationPermission(permission.canAskAgain);
         if (permission.status !== 'granted') {
           setLocationError('Location access helps improve Qibla precision.');
           return;
         }
 
-        const current = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
-        });
-        if (!mounted) return;
-        setCoords(current.coords);
-
-        const heading = await Location.getHeadingAsync();
-        const initialHeading = heading.trueHeading >= 0 ? heading.trueHeading : heading.magHeading;
-
-        if (mounted) {
-          setRawHeading(initialHeading);
-          setSmoothedHeading(initialHeading);
-        }
-
-        headingSubscription = await Location.watchHeadingAsync((nextHeading) => {
-          if (!mounted) return;
-
-          const liveHeading =
-            nextHeading.trueHeading >= 0 ? nextHeading.trueHeading : nextHeading.magHeading;
-
-          setRawHeading(liveHeading);
-          setSmoothedHeading((prev) => {
-            const delta = shortestSignedAngle(prev, liveHeading);
-            return normalizeDegrees(prev + delta * HEADING_SMOOTHING_ALPHA);
-          });
-        });
+        setLocationError(null);
+        await syncGrantedLocationState();
       } catch {
-        if (mounted) {
+        if (isMountedRef.current) {
           setLocationError('Compass data is unavailable on this device.');
+        }
+      } finally {
+        if (isMountedRef.current) {
+          setIsRequestingLocationPermission(false);
         }
       }
     };
@@ -200,10 +213,51 @@ export function useQiblaAlignment() {
     void setup();
 
     return () => {
-      mounted = false;
-      headingSubscription?.remove();
+      isMountedRef.current = false;
+      headingSubscriptionRef.current?.remove();
+      headingSubscriptionRef.current = null;
     };
-  }, []);
+  }, [syncGrantedLocationState]);
+
+  const requestLocationPermission = useCallback(async () => {
+    setIsRequestingLocationPermission(true);
+    try {
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (!isMountedRef.current) {
+        return permission;
+      }
+
+      setLocationPermissionStatus(permission.status);
+      setCanAskLocationPermission(permission.canAskAgain);
+
+      if (permission.status !== 'granted') {
+        setLocationError(
+          permission.canAskAgain
+            ? 'Location access helps improve Qibla precision.'
+            : 'Location access is blocked. Enable it in settings to continue.',
+        );
+        return permission;
+      }
+
+      setLocationError(null);
+      await syncGrantedLocationState();
+      return permission;
+    } catch {
+      if (isMountedRef.current) {
+        setLocationError('Compass data is unavailable on this device.');
+      }
+      return {
+        status: Location.PermissionStatus.DENIED,
+        canAskAgain: false,
+        granted: false,
+        expires: 'never',
+      } as Location.LocationPermissionResponse;
+    } finally {
+      if (isMountedRef.current) {
+        setIsRequestingLocationPermission(false);
+      }
+    }
+  }, [syncGrantedLocationState]);
 
   const recenter = useCallback(async () => {
     setManualHeadingOffset(0);
@@ -226,7 +280,10 @@ export function useQiblaAlignment() {
     manualHeadingOffset,
     locationError,
     locationPermissionStatus,
+    canAskLocationPermission,
+    isRequestingLocationPermission,
     rawHeading,
+    requestLocationPermission,
     recenter,
     nudgeCalibration,
   };

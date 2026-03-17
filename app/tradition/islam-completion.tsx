@@ -70,14 +70,7 @@ export default function IslamCompletionScreen() {
     }
 
     setIsNavigating(true);
-    try {
-      if (isPrayerName(prayerNameParam)) {
-        await markPrayerComplete(prayerNameParam);
-      }
-      await recordPrayerCompletion();
-    } finally {
-      router.replace('/(tabs)/prayers');
-    }
+    router.replace('/(tabs)/prayers');
   };
 
   return (

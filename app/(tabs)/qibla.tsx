@@ -50,6 +50,10 @@ export default function QiblaScreen() {
     signedOffset,
     alignmentState,
     manualHeadingOffset,
+    locationError,
+    canAskLocationPermission,
+    isRequestingLocationPermission,
+    requestLocationPermission,
     recenter,
     nudgeCalibration,
   } = useQiblaAlignment();
@@ -136,6 +140,8 @@ export default function QiblaScreen() {
     }
   };
 
+  const showLocationRecoveryNotice = alignmentOffset === null && Boolean(locationError);
+
   return (
     <View style={{ flex: 1 }}>
       <Stack.Screen
@@ -152,10 +158,20 @@ export default function QiblaScreen() {
         cameraPermissionStatus={cameraPermissionStatus}
         canAskCameraPermission={canAskCameraPermission}
         isRequestingCameraPermission={isRequestingCameraPermission}
+        showLocationRecoveryNotice={showLocationRecoveryNotice}
+        locationError={locationError}
+        canAskLocationPermission={canAskLocationPermission}
+        isRequestingLocationPermission={isRequestingLocationPermission}
         onRequestCameraPermission={() => {
           void handleCameraPermissionRequest();
         }}
+        onRequestLocationPermission={() => {
+          void requestLocationPermission();
+        }}
         onOpenCameraSettings={() => {
+          void Linking.openSettings();
+        }}
+        onOpenLocationSettings={() => {
           void Linking.openSettings();
         }}
         onClose={() => {
