@@ -4,9 +4,23 @@ import * as Location from 'expo-location';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { PRAYER_LOCATION_STORAGE_KEY, type SavedPrayerLocation } from '@/lib/islam-prayer-location';
+import {
+  getQiblaPermissionFlowState,
+  type QiblaPermissionFlowState,
+  type QiblaPermissionSyncSource,
+} from '@/lib/qibla-permission-state';
 import { getQiblaBearing } from '@/lib/qibla';
 
 export type QiblaAlignmentState = 'notAligned' | 'nearAligned' | 'aligned';
+export type LocationPermissionFailureCode =
+  | 'location_permission_request_failed'
+  | 'location_permission_state_failed';
+
+export type LocationPermissionFailure = {
+  code: LocationPermissionFailureCode;
+  message: string;
+  source: QiblaPermissionSyncSource;
+};
 
 const ALIGNED_ENTER = 5;
 const ALIGNED_EXIT = 7;
@@ -46,7 +60,13 @@ export function useQiblaAlignment() {
     useState<Location.PermissionStatus | null>(null);
   const [canAskLocationPermission, setCanAskLocationPermission] = useState(true);
   const [isRequestingLocationPermission, setIsRequestingLocationPermission] = useState(false);
+  const [locationPermissionFlowState, setLocationPermissionFlowState] =
+    useState<QiblaPermissionFlowState>('coldStart');
+  const [locationPermissionSyncSource, setLocationPermissionSyncSource] =
+    useState<QiblaPermissionSyncSource>('coldStart');
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [lastLocationPermissionFailure, setLastLocationPermissionFailure] =
+    useState<LocationPermissionFailure | null>(null);
   const [savedPrayerLocation, setSavedPrayerLocation] = useState<SavedPrayerLocation | null>(null);
   const [rawHeading, setRawHeading] = useState(0);
   const [smoothedHeading, setSmoothedHeading] = useState(0);
@@ -57,6 +77,59 @@ export function useQiblaAlignment() {
   const hasAlignedHapticRef = useRef(false);
   const isMountedRef = useRef(true);
   const headingSubscriptionRef = useRef<Location.LocationSubscription | null>(null);
+
+  const clearLiveLocationState = useCallback(() => {
+    headingSubscriptionRef.current?.remove();
+    headingSubscriptionRef.current = null;
+    setCoords(null);
+  }, []);
+
+  const applyLocationPermissionState = useCallback(
+    (
+      permission: Pick<Location.LocationPermissionResponse, 'status' | 'canAskAgain'>,
+      source: QiblaPermissionSyncSource,
+    ) => {
+      setLocationPermissionStatus(permission.status);
+      setCanAskLocationPermission(permission.canAskAgain);
+      setLocationPermissionSyncSource(source);
+      setLocationPermissionFlowState(
+        getQiblaPermissionFlowState({
+          status: permission.status,
+          canAskAgain: permission.canAskAgain,
+          isRequesting: false,
+        }),
+      );
+
+      if (permission.status !== 'granted') {
+        clearLiveLocationState();
+        setLocationError(
+          permission.canAskAgain
+            ? 'Location access helps improve Qibla precision.'
+            : 'Location access is blocked. Enable it in settings to continue.',
+        );
+      } else {
+        setLocationError(null);
+      }
+    },
+    [clearLiveLocationState],
+  );
+
+  const setLocationFailureState = useCallback(
+    (failure: LocationPermissionFailure) => {
+      if (!isMountedRef.current) {
+        return;
+      }
+
+      clearLiveLocationState();
+      setLastLocationPermissionFailure(failure);
+      setLocationPermissionSyncSource(failure.source);
+      setLocationPermissionStatus(Location.PermissionStatus.DENIED);
+      setCanAskLocationPermission(false);
+      setLocationPermissionFlowState('blocked');
+      setLocationError('Compass data is unavailable on this device.');
+    },
+    [clearLiveLocationState],
+  );
 
   const syncGrantedLocationState = useCallback(async () => {
     const current = await Location.getCurrentPositionAsync({
@@ -187,22 +260,25 @@ export function useQiblaAlignment() {
     const setup = async () => {
       try {
         setIsRequestingLocationPermission(true);
+        setLocationPermissionFlowState('requesting');
+        setLocationPermissionSyncSource('coldStart');
         const permission = await Location.requestForegroundPermissionsAsync();
         if (!isMountedRef.current) return;
 
-        setLocationPermissionStatus(permission.status);
-        setCanAskLocationPermission(permission.canAskAgain);
+        applyLocationPermissionState(permission, 'coldStart');
         if (permission.status !== 'granted') {
-          setLocationError('Location access helps improve Qibla precision.');
           return;
         }
 
-        setLocationError(null);
+        setLastLocationPermissionFailure(null);
         await syncGrantedLocationState();
-      } catch {
-        if (isMountedRef.current) {
-          setLocationError('Compass data is unavailable on this device.');
-        }
+      } catch (error) {
+        setLocationFailureState({
+          code: 'location_permission_state_failed',
+          message:
+            error instanceof Error ? error.message : 'Unable to initialize location services.',
+          source: 'coldStart',
+        });
       } finally {
         if (isMountedRef.current) {
           setIsRequestingLocationPermission(false);
@@ -217,35 +293,33 @@ export function useQiblaAlignment() {
       headingSubscriptionRef.current?.remove();
       headingSubscriptionRef.current = null;
     };
-  }, [syncGrantedLocationState]);
+  }, [applyLocationPermissionState, setLocationFailureState, syncGrantedLocationState]);
 
   const requestLocationPermission = useCallback(async () => {
     setIsRequestingLocationPermission(true);
+    setLocationPermissionFlowState('requesting');
+    setLocationPermissionSyncSource('prompt');
     try {
       const permission = await Location.requestForegroundPermissionsAsync();
       if (!isMountedRef.current) {
         return permission;
       }
 
-      setLocationPermissionStatus(permission.status);
-      setCanAskLocationPermission(permission.canAskAgain);
+      applyLocationPermissionState(permission, 'prompt');
 
       if (permission.status !== 'granted') {
-        setLocationError(
-          permission.canAskAgain
-            ? 'Location access helps improve Qibla precision.'
-            : 'Location access is blocked. Enable it in settings to continue.',
-        );
         return permission;
       }
 
-      setLocationError(null);
+      setLastLocationPermissionFailure(null);
       await syncGrantedLocationState();
       return permission;
-    } catch {
-      if (isMountedRef.current) {
-        setLocationError('Compass data is unavailable on this device.');
-      }
+    } catch (error) {
+      setLocationFailureState({
+        code: 'location_permission_request_failed',
+        message: error instanceof Error ? error.message : 'Unable to request location permission.',
+        source: 'prompt',
+      });
       return {
         status: Location.PermissionStatus.DENIED,
         canAskAgain: false,
@@ -257,7 +331,39 @@ export function useQiblaAlignment() {
         setIsRequestingLocationPermission(false);
       }
     }
-  }, [syncGrantedLocationState]);
+  }, [applyLocationPermissionState, setLocationFailureState, syncGrantedLocationState]);
+
+  const refreshLocationPermission = useCallback(
+    async (source: QiblaPermissionSyncSource = 'settingsReturn') => {
+      try {
+        const permission = await Location.getForegroundPermissionsAsync();
+        if (!isMountedRef.current) {
+          return permission;
+        }
+
+        applyLocationPermissionState(permission, source);
+        if (permission.status === 'granted') {
+          setLastLocationPermissionFailure(null);
+          await syncGrantedLocationState();
+        }
+        return permission;
+      } catch (error) {
+        setLocationFailureState({
+          code: 'location_permission_state_failed',
+          message:
+            error instanceof Error ? error.message : 'Unable to refresh location permission.',
+          source,
+        });
+        return {
+          status: Location.PermissionStatus.DENIED,
+          canAskAgain: false,
+          granted: false,
+          expires: 'never',
+        } as Location.LocationPermissionResponse;
+      }
+    },
+    [applyLocationPermissionState, setLocationFailureState, syncGrantedLocationState],
+  );
 
   const recenter = useCallback(async () => {
     setManualHeadingOffset(0);
@@ -280,10 +386,14 @@ export function useQiblaAlignment() {
     manualHeadingOffset,
     locationError,
     locationPermissionStatus,
+    locationPermissionFlowState,
+    locationPermissionSyncSource,
     canAskLocationPermission,
     isRequestingLocationPermission,
+    lastLocationPermissionFailure,
     rawHeading,
     requestLocationPermission,
+    refreshLocationPermission,
     recenter,
     nudgeCalibration,
   };

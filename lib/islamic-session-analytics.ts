@@ -7,17 +7,22 @@ export const ISLAMIC_SESSION_ANALYTICS_FUNNEL_ID = 'islamic_prayer_session';
 
 export type IslamicSessionAnalyticsEventType =
   | 'qibla_opened'
+  | 'camera_module_load_failed'
   | 'camera_permission_prompted'
   | 'camera_permission_granted'
   | 'camera_permission_denied'
   | 'camera_permission_blocked'
+  | 'camera_permission_request_failed'
   | 'location_permission_prompted'
   | 'location_permission_granted'
   | 'location_permission_denied'
   | 'location_permission_blocked'
+  | 'location_permission_state_failed'
   | 'alignment_reached'
+  | 'alignment_stable_confirmed'
   | 'auto_start_triggered'
   | 'manual_start_triggered'
+  | 'session_start_failed'
   | 'session_completed'
   | 'session_exited_early';
 
@@ -99,19 +104,24 @@ function inferFunnelStep(type: IslamicSessionAnalyticsEventType): IslamicSession
     case 'qibla_opened':
       return 'qibla';
     case 'camera_permission_prompted':
+    case 'camera_module_load_failed':
     case 'camera_permission_granted':
     case 'camera_permission_denied':
     case 'camera_permission_blocked':
+    case 'camera_permission_request_failed':
       return 'camera_permission';
     case 'location_permission_prompted':
     case 'location_permission_granted':
     case 'location_permission_denied':
     case 'location_permission_blocked':
+    case 'location_permission_state_failed':
       return 'location_permission';
     case 'alignment_reached':
+    case 'alignment_stable_confirmed':
       return 'alignment';
     case 'auto_start_triggered':
     case 'manual_start_triggered':
+    case 'session_start_failed':
       return 'session_start';
     case 'session_completed':
     case 'session_exited_early':

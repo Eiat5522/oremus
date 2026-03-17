@@ -1,6 +1,7 @@
+import mockAsyncStorage from '@react-native-async-storage/async-storage/jest/async-storage-mock';
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react-native';
-import { Linking } from 'react-native';
+import { act, fireEvent, render } from '@testing-library/react-native';
+import { AppState, Linking } from 'react-native';
 
 import QiblaScreen from '@/app/(tabs)/qibla';
 
@@ -17,10 +18,13 @@ const mockPush = jest.fn();
 const mockBack = jest.fn();
 const mockCanGoBack = jest.fn(() => true);
 const mockRequestCameraPermission = jest.fn();
+const mockRefreshCameraPermission = jest.fn();
 const mockRequestLocationPermission = jest.fn();
+const mockRefreshLocationPermission = jest.fn();
 const mockRecenter = jest.fn();
 const mockNudgeCalibration = jest.fn();
 const mockQiblaPropsSpy = jest.fn();
+let appStateChangeListener: ((state: string) => void) | null = null;
 
 const mockRouteParams: { mode?: string; prayerName?: string } = {
   mode: 'finder',
@@ -43,8 +47,17 @@ const mockAlignmentRef: {
     alignmentState: 'notAligned' | 'nearAligned' | 'aligned';
     manualHeadingOffset: number;
     locationError: string | null;
+    locationPermissionStatus: 'granted' | 'denied' | null;
+    locationPermissionFlowState:
+      | 'coldStart'
+      | 'requesting'
+      | 'granted'
+      | 'deniedAskable'
+      | 'blocked';
+    locationPermissionSyncSource: 'coldStart' | 'prompt' | 'settingsReturn';
     canAskLocationPermission: boolean;
     isRequestingLocationPermission: boolean;
+    lastLocationPermissionFailure: { code: string; message: string; source: string } | null;
   };
 } = {
   current: {
@@ -53,8 +66,12 @@ const mockAlignmentRef: {
     alignmentState: 'notAligned',
     manualHeadingOffset: 0,
     locationError: null,
+    locationPermissionStatus: 'granted',
+    locationPermissionFlowState: 'granted',
+    locationPermissionSyncSource: 'coldStart',
     canAskLocationPermission: true,
     isRequestingLocationPermission: false,
+    lastLocationPermissionFailure: null,
   },
 };
 
@@ -70,14 +87,33 @@ jest.mock('expo-router', () => ({
   useLocalSearchParams: () => mockRouteParams,
 }));
 
+jest.mock('@react-native-async-storage/async-storage', () => mockAsyncStorage);
 jest.mock('@/hooks/use-safe-camera-permissions', () => ({
-  useSafeCameraPermissions: () => [mockCameraPermissionRef.current, mockRequestCameraPermission],
+  useSafeCameraPermissions: () => [
+    mockCameraPermissionRef.current,
+    mockRequestCameraPermission,
+    mockRefreshCameraPermission,
+    {
+      permissionFlowState:
+        mockCameraPermissionRef.current?.status === 'granted'
+          ? 'granted'
+          : mockCameraPermissionRef.current?.status === 'undetermined'
+            ? 'coldStart'
+            : mockCameraPermissionRef.current?.canAskAgain
+              ? 'deniedAskable'
+              : 'blocked',
+      permissionSyncSource: 'coldStart',
+      isRequestingPermission: false,
+      lastPermissionFailure: null,
+    },
+  ],
 }));
 
 jest.mock('@/hooks/use-qibla-alignment', () => ({
   useQiblaAlignment: () => ({
     ...mockAlignmentRef.current,
     requestLocationPermission: mockRequestLocationPermission,
+    refreshLocationPermission: mockRefreshLocationPermission,
     recenter: mockRecenter,
     nudgeCalibration: mockNudgeCalibration,
   }),
@@ -113,7 +149,15 @@ jest.mock('@/components/qibla/qibla-compass-page', () => ({
 describe('QiblaScreen integration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAsyncStorage.clear();
     jest.useFakeTimers();
+    appStateChangeListener = null;
+    jest.spyOn(AppState, 'addEventListener').mockImplementation((_type, listener) => {
+      appStateChangeListener = listener as (state: string) => void;
+      return {
+        remove: jest.fn(),
+      } as never;
+    });
 
     mockRouteParams.mode = 'finder';
     mockRouteParams.prayerName = 'fajr';
@@ -123,15 +167,26 @@ describe('QiblaScreen integration', () => {
       expires: 'never',
       granted: true,
     };
+    mockRefreshCameraPermission.mockResolvedValue(mockCameraPermissionRef.current);
     mockAlignmentRef.current = {
       alignmentOffset: 22,
       signedOffset: 22,
       alignmentState: 'notAligned',
       manualHeadingOffset: 0,
       locationError: null,
+      locationPermissionStatus: 'granted',
+      locationPermissionFlowState: 'granted',
+      locationPermissionSyncSource: 'coldStart',
       canAskLocationPermission: true,
       isRequestingLocationPermission: false,
+      lastLocationPermissionFailure: null,
     };
+    mockRefreshLocationPermission.mockResolvedValue({
+      status: 'granted',
+      canAskAgain: true,
+      granted: true,
+      expires: 'never',
+    });
     mockRequestCameraPermission.mockResolvedValue({
       status: 'granted',
       canAskAgain: true,
@@ -141,8 +196,9 @@ describe('QiblaScreen integration', () => {
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
+    jest.clearAllTimers();
     jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   it('passes denied camera permission state (recoverable) to the qibla view model', () => {
@@ -176,6 +232,24 @@ describe('QiblaScreen integration', () => {
     expect(openSettingsSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('refreshes camera permission after returning from settings', () => {
+    const openSettingsSpy = jest.spyOn(Linking, 'openSettings').mockResolvedValue();
+    mockCameraPermissionRef.current = {
+      status: 'denied',
+      canAskAgain: false,
+      expires: 'never',
+      granted: false,
+    };
+
+    const { getByTestId } = render(<QiblaScreen />);
+
+    fireEvent.press(getByTestId('open-camera-settings'));
+    appStateChangeListener?.('active');
+
+    expect(openSettingsSpy).toHaveBeenCalledTimes(1);
+    expect(mockRefreshCameraPermission).toHaveBeenCalledWith('settingsReturn');
+  });
+
   it('auto-requests camera permission when status is undetermined', () => {
     mockCameraPermissionRef.current = {
       status: 'undetermined',
@@ -201,13 +275,17 @@ describe('QiblaScreen integration', () => {
     mockAlignmentRef.current.signedOffset = 0;
     rerender(<QiblaScreen />);
 
-    jest.advanceTimersByTime(899);
+    act(() => {
+      jest.advanceTimersByTime(899);
+    });
     expect(mockPush).not.toHaveBeenCalled();
 
-    jest.advanceTimersByTime(1);
+    act(() => {
+      jest.advanceTimersByTime(1);
+    });
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/tradition/islam-session',
-      params: { prayerName: 'isha' },
+      params: expect.objectContaining({ prayerName: 'isha' }),
     });
   });
 
@@ -222,14 +300,39 @@ describe('QiblaScreen integration', () => {
     mockAlignmentRef.current.signedOffset = 0;
     rerender(<QiblaScreen />);
 
-    jest.advanceTimersByTime(450);
+    act(() => {
+      jest.advanceTimersByTime(450);
+    });
 
     mockAlignmentRef.current.alignmentState = 'notAligned';
     mockAlignmentRef.current.alignmentOffset = 9;
     mockAlignmentRef.current.signedOffset = 9;
     rerender(<QiblaScreen />);
 
-    jest.advanceTimersByTime(1000);
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it('does not auto-open while location recovery is required even if alignment stays locked', () => {
+    mockRouteParams.mode = 'session';
+    mockRouteParams.prayerName = 'maghrib';
+
+    mockAlignmentRef.current.alignmentState = 'aligned';
+    mockAlignmentRef.current.alignmentOffset = 0;
+    mockAlignmentRef.current.signedOffset = 0;
+    mockAlignmentRef.current.locationPermissionStatus = 'denied';
+    mockAlignmentRef.current.locationPermissionFlowState = 'blocked';
+    mockAlignmentRef.current.canAskLocationPermission = false;
+    mockAlignmentRef.current.locationError =
+      'Location access is blocked. Enable it in settings to continue.';
+
+    render(<QiblaScreen />);
+
+    act(() => {
+      jest.advanceTimersByTime(1500);
+    });
     expect(mockPush).not.toHaveBeenCalled();
   });
 
@@ -242,7 +345,7 @@ describe('QiblaScreen integration', () => {
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/tradition/islam-session',
-      params: { prayerName: 'asr' },
+      params: expect.objectContaining({ prayerName: 'asr' }),
     });
   });
 });

@@ -4,6 +4,7 @@ import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { useQiblaAlignment } from '@/hooks/use-qibla-alignment';
 
 const mockRequestForegroundPermissionsAsync = jest.fn();
+const mockGetForegroundPermissionsAsync = jest.fn();
 const mockGetCurrentPositionAsync = jest.fn();
 const mockGetHeadingAsync = jest.fn();
 const mockWatchHeadingAsync = jest.fn();
@@ -25,6 +26,7 @@ jest.mock('expo-location', () => ({
   },
   requestForegroundPermissionsAsync: (...args: unknown[]) =>
     mockRequestForegroundPermissionsAsync(...args),
+  getForegroundPermissionsAsync: (...args: unknown[]) => mockGetForegroundPermissionsAsync(...args),
   getCurrentPositionAsync: (...args: unknown[]) => mockGetCurrentPositionAsync(...args),
   getHeadingAsync: (...args: unknown[]) => mockGetHeadingAsync(...args),
   watchHeadingAsync: (...args: unknown[]) => mockWatchHeadingAsync(...args),
@@ -36,6 +38,12 @@ describe('useQiblaAlignment', () => {
     mockAsyncStorage.clear();
     mockGetCurrentPositionAsync.mockResolvedValue({
       coords: { latitude: 13.7563, longitude: 100.5018 },
+    });
+    mockGetForegroundPermissionsAsync.mockResolvedValue({
+      status: 'granted',
+      canAskAgain: true,
+      granted: true,
+      expires: 'never',
     });
     mockGetHeadingAsync.mockResolvedValue({ trueHeading: 120, magHeading: 120 });
     mockWatchHeadingAsync.mockResolvedValue({ remove: jest.fn() });
@@ -57,6 +65,8 @@ describe('useQiblaAlignment', () => {
 
     expect(result.current.locationError).toBe('Location access helps improve Qibla precision.');
     expect(result.current.canAskLocationPermission).toBe(true);
+    expect(result.current.locationPermissionFlowState).toBe('deniedAskable');
+    expect(result.current.locationPermissionSyncSource).toBe('coldStart');
     expect(result.current.alignmentOffset).toBeNull();
   });
 
@@ -90,8 +100,43 @@ describe('useQiblaAlignment', () => {
     });
 
     expect(result.current.locationError).toBeNull();
+    expect(result.current.locationPermissionFlowState).toBe('granted');
+    expect(result.current.locationPermissionSyncSource).toBe('prompt');
     expect(mockGetCurrentPositionAsync).toHaveBeenCalled();
     expect(mockGetHeadingAsync).toHaveBeenCalled();
     expect(mockWatchHeadingAsync).toHaveBeenCalled();
+  });
+
+  it('tracks a deterministic settings-return recovery path', async () => {
+    mockRequestForegroundPermissionsAsync.mockResolvedValue({
+      status: 'denied',
+      canAskAgain: false,
+      granted: false,
+      expires: 'never',
+    });
+    mockGetForegroundPermissionsAsync.mockResolvedValue({
+      status: 'granted',
+      canAskAgain: true,
+      granted: true,
+      expires: 'never',
+    });
+
+    const { result } = renderHook(() => useQiblaAlignment());
+
+    await waitFor(() => {
+      expect(result.current.locationPermissionFlowState).toBe('blocked');
+    });
+
+    await act(async () => {
+      await result.current.refreshLocationPermission('settingsReturn');
+    });
+
+    await waitFor(() => {
+      expect(result.current.locationPermissionStatus).toBe('granted');
+    });
+
+    expect(result.current.locationPermissionFlowState).toBe('granted');
+    expect(result.current.locationPermissionSyncSource).toBe('settingsReturn');
+    expect(result.current.locationError).toBeNull();
   });
 });

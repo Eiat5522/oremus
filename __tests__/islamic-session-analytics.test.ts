@@ -44,6 +44,39 @@ describe('islamic session analytics', () => {
     });
   });
 
+  it('keeps structured failure metadata for stability and transition errors', () => {
+    const payload = buildIslamicSessionAnalyticsPayload({
+      type: 'session_start_failed',
+      mode: 'session',
+      sourceScreen: 'qibla',
+      trigger: 'system',
+      alignmentOffsetDegrees: 4.98,
+      extra: {
+        cameraPermissionFlowState: 'granted',
+        locationPermissionFlowState: 'blocked',
+        errorMessage: 'Navigation exploded',
+      },
+    });
+
+    expect(payload).toEqual({
+      flow: 'islamic_prayer_session',
+      funnelId: 'islamic_prayer_session',
+      funnelStep: 'session_start',
+      mode: 'session',
+      sourceScreen: 'qibla',
+      trigger: 'system',
+      permissionType: null,
+      permissionStatus: null,
+      canAskAgain: null,
+      alignmentOffsetDegrees: 5,
+      durationSeconds: null,
+      exitedEarly: null,
+      cameraPermissionFlowState: 'granted',
+      locationPermissionFlowState: 'blocked',
+      errorMessage: 'Navigation exploded',
+    });
+  });
+
   it('persists tracked events in chronological order', async () => {
     await trackIslamicSessionAnalyticsEvent({
       type: 'qibla_opened',

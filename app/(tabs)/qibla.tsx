@@ -1,6 +1,6 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Linking, View } from 'react-native';
+import { AppState, Linking, View } from 'react-native';
 
 import { QiblaCompassPage } from '@/components/qibla/qibla-compass-page';
 import { useIslamicSessionAnalytics } from '@/hooks/use-islamic-session-analytics';
@@ -10,7 +10,9 @@ import { createIslamicPrayerSessionId } from '@/lib/islamic-session-analytics';
 import type { PrayerName } from '@/lib/prayer-times';
 
 const CALIBRATION_STEP_DEGREES = 2;
-const AUTO_ADVANCE_DELAY_MS = 900;
+const ALIGNMENT_STABILITY_WINDOW_MS = 900;
+
+type SessionStartState = 'idle' | 'stabilizing' | 'starting';
 
 function toTitleCase(value: string) {
   return value.replace(/\b\w/g, (char) => char.toUpperCase());
@@ -31,9 +33,22 @@ export default function QiblaScreen() {
   const hasAutoRequestedCamera = useRef(false);
   const autoAdvanceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasAutoAdvancedRef = useRef(false);
-  const [cameraPermission, requestCameraPermission] = useSafeCameraPermissions();
-  const [isRequestingCameraPermission, setIsRequestingCameraPermission] = useState(false);
-  const [isTransitioningToPrayer, setIsTransitioningToPrayer] = useState(false);
+  const alignedAtRef = useRef<number | null>(null);
+  const latestAlignmentStateRef = useRef<'notAligned' | 'nearAligned' | 'aligned'>('notAligned');
+  const latestAlignmentOffsetRef = useRef<number | null>(null);
+  const pendingSettingsRefreshRef = useRef<Set<'camera' | 'location'>>(new Set());
+  const [sessionStartState, setSessionStartState] = useState<SessionStartState>('idle');
+  const [
+    cameraPermission,
+    requestCameraPermission,
+    refreshCameraPermission,
+    {
+      permissionFlowState: cameraPermissionFlowState,
+      permissionSyncSource: cameraPermissionSyncSource,
+      isRequestingPermission: isRequestingCameraPermission,
+      lastPermissionFailure: lastCameraPermissionFailure,
+    },
+  ] = useSafeCameraPermissions();
 
   const params = useLocalSearchParams<{
     prayerName?: string | string[];
@@ -65,9 +80,13 @@ export default function QiblaScreen() {
     manualHeadingOffset,
     locationError,
     locationPermissionStatus,
+    locationPermissionFlowState,
+    locationPermissionSyncSource,
     canAskLocationPermission,
     isRequestingLocationPermission,
+    lastLocationPermissionFailure,
     requestLocationPermission,
+    refreshLocationPermission,
     recenter,
     nudgeCalibration,
   } = useQiblaAlignment();
@@ -78,8 +97,44 @@ export default function QiblaScreen() {
   const hasTrackedQiblaOpenedRef = useRef(false);
   const lastTrackedCameraPermissionRef = useRef<string | null>(null);
   const lastTrackedLocationPermissionRef = useRef<string | null>(null);
+  const lastTrackedCameraFailureRef = useRef<string | null>(null);
+  const lastTrackedLocationFailureRef = useRef<string | null>(null);
+  const lastTrackedCameraModuleFailureRef = useRef<string | null>(null);
   const hasTrackedLocationPromptRef = useRef(false);
   const hasTrackedAlignmentReachedRef = useRef(false);
+  const hasTrackedAlignmentStableRef = useRef(false);
+
+  useEffect(() => {
+    latestAlignmentStateRef.current = alignmentState;
+    latestAlignmentOffsetRef.current = alignmentOffset;
+  }, [alignmentOffset, alignmentState]);
+
+  const trackStructuredFailure = React.useCallback(
+    (
+      type:
+        | 'camera_module_load_failed'
+        | 'camera_permission_request_failed'
+        | 'location_permission_state_failed'
+        | 'session_start_failed',
+      details: Record<string, string | number | boolean | null>,
+    ) => {
+      console.error('[QiblaSessionFlow]', {
+        type,
+        ...details,
+      });
+
+      if (mode !== 'session') {
+        return;
+      }
+
+      void trackIslamicSessionEvent(type, {
+        trigger: type === 'session_start_failed' ? 'system' : null,
+        alignmentOffsetDegrees: latestAlignmentOffsetRef.current,
+        extra: details,
+      });
+    },
+    [mode, trackIslamicSessionEvent],
+  );
 
   useEffect(() => {
     if (mode !== 'session' || hasTrackedQiblaOpenedRef.current) {
@@ -109,15 +164,36 @@ export default function QiblaScreen() {
         autoAdvanceTimeoutRef.current = null;
       }
 
-      setIsTransitioningToPrayer(true);
+      setSessionStartState('starting');
       hasAutoAdvancedRef.current = true;
 
-      router.push({
-        pathname: '/tradition/islam-session',
-        params: { prayerName, sessionId: sessionIdRef.current ?? undefined },
-      });
+      try {
+        router.push({
+          pathname: '/tradition/islam-session',
+          params: { prayerName, sessionId: sessionIdRef.current ?? undefined },
+        });
+      } catch (error) {
+        hasAutoAdvancedRef.current = false;
+        setSessionStartState('idle');
+        trackStructuredFailure('session_start_failed', {
+          startTrigger: trigger,
+          errorMessage:
+            error instanceof Error ? error.message : 'Unable to open the prayer session.',
+          cameraPermissionFlowState,
+          locationPermissionFlowState,
+        });
+      }
     },
-    [alignmentOffset, mode, prayerName, router, trackIslamicSessionEvent],
+    [
+      alignmentOffset,
+      cameraPermissionFlowState,
+      locationPermissionFlowState,
+      mode,
+      prayerName,
+      router,
+      trackIslamicSessionEvent,
+      trackStructuredFailure,
+    ],
   );
 
   useEffect(() => {
@@ -132,16 +208,19 @@ export default function QiblaScreen() {
           permissionType: 'camera',
           permissionStatus: 'prompted',
           canAskAgain: canAskCameraPermission,
+          extra: {
+            permissionFlowState: cameraPermissionFlowState,
+            permissionSyncSource: cameraPermissionSyncSource,
+          },
         });
       }
-      setIsRequestingCameraPermission(true);
-      requestCameraPermission().finally(() => {
-        setIsRequestingCameraPermission(false);
-      });
+      void requestCameraPermission();
     }
   }, [
     cameraPermissionStatus,
     canAskCameraPermission,
+    cameraPermissionFlowState,
+    cameraPermissionSyncSource,
     mode,
     requestCameraPermission,
     trackIslamicSessionEvent,
@@ -175,7 +254,7 @@ export default function QiblaScreen() {
         : canAskCameraPermission
           ? 'camera_permission_denied'
           : 'camera_permission_blocked';
-    const permissionKey = `${permissionEvent}:${canAskCameraPermission}`;
+    const permissionKey = `${permissionEvent}:${canAskCameraPermission}:${cameraPermissionSyncSource}`;
     if (lastTrackedCameraPermissionRef.current === permissionKey) {
       return;
     }
@@ -190,8 +269,19 @@ export default function QiblaScreen() {
             ? 'denied'
             : 'blocked',
       canAskAgain: canAskCameraPermission,
+      extra: {
+        permissionFlowState: cameraPermissionFlowState,
+        permissionSyncSource: cameraPermissionSyncSource,
+      },
     });
-  }, [cameraPermissionStatus, canAskCameraPermission, mode, trackIslamicSessionEvent]);
+  }, [
+    cameraPermissionFlowState,
+    cameraPermissionStatus,
+    cameraPermissionSyncSource,
+    canAskCameraPermission,
+    mode,
+    trackIslamicSessionEvent,
+  ]);
 
   useEffect(() => {
     if (mode !== 'session' || !locationPermissionStatus) {
@@ -204,7 +294,7 @@ export default function QiblaScreen() {
         : canAskLocationPermission
           ? 'location_permission_denied'
           : 'location_permission_blocked';
-    const permissionKey = `${permissionEvent}:${canAskLocationPermission}`;
+    const permissionKey = `${permissionEvent}:${canAskLocationPermission}:${locationPermissionSyncSource}`;
     if (lastTrackedLocationPermissionRef.current === permissionKey) {
       return;
     }
@@ -219,8 +309,69 @@ export default function QiblaScreen() {
             ? 'denied'
             : 'blocked',
       canAskAgain: canAskLocationPermission,
+      extra: {
+        permissionFlowState: locationPermissionFlowState,
+        permissionSyncSource: locationPermissionSyncSource,
+      },
     });
-  }, [canAskLocationPermission, locationPermissionStatus, mode, trackIslamicSessionEvent]);
+  }, [
+    canAskLocationPermission,
+    locationPermissionFlowState,
+    locationPermissionStatus,
+    locationPermissionSyncSource,
+    mode,
+    trackIslamicSessionEvent,
+  ]);
+
+  useEffect(() => {
+    if (mode !== 'session' || !lastCameraPermissionFailure) {
+      return;
+    }
+
+    const failureKey = [
+      lastCameraPermissionFailure.code,
+      lastCameraPermissionFailure.source,
+      lastCameraPermissionFailure.message,
+    ].join(':');
+    if (lastTrackedCameraFailureRef.current === failureKey) {
+      return;
+    }
+
+    lastTrackedCameraFailureRef.current = failureKey;
+    trackStructuredFailure(
+      lastCameraPermissionFailure.code === 'camera_module_load_failed'
+        ? 'camera_module_load_failed'
+        : 'camera_permission_request_failed',
+      {
+        permissionSyncSource: lastCameraPermissionFailure.source,
+        errorMessage: lastCameraPermissionFailure.message,
+        cameraPermissionFlowState,
+      },
+    );
+  }, [cameraPermissionFlowState, lastCameraPermissionFailure, mode, trackStructuredFailure]);
+
+  useEffect(() => {
+    if (mode !== 'session' || !lastLocationPermissionFailure) {
+      return;
+    }
+
+    const failureKey = [
+      lastLocationPermissionFailure.code,
+      lastLocationPermissionFailure.source,
+      lastLocationPermissionFailure.message,
+    ].join(':');
+    if (lastTrackedLocationFailureRef.current === failureKey) {
+      return;
+    }
+
+    lastTrackedLocationFailureRef.current = failureKey;
+    trackStructuredFailure('location_permission_state_failed', {
+      failureCode: lastLocationPermissionFailure.code,
+      permissionSyncSource: lastLocationPermissionFailure.source,
+      errorMessage: lastLocationPermissionFailure.message,
+      locationPermissionFlowState,
+    });
+  }, [lastLocationPermissionFailure, locationPermissionFlowState, mode, trackStructuredFailure]);
 
   useEffect(() => {
     if (mode !== 'session') {
@@ -238,40 +389,70 @@ export default function QiblaScreen() {
 
     if (alignmentState !== 'aligned') {
       hasTrackedAlignmentReachedRef.current = false;
+      hasTrackedAlignmentStableRef.current = false;
     }
   }, [alignmentOffset, alignmentState, mode, trackIslamicSessionEvent]);
 
+  const canAutoStartSession =
+    mode === 'session' &&
+    alignmentState === 'aligned' &&
+    cameraPermissionFlowState === 'granted' &&
+    locationPermissionFlowState === 'granted';
+
   useEffect(() => {
     if (mode !== 'session') {
-      setIsTransitioningToPrayer(false);
+      setSessionStartState('idle');
       if (autoAdvanceTimeoutRef.current) {
         clearTimeout(autoAdvanceTimeoutRef.current);
         autoAdvanceTimeoutRef.current = null;
       }
+      alignedAtRef.current = null;
       hasAutoAdvancedRef.current = false;
       return;
     }
 
-    if (alignmentState === 'aligned') {
+    if (canAutoStartSession) {
       if (autoAdvanceTimeoutRef.current || hasAutoAdvancedRef.current) {
         return;
       }
 
-      setIsTransitioningToPrayer(true);
+      alignedAtRef.current = Date.now();
+      setSessionStartState('stabilizing');
       autoAdvanceTimeoutRef.current = setTimeout(() => {
         autoAdvanceTimeoutRef.current = null;
+        const alignedDurationMs = Date.now() - (alignedAtRef.current ?? 0);
+        if (
+          latestAlignmentStateRef.current !== 'aligned' ||
+          alignedDurationMs < ALIGNMENT_STABILITY_WINDOW_MS ||
+          hasAutoAdvancedRef.current
+        ) {
+          setSessionStartState('idle');
+          return;
+        }
+
+        if (!hasTrackedAlignmentStableRef.current) {
+          hasTrackedAlignmentStableRef.current = true;
+          void trackIslamicSessionEvent('alignment_stable_confirmed', {
+            alignmentOffsetDegrees: latestAlignmentOffsetRef.current,
+            extra: {
+              stableDurationMs: alignedDurationMs,
+            },
+          });
+        }
         openPrayerSession('auto');
-      }, AUTO_ADVANCE_DELAY_MS);
+      }, ALIGNMENT_STABILITY_WINDOW_MS);
 
       return;
     }
 
-    setIsTransitioningToPrayer(false);
+    setSessionStartState('idle');
     if (autoAdvanceTimeoutRef.current) {
       clearTimeout(autoAdvanceTimeoutRef.current);
       autoAdvanceTimeoutRef.current = null;
     }
-  }, [alignmentState, mode, openPrayerSession]);
+    alignedAtRef.current = null;
+    hasTrackedAlignmentStableRef.current = false;
+  }, [canAutoStartSession, mode, openPrayerSession, trackIslamicSessionEvent]);
 
   useEffect(() => {
     return () => {
@@ -281,23 +462,54 @@ export default function QiblaScreen() {
     };
   }, []);
 
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState !== 'active' || pendingSettingsRefreshRef.current.size === 0) {
+        return;
+      }
+
+      const pendingRefreshes = Array.from(pendingSettingsRefreshRef.current);
+      pendingSettingsRefreshRef.current.clear();
+      pendingRefreshes.forEach((permissionType) => {
+        if (permissionType === 'camera') {
+          void refreshCameraPermission('settingsReturn');
+          return;
+        }
+
+        void refreshLocationPermission('settingsReturn');
+      });
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [refreshCameraPermission, refreshLocationPermission]);
+
   const handleCameraPermissionRequest = async () => {
     if (mode === 'session') {
       void trackIslamicSessionEvent('camera_permission_prompted', {
         permissionType: 'camera',
         permissionStatus: 'prompted',
         canAskAgain: canAskCameraPermission,
+        extra: {
+          permissionFlowState: cameraPermissionFlowState,
+          permissionSyncSource: 'prompt',
+        },
       });
     }
-    setIsRequestingCameraPermission(true);
-    try {
-      await requestCameraPermission();
-    } finally {
-      setIsRequestingCameraPermission(false);
-    }
+    await requestCameraPermission();
   };
 
-  const showLocationRecoveryNotice = alignmentOffset === null && Boolean(locationError);
+  const showLocationRecoveryNotice =
+    mode === 'session' &&
+    locationPermissionFlowState !== 'granted' &&
+    locationPermissionFlowState !== 'requesting' &&
+    Boolean(locationError);
+
+  const handleOpenSettings = React.useCallback((permissionType: 'camera' | 'location') => {
+    pendingSettingsRefreshRef.current.add(permissionType);
+    void Linking.openSettings();
+  }, []);
 
   return (
     <View style={{ flex: 1 }}>
@@ -328,15 +540,32 @@ export default function QiblaScreen() {
               permissionType: 'location',
               permissionStatus: 'prompted',
               canAskAgain: canAskLocationPermission,
+              extra: {
+                permissionFlowState: locationPermissionFlowState,
+                permissionSyncSource: 'prompt',
+              },
             });
           }
           void requestLocationPermission();
         }}
+        onCameraModuleLoadFailure={(details) => {
+          const failureKey = `${details.reason}:${details.errorMessage}`;
+          if (lastTrackedCameraModuleFailureRef.current === failureKey) {
+            return;
+          }
+
+          lastTrackedCameraModuleFailureRef.current = failureKey;
+          trackStructuredFailure('camera_module_load_failed', {
+            cameraPermissionFlowState,
+            reason: details.reason,
+            errorMessage: details.errorMessage,
+          });
+        }}
         onOpenCameraSettings={() => {
-          void Linking.openSettings();
+          handleOpenSettings('camera');
         }}
         onOpenLocationSettings={() => {
-          void Linking.openSettings();
+          handleOpenSettings('location');
         }}
         onClose={() => {
           if (router.canGoBack()) {
@@ -353,7 +582,7 @@ export default function QiblaScreen() {
         alignmentDelta={alignmentOffset}
         signedOffset={signedOffset ?? 0}
         alignmentState={alignmentState}
-        isTransitioningToPrayer={isTransitioningToPrayer}
+        isTransitioningToPrayer={sessionStartState === 'starting'}
         onStartPrayerNow={() => openPrayerSession('manual')}
       />
     </View>
