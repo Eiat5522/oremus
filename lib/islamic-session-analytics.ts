@@ -140,7 +140,7 @@ function parseJson<T>(raw: string | null, fallback: T): T {
   }
 }
 
-let islamicAnalyticsQueue: Promise<unknown> = Promise.resolve();
+let islamicAnalyticsOperationChain: Promise<unknown> = Promise.resolve();
 
 export function createIslamicPrayerSessionId(prayerName: PrayerName | null): string {
   return `islam:${prayerName ?? 'general'}:${Date.now()}`;
@@ -184,14 +184,14 @@ export async function loadIslamicSessionAnalyticsEvents(): Promise<IslamicSessio
 export async function appendIslamicSessionAnalyticsEvent(
   event: IslamicSessionAnalyticsEvent,
 ): Promise<IslamicSessionAnalyticsEvent[]> {
-  const operation = islamicAnalyticsQueue.then(async () => {
+  const operation = islamicAnalyticsOperationChain.then(async () => {
     const previous = await loadIslamicSessionAnalyticsEvents();
     const next = [...previous, event].slice(-300);
     await AsyncStorage.setItem(ISLAMIC_SESSION_ANALYTICS_STORAGE_KEY, JSON.stringify(next));
     return next;
   });
 
-  islamicAnalyticsQueue = operation.then(
+  islamicAnalyticsOperationChain = operation.then(
     () => undefined,
     () => undefined,
   );

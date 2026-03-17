@@ -6,7 +6,12 @@ import { QiblaCompassPage } from '@/components/qibla/qibla-compass-page';
 import { useIslamicSessionAnalytics } from '@/hooks/use-islamic-session-analytics';
 import { useQiblaAlignment } from '@/hooks/use-qibla-alignment';
 import { useSafeCameraPermissions } from '@/hooks/use-safe-camera-permissions';
-import { createIslamicPrayerSessionId } from '@/lib/islamic-session-analytics';
+import {
+  createIslamicPrayerSessionId,
+  type IslamicSessionAnalyticsEventType,
+  type IslamicSessionAnalyticsPermissionStatus,
+  type IslamicSessionAnalyticsTrigger,
+} from '@/lib/islamic-session-analytics';
 import type { PrayerName } from '@/lib/prayer-times';
 
 const CALIBRATION_STEP_DEGREES = 2;
@@ -24,6 +29,59 @@ function isPrayerName(value: string | undefined): value is PrayerName {
     value === 'maghrib' ||
     value === 'isha'
   );
+}
+
+function resolvePermissionOutcome(
+  status: 'granted' | 'denied',
+  canAskAgain: boolean,
+): {
+  eventType: IslamicSessionAnalyticsEventType;
+  permissionStatus: IslamicSessionAnalyticsPermissionStatus;
+  dedupeKey: string;
+} {
+  if (status === 'granted') {
+    return {
+      eventType: 'camera_permission_granted',
+      permissionStatus: 'granted',
+      dedupeKey: 'granted',
+    };
+  }
+
+  return canAskAgain
+    ? {
+        eventType: 'camera_permission_denied',
+        permissionStatus: 'denied',
+        dedupeKey: 'denied:true',
+      }
+    : {
+        eventType: 'camera_permission_blocked',
+        permissionStatus: 'blocked',
+        dedupeKey: 'blocked:false',
+      };
+}
+
+function resolveScopedPermissionOutcome(
+  permissionType: 'camera' | 'location',
+  status: 'granted' | 'denied',
+  canAskAgain: boolean,
+): {
+  eventType: IslamicSessionAnalyticsEventType;
+  permissionStatus: IslamicSessionAnalyticsPermissionStatus;
+  dedupeKey: string;
+} {
+  const baseOutcome = resolvePermissionOutcome(status, canAskAgain);
+  if (permissionType === 'camera') {
+    return baseOutcome;
+  }
+
+  return {
+    eventType: baseOutcome.eventType.replace(
+      'camera_permission',
+      'location_permission',
+    ) as IslamicSessionAnalyticsEventType,
+    permissionStatus: baseOutcome.permissionStatus,
+    dedupeKey: `${permissionType}:${baseOutcome.dedupeKey}`,
+  };
 }
 
 export default function QiblaScreen() {
@@ -91,7 +149,7 @@ export default function QiblaScreen() {
   }, [mode, trackIslamicSessionEvent]);
 
   const openPrayerSession = React.useCallback(
-    (trigger: 'auto' | 'manual') => {
+    (trigger: IslamicSessionAnalyticsTrigger) => {
       if (mode !== 'session') {
         return;
       }
@@ -169,26 +227,19 @@ export default function QiblaScreen() {
       return;
     }
 
-    const permissionEvent =
-      cameraPermissionStatus === 'granted'
-        ? 'camera_permission_granted'
-        : canAskCameraPermission
-          ? 'camera_permission_denied'
-          : 'camera_permission_blocked';
-    const permissionKey = `${permissionEvent}:${canAskCameraPermission}`;
-    if (lastTrackedCameraPermissionRef.current === permissionKey) {
+    const { eventType, permissionStatus, dedupeKey } = resolveScopedPermissionOutcome(
+      'camera',
+      cameraPermissionStatus,
+      canAskCameraPermission,
+    );
+    if (lastTrackedCameraPermissionRef.current === dedupeKey) {
       return;
     }
 
-    lastTrackedCameraPermissionRef.current = permissionKey;
-    void trackIslamicSessionEvent(permissionEvent, {
+    lastTrackedCameraPermissionRef.current = dedupeKey;
+    void trackIslamicSessionEvent(eventType, {
       permissionType: 'camera',
-      permissionStatus:
-        cameraPermissionStatus === 'granted'
-          ? 'granted'
-          : canAskCameraPermission
-            ? 'denied'
-            : 'blocked',
+      permissionStatus,
       canAskAgain: canAskCameraPermission,
     });
   }, [cameraPermissionStatus, canAskCameraPermission, mode, trackIslamicSessionEvent]);
@@ -198,26 +249,19 @@ export default function QiblaScreen() {
       return;
     }
 
-    const permissionEvent =
-      locationPermissionStatus === 'granted'
-        ? 'location_permission_granted'
-        : canAskLocationPermission
-          ? 'location_permission_denied'
-          : 'location_permission_blocked';
-    const permissionKey = `${permissionEvent}:${canAskLocationPermission}`;
-    if (lastTrackedLocationPermissionRef.current === permissionKey) {
+    const { eventType, permissionStatus, dedupeKey } = resolveScopedPermissionOutcome(
+      'location',
+      locationPermissionStatus,
+      canAskLocationPermission,
+    );
+    if (lastTrackedLocationPermissionRef.current === dedupeKey) {
       return;
     }
 
-    lastTrackedLocationPermissionRef.current = permissionKey;
-    void trackIslamicSessionEvent(permissionEvent, {
+    lastTrackedLocationPermissionRef.current = dedupeKey;
+    void trackIslamicSessionEvent(eventType, {
       permissionType: 'location',
-      permissionStatus:
-        locationPermissionStatus === 'granted'
-          ? 'granted'
-          : canAskLocationPermission
-            ? 'denied'
-            : 'blocked',
+      permissionStatus,
       canAskAgain: canAskLocationPermission,
     });
   }, [canAskLocationPermission, locationPermissionStatus, mode, trackIslamicSessionEvent]);
