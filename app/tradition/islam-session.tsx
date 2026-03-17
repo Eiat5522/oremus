@@ -10,6 +10,7 @@ import { PrayerSessionBackground } from '@/components/islam/session/prayer-sessi
 import { PrayerSessionControls } from '@/components/islam/session/prayer-session-controls';
 import { PrayerSessionTimer } from '@/components/islam/session/prayer-session-timer';
 import { ThemedText } from '@/components/themed-text';
+import { useIslamicSessionAnalytics } from '@/hooks/use-islamic-session-analytics';
 import { usePrayerSessionVisibilityControls } from '@/hooks/use-prayer-session-visibility-controls';
 import type { PrayerName } from '@/lib/prayer-times';
 import { addSessionLogEntry } from '@/lib/session-log';
@@ -49,9 +50,19 @@ export default function IslamPrayerSessionScreen() {
   const { width, height } = useWindowDimensions();
 
   // Prayer name may be passed as a route param from the prayer list.
-  const params = useLocalSearchParams<{ prayerName?: string | string[] }>();
+  const params = useLocalSearchParams<{
+    prayerName?: string | string[];
+    sessionId?: string | string[];
+  }>();
   const prayerName = Array.isArray(params.prayerName) ? params.prayerName[0] : params.prayerName;
+  const sessionIdParam = Array.isArray(params.sessionId) ? params.sessionId[0] : params.sessionId;
   const displayName = prayerName ? `${toTitleCase(prayerName)} Prayer` : 'Prayer Session';
+  const trackIslamicSessionEvent = useIslamicSessionAnalytics({
+    sessionId: sessionIdParam ?? null,
+    prayerName: isPrayerName(prayerName) ? prayerName : null,
+    mode: 'session',
+    sourceScreen: 'islam-session',
+  });
 
   // Visibility hook – auto-hides controls after 3 s of idle.
   const { controlsOpacity, reveal } = usePrayerSessionVisibilityControls();
@@ -103,6 +114,10 @@ export default function IslamPrayerSessionScreen() {
       Math.floor((completedAtMs - sessionStartedAtRef.current) / 1000),
     );
 
+    void trackIslamicSessionEvent('session_completed', {
+      durationSeconds,
+      exitedEarly: false,
+    });
     void addSessionLogEntry({
       tradition: 'islam',
       prayerName: isPrayerName(prayerName) ? prayerName : undefined,
@@ -115,12 +130,21 @@ export default function IslamPrayerSessionScreen() {
       pathname: '/tradition/islam-completion',
       params: {
         prayerName: isPrayerName(prayerName) ? prayerName : undefined,
+        sessionId: sessionIdParam ?? undefined,
         durationSeconds: String(durationSeconds),
       },
     });
   };
 
   const handleEmergencyExit = () => {
+    const durationSeconds = Math.max(
+      0,
+      Math.floor((Date.now() - sessionStartedAtRef.current) / 1000),
+    );
+    void trackIslamicSessionEvent('session_exited_early', {
+      durationSeconds,
+      exitedEarly: true,
+    });
     router.back();
   };
 

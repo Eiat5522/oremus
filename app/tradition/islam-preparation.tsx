@@ -9,6 +9,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { PrayerAtmosphere } from '@/components/visual/prayer-atmosphere';
 import { Fonts } from '@/constants/theme';
 import { useIslamPrayerData } from '@/hooks/use-islam-prayer-data';
+import { createIslamicPrayerSessionId } from '@/lib/islamic-session-analytics';
 import type { PrayerName } from '@/lib/prayer-times';
 import { formatTime } from '@/lib/prayer-times';
 
@@ -138,7 +139,11 @@ export default function IslamPreparationScreen() {
           onPress={() =>
             router.push({
               pathname: '/qibla',
-              params: { mode: 'session', prayerName: resolvedPrayerName },
+              params: {
+                mode: 'session',
+                prayerName: resolvedPrayerName,
+                sessionId: createIslamicPrayerSessionId(resolvedPrayerName),
+              },
             })
           }
           style={styles.ctaWrap}
