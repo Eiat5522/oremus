@@ -1,3 +1,4 @@
+import mockAsyncStorage from '@react-native-async-storage/async-storage/jest/async-storage-mock';
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react-native';
 import { Animated } from 'react-native';
@@ -100,6 +101,8 @@ jest.mock('@/lib/session-log', () => ({
   addSessionLogEntry: (...args: unknown[]) => mockAddSessionLogEntry(...args),
 }));
 
+jest.mock('@react-native-async-storage/async-storage', () => mockAsyncStorage);
+
 describe('IslamPrayerSessionScreen integration', () => {
   let timingSpy: jest.SpyInstance;
   let sequenceSpy: jest.SpyInstance;
@@ -108,6 +111,7 @@ describe('IslamPrayerSessionScreen integration', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAsyncStorage.clear();
 
     const immediateAnimation = {
       start: (cb?: () => void) => {

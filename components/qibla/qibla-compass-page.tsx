@@ -32,6 +32,7 @@ type QiblaCompassPageProps = {
   isRequestingLocationPermission: boolean;
   onRequestCameraPermission: () => void;
   onRequestLocationPermission: () => void;
+  onCameraModuleLoadFailure?: (details: { reason: string; errorMessage: string }) => void;
   onOpenCameraSettings: () => void;
   onOpenLocationSettings: () => void;
   onClose: () => void;
@@ -68,6 +69,7 @@ export function QiblaCompassPage({
   isRequestingLocationPermission,
   onRequestCameraPermission,
   onRequestLocationPermission,
+  onCameraModuleLoadFailure,
   onOpenCameraSettings,
   onOpenLocationSettings,
   onClose,
@@ -86,6 +88,7 @@ export function QiblaCompassPage({
   const { width } = useWindowDimensions();
   const cameraViewRef = React.useRef<CameraViewComponentType | null>(null);
   const [isCameraReady, setIsCameraReady] = React.useState(false);
+  const hasReportedCameraModuleFailureRef = React.useRef(false);
   const isCameraLoading = showLiveCamera && !isCameraReady;
 
   React.useEffect(() => {
@@ -97,22 +100,38 @@ export function QiblaCompassPage({
         if (typeof cameraModule.CameraView === 'function') {
           cameraViewRef.current = cameraModule.CameraView as CameraViewComponentType;
           setIsCameraReady(true);
+          hasReportedCameraModuleFailureRef.current = false;
         } else {
           cameraViewRef.current = null;
           setIsCameraReady(false);
+          if (!hasReportedCameraModuleFailureRef.current) {
+            hasReportedCameraModuleFailureRef.current = true;
+            onCameraModuleLoadFailure?.({
+              reason: 'camera_view_unavailable',
+              errorMessage: 'expo-camera loaded without a CameraView export.',
+            });
+          }
         }
       })
-      .catch(() => {
+      .catch((error) => {
         if (isMounted) {
           cameraViewRef.current = null;
           setIsCameraReady(false);
+          if (!hasReportedCameraModuleFailureRef.current) {
+            hasReportedCameraModuleFailureRef.current = true;
+            onCameraModuleLoadFailure?.({
+              reason: 'camera_module_import_failed',
+              errorMessage:
+                error instanceof Error ? error.message : 'Unable to load the expo-camera module.',
+            });
+          }
         }
       });
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [onCameraModuleLoadFailure]);
 
   const isAligned = alignmentState === 'aligned';
   const isNearAligned = alignmentState === 'nearAligned';
