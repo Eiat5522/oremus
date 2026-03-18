@@ -1,6 +1,7 @@
 import { Stack, useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 
 import {
   BuddhistAltar3D,
@@ -14,14 +15,19 @@ import { useAltarExperience } from '@/hooks/use-altar-experience';
 
 export default function ARPlacementScreen() {
   const router = useRouter();
+  const [permission] = useCameraPermissions();
   const {
     placementScale,
     placementRotation,
+    altarExperienceMode,
     adjustRotation,
     adjustScale,
     resetAltarPlacement,
     confirmPlacement,
   } = useAltarExperience();
+
+  const isNativeAR = altarExperienceMode === 'nativeARReady';
+  const cameraGranted = permission?.granted ?? false;
 
   const handleConfirm = () => {
     confirmPlacement();
@@ -34,8 +40,13 @@ export default function ARPlacementScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isNativeAR && styles.containerAR]}>
       <Stack.Screen options={{ headerShown: false }} />
+
+      {/* Live camera background for native AR anchored placement */}
+      {isNativeAR && cameraGranted ? (
+        <CameraView style={StyleSheet.absoluteFill} facing="back" />
+      ) : null}
 
       <SacredHeader
         title="Place Your Altar"
@@ -67,6 +78,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: BuddhistPrayerColors.background,
+  },
+  containerAR: {
+    backgroundColor: 'transparent',
   },
   altarArea: {
     flex: 1,

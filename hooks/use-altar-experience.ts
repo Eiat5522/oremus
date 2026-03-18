@@ -38,6 +38,7 @@ export function useAltarExperience(callbacks?: AltarExperienceCallbacks) {
     startSession: startARSession,
     stopSession: stopARSession,
     handleCameraReady,
+    confirmSurface,
     handleMountError: handleCameraMountError,
   } = useARSession({
     onPlaneDetected: () => {
@@ -128,6 +129,7 @@ export function useAltarExperience(callbacks?: AltarExperienceCallbacks) {
     // AR session – wire into CameraView on the scan screen
     arSessionState,
     handleCameraReady,
+    confirmSurface,
     handleCameraMountError,
   };
 }

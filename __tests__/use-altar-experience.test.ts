@@ -64,7 +64,7 @@ describe('useAltarExperience', () => {
     expect(result.current.isSurfaceDetected).toBe(false);
   });
 
-  it('detects a surface when the camera reports ready in nativeARReady mode', () => {
+  it('enters scanning state when the camera reports ready in nativeARReady mode', () => {
     useBuddhistPrayerStore.getState().setAltarExperienceMode('nativeARReady');
     const onSurfaceDetected = jest.fn();
     const { result } = renderHook(() => useAltarExperience({ onSurfaceDetected }));
@@ -75,6 +75,30 @@ describe('useAltarExperience', () => {
 
     act(() => {
       result.current.handleCameraReady();
+    });
+
+    // Camera ready → scanning, NOT detected
+    expect(result.current.arSessionState).toBe('scanning');
+    expect(result.current.isSurfaceDetected).toBe(false);
+    expect(onSurfaceDetected).not.toHaveBeenCalled();
+  });
+
+  it('detects a surface when the user confirms it via confirmSurface in nativeARReady mode', () => {
+    useBuddhistPrayerStore.getState().setAltarExperienceMode('nativeARReady');
+    const onSurfaceDetected = jest.fn();
+    const { result } = renderHook(() => useAltarExperience({ onSurfaceDetected }));
+
+    act(() => {
+      result.current.beginScan();
+    });
+
+    act(() => {
+      result.current.handleCameraReady();
+    });
+    expect(result.current.arSessionState).toBe('scanning');
+
+    act(() => {
+      result.current.confirmSurface();
     });
 
     expect(result.current.isSurfaceDetected).toBe(true);
