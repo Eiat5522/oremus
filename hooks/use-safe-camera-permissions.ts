@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import {
+  getQiblaPermissionFlowState,
+  type QiblaPermissionFlowState,
+  type QiblaPermissionSyncSource,
+} from '@/lib/qibla-permission-state';
+
 type CameraPermissionStatus = 'granted' | 'denied' | 'undetermined';
 
 type CameraPermissionResponse = {
@@ -18,6 +24,17 @@ type CameraModule = {
   Camera?: CameraClassCompat;
 };
 
+export type CameraPermissionFailureCode =
+  | 'camera_module_load_failed'
+  | 'camera_permission_read_failed'
+  | 'camera_permission_request_failed';
+
+export type CameraPermissionFailure = {
+  code: CameraPermissionFailureCode;
+  message: string;
+  source: QiblaPermissionSyncSource;
+};
+
 const unavailablePermission: CameraPermissionResponse = {
   canAskAgain: false,
   expires: 'never',
@@ -27,7 +44,41 @@ const unavailablePermission: CameraPermissionResponse = {
 
 export function useSafeCameraPermissions() {
   const [permission, setPermission] = useState<CameraPermissionResponse | null>(null);
+  const [isRequestingPermission, setIsRequestingPermission] = useState(false);
+  const [permissionFlowState, setPermissionFlowState] = useState<QiblaPermissionFlowState>(
+    'coldStart',
+  );
+  const [permissionSyncSource, setPermissionSyncSource] =
+    useState<QiblaPermissionSyncSource>('coldStart');
+  const [lastPermissionFailure, setLastPermissionFailure] = useState<CameraPermissionFailure | null>(
+    null,
+  );
   const modulePromiseRef = useRef<Promise<CameraClassCompat | null> | null>(null);
+  const isMountedRef = useRef(true);
+
+  const applyPermissionState = useCallback(
+    (nextPermission: CameraPermissionResponse | null, source: QiblaPermissionSyncSource) => {
+      setPermission(nextPermission);
+      setPermissionSyncSource(source);
+      setPermissionFlowState(
+        getQiblaPermissionFlowState({
+          status: nextPermission?.status ?? null,
+          canAskAgain: nextPermission?.canAskAgain ?? false,
+          isRequesting: false,
+        }),
+      );
+    },
+    [],
+  );
+
+  const setFailureState = useCallback((failure: CameraPermissionFailure) => {
+    if (!isMountedRef.current) {
+      return;
+    }
+
+    setLastPermissionFailure(failure);
+    applyPermissionState(unavailablePermission, failure.source);
+  }, [applyPermissionState]);
 
   const loadCameraModule = useCallback(async () => {
     if (!modulePromiseRef.current) {
@@ -43,10 +94,18 @@ export function useSafeCameraPermissions() {
           }
           return null;
         })
-        .catch(() => null);
+        .catch((error) => {
+          setFailureState({
+            code: 'camera_module_load_failed',
+            message:
+              error instanceof Error ? error.message : 'Unable to load the camera module.',
+            source: 'coldStart',
+          });
+          return null;
+        });
     }
     return modulePromiseRef.current;
-  }, []);
+  }, [setFailureState]);
 
   useEffect(() => {
     let isMounted = true;
@@ -54,20 +113,23 @@ export function useSafeCameraPermissions() {
     const syncPermission = async () => {
       const cameraModule = await loadCameraModule();
       if (!cameraModule) {
-        if (isMounted) {
-          setPermission(unavailablePermission);
-        }
         return;
       }
 
       try {
         const nextPermission = await cameraModule.getCameraPermissionsAsync();
         if (isMounted) {
-          setPermission(nextPermission);
+          applyPermissionState(nextPermission, 'coldStart');
+          setLastPermissionFailure(null);
         }
-      } catch {
+      } catch (error) {
         if (isMounted) {
-          setPermission(unavailablePermission);
+          setFailureState({
+            code: 'camera_permission_read_failed',
+            message:
+              error instanceof Error ? error.message : 'Unable to read camera permissions.',
+            source: 'coldStart',
+          });
         }
       }
     };
@@ -77,9 +139,7 @@ export function useSafeCameraPermissions() {
     return () => {
       isMounted = false;
     };
-  }, [loadCameraModule]);
-
-  const isMountedRef = useRef(true);
+  }, [applyPermissionState, loadCameraModule, setFailureState]);
 
   useEffect(() => {
     return () => {
@@ -87,11 +147,40 @@ export function useSafeCameraPermissions() {
     };
   }, []);
 
+  const refreshPermission = useCallback(
+    async (source: QiblaPermissionSyncSource = 'settingsReturn') => {
+      const cameraModule = await loadCameraModule();
+      if (!cameraModule) {
+        return unavailablePermission;
+      }
+
+      try {
+        const nextPermission = await cameraModule.getCameraPermissionsAsync();
+        if (isMountedRef.current) {
+          applyPermissionState(nextPermission, source);
+          setLastPermissionFailure(null);
+        }
+        return nextPermission;
+      } catch (error) {
+        setFailureState({
+          code: 'camera_permission_read_failed',
+          message: error instanceof Error ? error.message : 'Unable to refresh camera permissions.',
+          source,
+        });
+        return unavailablePermission;
+      }
+    },
+    [applyPermissionState, loadCameraModule, setFailureState],
+  );
+
   const requestPermission = useCallback(async () => {
+    setIsRequestingPermission(true);
+    setPermissionFlowState('requesting');
+    setPermissionSyncSource('prompt');
     const cameraModule = await loadCameraModule();
     if (!cameraModule) {
       if (isMountedRef.current) {
-        setPermission(unavailablePermission);
+        setIsRequestingPermission(false);
       }
       return unavailablePermission;
     }
@@ -99,16 +188,33 @@ export function useSafeCameraPermissions() {
     try {
       const nextPermission = await cameraModule.requestCameraPermissionsAsync();
       if (isMountedRef.current) {
-        setPermission(nextPermission);
+        applyPermissionState(nextPermission, 'prompt');
+        setLastPermissionFailure(null);
       }
       return nextPermission;
-    } catch {
-      if (isMountedRef.current) {
-        setPermission(unavailablePermission);
-      }
+    } catch (error) {
+      setFailureState({
+        code: 'camera_permission_request_failed',
+        message: error instanceof Error ? error.message : 'Unable to request camera permission.',
+        source: 'prompt',
+      });
       return unavailablePermission;
+    } finally {
+      if (isMountedRef.current) {
+        setIsRequestingPermission(false);
+      }
     }
-  }, [loadCameraModule]);
+  }, [applyPermissionState, loadCameraModule, setFailureState]);
 
-  return [permission, requestPermission] as const;
+  return [
+    permission,
+    requestPermission,
+    refreshPermission,
+    {
+      permissionFlowState,
+      permissionSyncSource,
+      isRequestingPermission,
+      lastPermissionFailure,
+    },
+  ] as const;
 }
