@@ -4,12 +4,12 @@ import * as Location from 'expo-location';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { PRAYER_LOCATION_STORAGE_KEY, type SavedPrayerLocation } from '@/lib/islam-prayer-location';
+import { getQiblaBearing } from '@/lib/qibla';
 import {
   getQiblaPermissionFlowState,
   type QiblaPermissionFlowState,
   type QiblaPermissionSyncSource,
 } from '@/lib/qibla-permission-state';
-import { getQiblaBearing } from '@/lib/qibla';
 
 export type QiblaAlignmentState = 'notAligned' | 'nearAligned' | 'aligned';
 export type LocationPermissionFailureCode =
@@ -79,6 +79,8 @@ export function useQiblaAlignment() {
   const hasAlignedHapticRef = useRef(false);
   const isMountedRef = useRef(true);
   const headingSubscriptionRef = useRef<Location.LocationSubscription | null>(null);
+  const locationPermissionStatusRef = useRef<Location.PermissionStatus | null>(null);
+  const canAskLocationPermissionRef = useRef(true);
 
   const clearLiveLocationState = useCallback(() => {
     headingSubscriptionRef.current?.remove();
@@ -91,6 +93,8 @@ export function useQiblaAlignment() {
       permission: Pick<Location.LocationPermissionResponse, 'status' | 'canAskAgain'>,
       source: QiblaPermissionSyncSource,
     ) => {
+      locationPermissionStatusRef.current = permission.status;
+      canAskLocationPermissionRef.current = permission.canAskAgain;
       setLocationPermissionStatus(permission.status);
       setCanAskLocationPermission(permission.canAskAgain);
       setLocationPermissionSyncSource(source);
@@ -122,27 +126,33 @@ export function useQiblaAlignment() {
         return;
       }
 
-      const nextStatus = failure.permissionStatus ?? locationPermissionStatus ?? null;
+      const nextStatus =
+        failure.permissionStatus ??
+        locationPermissionStatusRef.current ??
+        Location.PermissionStatus.DENIED;
       const nextCanAskAgain =
         failure.permissionStatus === Location.PermissionStatus.GRANTED
           ? true
-          : (failure.canAskAgain ?? canAskLocationPermission);
+          : (failure.canAskAgain ?? canAskLocationPermissionRef.current);
+
+      locationPermissionStatusRef.current = nextStatus;
+      canAskLocationPermissionRef.current = nextCanAskAgain;
 
       clearLiveLocationState();
       setLastLocationPermissionFailure(failure);
       setLocationPermissionSyncSource(failure.source);
-      setLocationPermissionStatus(nextStatus ?? Location.PermissionStatus.DENIED);
+      setLocationPermissionStatus(nextStatus);
       setCanAskLocationPermission(nextCanAskAgain);
       setLocationPermissionFlowState(
         getQiblaPermissionFlowState({
-          status: nextStatus ?? Location.PermissionStatus.DENIED,
+          status: nextStatus,
           canAskAgain: nextCanAskAgain,
           isRequesting: false,
         }),
       );
       setLocationError('Unable to access location services.');
     },
-    [canAskLocationPermission, clearLiveLocationState, locationPermissionStatus],
+    [clearLiveLocationState],
   );
 
   const syncGrantedLocationState = useCallback(async () => {

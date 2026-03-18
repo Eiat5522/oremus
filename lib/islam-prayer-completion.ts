@@ -4,6 +4,8 @@ import type { PrayerName } from '@/lib/prayer-times';
 
 export const PRAYER_COMPLETION_STORAGE_KEY = '@oremus/islam-prayer-completion-v1';
 
+const COMPLETION_TTL_DAYS = 30;
+
 export type DailyPrayerCompletion = Record<PrayerName, boolean>;
 export type PrayerCompletionStore = Record<string, DailyPrayerCompletion>;
 
@@ -26,10 +28,23 @@ export function getLocalDateKey(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+function pruneOldCompletions(store: PrayerCompletionStore): PrayerCompletionStore {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - COMPLETION_TTL_DAYS);
+  const cutoffKey = getLocalDateKey(cutoff);
+  return Object.fromEntries(Object.entries(store).filter(([key]) => key >= cutoffKey));
+}
+
 export async function loadPrayerCompletions(): Promise<PrayerCompletionStore> {
   try {
     const stored = await AsyncStorage.getItem(PRAYER_COMPLETION_STORAGE_KEY);
-    return stored ? (JSON.parse(stored) as PrayerCompletionStore) : {};
+    if (!stored) return {};
+    const parsed = JSON.parse(stored) as PrayerCompletionStore;
+    const pruned = pruneOldCompletions(parsed);
+    if (Object.keys(pruned).length < Object.keys(parsed).length) {
+      await savePrayerCompletions(pruned);
+    }
+    return pruned;
   } catch {
     return {};
   }

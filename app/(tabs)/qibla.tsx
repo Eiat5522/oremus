@@ -1,6 +1,7 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
-import { AppState, Linking, View } from 'react-native';
+import type { ReactNode } from 'react';
+import React, { Component, useEffect, useRef, useState } from 'react';
+import { AppState, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { QiblaCompassPage } from '@/components/qibla/qibla-compass-page';
 import { useIslamicSessionAnalytics } from '@/hooks/use-islamic-session-analytics';
@@ -28,7 +29,7 @@ function isPrayerName(value: string | undefined): value is PrayerName {
   );
 }
 
-export default function QiblaScreen() {
+function QiblaScreen() {
   const router = useRouter();
   const hasAutoRequestedCamera = useRef(false);
   const autoAdvanceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -456,7 +457,7 @@ export default function QiblaScreen() {
       void trackIslamicSessionEvent('alignment_stability_interrupted', {
         alignmentOffsetDegrees: alignmentOffset,
         extra: {
-          stableDurationMs: Date.now() - alignedAtRef.current,
+          stableDurationMs: Date.now() - (alignedAtRef.current ?? Date.now()),
           interruptionReason:
             alignmentState !== 'aligned'
               ? 'alignment_lost'
@@ -618,5 +619,122 @@ export default function QiblaScreen() {
         onStartPrayerNow={() => openPrayerSession('manual')}
       />
     </View>
+  );
+}
+
+// ─── Error boundary ──────────────────────────────────────────────────────────
+
+interface QiblaErrorBoundaryProps {
+  children: ReactNode;
+  onGoBack: () => void;
+}
+
+interface QiblaErrorBoundaryState {
+  hasError: boolean;
+}
+
+class QiblaErrorBoundary extends Component<QiblaErrorBoundaryProps, QiblaErrorBoundaryState> {
+  state: QiblaErrorBoundaryState = { hasError: false };
+
+  static getDerivedStateFromError(): QiblaErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error) {
+    if (__DEV__) {
+      console.error('[QiblaErrorBoundary] Caught error in camera/sensor screen:', error);
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <QiblaErrorFallback onGoBack={this.props.onGoBack} />;
+    }
+    return this.props.children;
+  }
+}
+
+function QiblaErrorFallback({ onGoBack, onRetry }: { onGoBack: () => void; onRetry?: () => void }) {
+  return (
+    <View style={styles.errorContainer}>
+      <Text style={styles.errorTitle} accessibilityRole="header">
+        Something went wrong
+      </Text>
+      <Text style={styles.errorMessage}>
+        The Qibla compass encountered an unexpected error. This can happen if your device does not
+        support the required camera or sensor features.
+      </Text>
+      {onRetry && (
+        <TouchableOpacity
+          onPress={onRetry}
+          style={styles.errorButton}
+          accessibilityRole="button"
+          accessibilityLabel="Try again"
+        >
+          <Text style={styles.errorButtonText}>Try Again</Text>
+        </TouchableOpacity>
+      )}
+      <TouchableOpacity
+        onPress={onGoBack}
+        style={styles.errorButton}
+        accessibilityRole="button"
+        accessibilityLabel="Go back to previous screen"
+      >
+        <Text style={styles.errorButtonText}>Go Back</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 32,
+    backgroundColor: '#000',
+  },
+  errorTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  errorMessage: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  errorButton: {
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.35)',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+  },
+  errorButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+});
+
+// ─── Default export (wrapped with boundary) ──────────────────────────────────
+
+export default function QiblaRoute() {
+  const router = useRouter();
+  const handleGoBack = React.useCallback(() => {
+    if (router.canGoBack()) {
+      router.back();
+    }
+  }, [router]);
+
+  return (
+    <QiblaErrorBoundary onGoBack={handleGoBack}>
+      <QiblaScreen />
+    </QiblaErrorBoundary>
   );
 }

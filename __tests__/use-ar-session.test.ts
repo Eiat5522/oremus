@@ -6,6 +6,7 @@ describe('useARSession', () => {
     const { result } = renderHook(() => useARSession());
     expect(result.current.sessionState).toBe('inactive');
     expect(result.current.isDetected).toBe(false);
+    expect(result.current.isScanning).toBe(false);
   });
 
   it('transitions to initializing when the session starts', () => {
@@ -17,9 +18,10 @@ describe('useARSession', () => {
 
     expect(result.current.sessionState).toBe('initializing');
     expect(result.current.isDetected).toBe(false);
+    expect(result.current.isScanning).toBe(false);
   });
 
-  it('transitions to detected on camera ready and fires onPlaneDetected', () => {
+  it('transitions to scanning on camera ready (not detected)', () => {
     const onPlaneDetected = jest.fn();
     const { result } = renderHook(() => useARSession({ onPlaneDetected }));
 
@@ -30,9 +32,45 @@ describe('useARSession', () => {
       result.current.handleCameraReady();
     });
 
+    expect(result.current.sessionState).toBe('scanning');
+    expect(result.current.isScanning).toBe(true);
+    expect(result.current.isDetected).toBe(false);
+    // onPlaneDetected must NOT fire yet – camera ready ≠ surface detected
+    expect(onPlaneDetected).not.toHaveBeenCalled();
+  });
+
+  it('transitions to detected when the user confirms a surface and fires onPlaneDetected', () => {
+    const onPlaneDetected = jest.fn();
+    const { result } = renderHook(() => useARSession({ onPlaneDetected }));
+
+    act(() => {
+      result.current.startSession();
+    });
+    act(() => {
+      result.current.handleCameraReady();
+    });
+    expect(result.current.sessionState).toBe('scanning');
+
+    act(() => {
+      result.current.confirmSurface();
+    });
+
     expect(result.current.sessionState).toBe('detected');
     expect(result.current.isDetected).toBe(true);
+    expect(result.current.isScanning).toBe(false);
     expect(onPlaneDetected).toHaveBeenCalledTimes(1);
+  });
+
+  it('confirmSurface is a no-op when not in the scanning state', () => {
+    const onPlaneDetected = jest.fn();
+    const { result } = renderHook(() => useARSession({ onPlaneDetected }));
+
+    // In inactive state, confirmSurface should do nothing
+    act(() => {
+      result.current.confirmSurface();
+    });
+    expect(result.current.sessionState).toBe('inactive');
+    expect(onPlaneDetected).not.toHaveBeenCalled();
   });
 
   it('transitions to error on camera mount failure and fires onError', () => {
@@ -60,6 +98,9 @@ describe('useARSession', () => {
     act(() => {
       result.current.handleCameraReady();
     });
+    act(() => {
+      result.current.confirmSurface();
+    });
     expect(result.current.isDetected).toBe(true);
 
     act(() => {
@@ -67,6 +108,7 @@ describe('useARSession', () => {
     });
     expect(result.current.sessionState).toBe('inactive');
     expect(result.current.isDetected).toBe(false);
+    expect(result.current.isScanning).toBe(false);
   });
 
   it('picks up updated callbacks without restarting the session', () => {
@@ -80,11 +122,14 @@ describe('useARSession', () => {
     act(() => {
       result.current.startSession();
     });
+    act(() => {
+      result.current.handleCameraReady();
+    });
 
     rerender({ cb: secondCallback });
 
     act(() => {
-      result.current.handleCameraReady();
+      result.current.confirmSurface();
     });
 
     expect(firstCallback).not.toHaveBeenCalled();

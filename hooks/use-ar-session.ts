@@ -5,10 +5,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  *
  * inactive      – no session running
  * initializing  – session requested, waiting for the native camera
- * detected      – the camera is streaming and a surface has been detected
+ * scanning      – camera is streaming; waiting for the user to confirm a surface
+ * detected      – a flat surface has been explicitly confirmed for altar placement
  * error         – the camera failed to mount or the session was lost
  */
-export type ARSessionState = 'inactive' | 'initializing' | 'detected' | 'error';
+export type ARSessionState = 'inactive' | 'initializing' | 'scanning' | 'detected' | 'error';
 
 export interface ARSessionCallbacks {
   onPlaneDetected?: () => void;
@@ -18,18 +19,30 @@ export interface ARSessionCallbacks {
 /**
  * Manages a native AR camera session for surface detection.
  *
- * Surface detection is driven by the native camera's `onCameraReady`
- * callback rather than an arbitrary timeout.  The session transitions
- * through: inactive → initializing → detected.
+ * Surface detection follows a two-step flow that separates "camera hardware
+ * ready" from "surface confirmed":
  *
- * Wire the returned `handleCameraReady` and `handleMountError` callbacks
- * directly into a `<CameraView>` component from expo-camera.
+ *   inactive → initializing → scanning → detected
+ *
+ * 1. `handleCameraReady` (from CameraView's `onCameraReady`) transitions
+ *    initializing → scanning.  The camera is now live but no surface has
+ *    been selected yet.
+ * 2. `confirmSurface` is called when the user explicitly taps on a flat
+ *    surface in the camera view, transitioning scanning → detected and
+ *    firing the `onPlaneDetected` callback.
+ *
+ * Wire `handleCameraReady` and `handleMountError` directly into a
+ * `<CameraView>` from expo-camera, and call `confirmSurface` from a tap
+ * handler on the camera preview.
  */
 export function useARSession(callbacks?: ARSessionCallbacks) {
   const [sessionState, setSessionState] = useState<ARSessionState>('inactive');
 
   const callbacksRef = useRef(callbacks);
   callbacksRef.current = callbacks;
+
+  // Tracks the previous session state to detect transitions in effects.
+  const sessionStateRef = useRef<ARSessionState>('inactive');
 
   const startSession = useCallback(() => {
     setSessionState('initializing');
@@ -39,10 +52,21 @@ export function useARSession(callbacks?: ARSessionCallbacks) {
     setSessionState('inactive');
   }, []);
 
-  /** Attach to CameraView's `onCameraReady` prop. */
+  /**
+   * Attach to CameraView's `onCameraReady` prop.
+   * Transitions initializing → scanning.  Camera ready does NOT mean a
+   * surface has been detected.
+   */
   const handleCameraReady = useCallback(() => {
-    setSessionState('detected');
-    callbacksRef.current?.onPlaneDetected?.();
+    setSessionState((prev) => (prev === 'initializing' ? 'scanning' : prev));
+  }, []);
+
+  /**
+   * Call when the user taps on a flat surface in the camera preview.
+   * Transitions scanning → detected and fires the `onPlaneDetected` callback.
+   */
+  const confirmSurface = useCallback(() => {
+    setSessionState((prev) => (prev === 'scanning' ? 'detected' : prev));
   }, []);
 
   /** Attach to CameraView's `onMountError` prop. */
@@ -50,6 +74,15 @@ export function useARSession(callbacks?: ARSessionCallbacks) {
     setSessionState('error');
     callbacksRef.current?.onError?.(error.message);
   }, []);
+
+  // Fire onPlaneDetected exactly once when transitioning into the detected state.
+  useEffect(() => {
+    const prev = sessionStateRef.current;
+    sessionStateRef.current = sessionState;
+    if (sessionState === 'detected' && prev === 'scanning') {
+      callbacksRef.current?.onPlaneDetected?.();
+    }
+  }, [sessionState]);
 
   // Cleanup is implicit – stopSession resets state.  The owning
   // component should call stopSession on unmount if needed.
@@ -62,9 +95,11 @@ export function useARSession(callbacks?: ARSessionCallbacks) {
   return {
     sessionState,
     isDetected: sessionState === 'detected',
+    isScanning: sessionState === 'scanning',
     startSession,
     stopSession,
     handleCameraReady,
+    confirmSurface,
     handleMountError,
   };
 }

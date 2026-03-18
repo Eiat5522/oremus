@@ -1,6 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 
 import {
@@ -26,6 +26,8 @@ export default function ARScanScreen() {
     resetAltarPlacement,
     handleCameraReady,
     handleCameraMountError,
+    confirmSurface,
+    arSessionState,
   } = useAltarExperience();
   const modeOption = ALTAR_EXPERIENCE_OPTIONS[altarExperienceMode];
 
@@ -105,7 +107,13 @@ export default function ARScanScreen() {
         ) : (
           <>
             {isNativeMode ? (
-              <View style={styles.cameraContainer}>
+              <Pressable
+                style={styles.cameraContainer}
+                onPress={arSessionState === 'scanning' ? confirmSurface : undefined}
+                accessible
+                accessibilityLabel="Camera view — tap on a flat surface to anchor your altar"
+                accessibilityRole="button"
+              >
                 <CameraView
                   style={StyleSheet.absoluteFill}
                   facing="back"
@@ -115,12 +123,12 @@ export default function ARScanScreen() {
                 <ScanOverlay
                   isDetected={isSurfaceDetected}
                   instructionText={
-                    isSurfaceDetected
-                      ? 'Surface detected — continue to place your altar.'
+                    arSessionState === 'scanning'
+                      ? 'Tap on a flat surface to anchor your altar'
                       : 'Move your phone slowly to find a flat surface'
                   }
                 />
-              </View>
+              </Pressable>
             ) : (
               <View style={styles.immersiveScene}>
                 <BuddhistAltar3D showHalo style={styles.immersiveAltar} />
@@ -137,7 +145,9 @@ export default function ARScanScreen() {
               {isSurfaceDetected
                 ? `${modeOption.title} ready for placement`
                 : isNativeMode
-                  ? 'Scanning your room…'
+                  ? arSessionState === 'scanning'
+                    ? 'Point at a flat surface and tap to place'
+                    : 'Scanning your room…'
                   : 'Preparing immersive sanctuary…'}
             </ThemedText>
 
