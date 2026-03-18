@@ -61,8 +61,8 @@ describe('useQiblaAlignment', () => {
 
     await waitFor(() => {
       expect(result.current.locationPermissionStatus).toBe('denied');
+      expect(result.current.isRequestingLocationPermission).toBe(false);
     });
-
     expect(result.current.locationError).toBe('Location access helps improve Qibla precision.');
     expect(result.current.canAskLocationPermission).toBe(true);
     expect(result.current.locationPermissionFlowState).toBe('deniedAskable');
@@ -97,6 +97,7 @@ describe('useQiblaAlignment', () => {
 
     await waitFor(() => {
       expect(result.current.locationPermissionStatus).toBe('granted');
+      expect(result.current.isRequestingLocationPermission).toBe(false);
     });
 
     expect(result.current.locationError).toBeNull();
@@ -124,6 +125,7 @@ describe('useQiblaAlignment', () => {
     const { result } = renderHook(() => useQiblaAlignment());
 
     await waitFor(() => {
+      expect(result.current.isRequestingLocationPermission).toBe(false);
       expect(result.current.locationPermissionFlowState).toBe('blocked');
     });
 

@@ -1,5 +1,5 @@
-import React, { memo } from 'react';
 import { act, render, waitFor } from '@testing-library/react-native';
+import React, { memo } from 'react';
 import { AccessibilityInfo, Animated, View } from 'react-native';
 
 import { Altar3DPlaceholder, BuddhistAltar3D } from '@/components/buddhist-prayer';
@@ -100,7 +100,7 @@ describe('buddhist altar 3D placeholder', () => {
     render(<BuddhistAltar3D showHalo />);
 
     await act(async () => {
-      await Promise.resolve();
+      jest.advanceTimersByTime(1);
     });
 
     expect(loopSpy).not.toHaveBeenCalled();

@@ -2,12 +2,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { usePrayerLocationSettings } from '@/hooks/use-prayer-location-settings';
+import { recordPrayerCompletion } from '@/lib/focus-gate';
 import {
-  type DailyPrayerCompletion,
   getDefaultCompletionState,
   getLocalDateKey,
   loadPrayerCompletions as loadStoredPrayerCompletions,
   savePrayerCompletions,
+  type DailyPrayerCompletion,
   type PrayerCompletionStore,
 } from '@/lib/islam-prayer-completion';
 import {
@@ -15,12 +16,12 @@ import {
   getCurrentPrayerName,
   getNextPrayer,
   getPrayerTimesForDate,
-  type PrayerTimeEntry,
   type PrayerName,
+  type PrayerTimeEntry,
 } from '@/lib/prayer-times';
-import { recordPrayerCompletion } from '@/lib/focus-gate';
 
 const PRAYER_RESCHEDULE_STORAGE_KEY = '@oremus/islam-prayer-rescheduled-v1';
+const RESCHEDULE_TTL_DAYS = 7;
 
 export interface RescheduledPrayerData {
   time: string; // ISO string
@@ -30,6 +31,13 @@ export interface RescheduledPrayerData {
 
 type DailyRescheduledPrayers = Record<PrayerName, RescheduledPrayerData>;
 type PrayerRescheduleStore = Record<string, DailyRescheduledPrayers>;
+
+function pruneOldReschedules(store: PrayerRescheduleStore): PrayerRescheduleStore {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - RESCHEDULE_TTL_DAYS);
+  const cutoffKey = getLocalDateKey(cutoff);
+  return Object.fromEntries(Object.entries(store).filter(([key]) => key >= cutoffKey));
+}
 
 function getComparisonTimeForDate(selectedDate: Date, now: Date): Date {
   const comparison = new Date(selectedDate);
@@ -144,7 +152,9 @@ export function useIslamPrayerData(referenceDate?: Date) {
         setRescheduledPrayers({});
         return;
       }
-      setRescheduledPrayers(JSON.parse(stored) as PrayerRescheduleStore);
+      const pruned = pruneOldReschedules(JSON.parse(stored) as PrayerRescheduleStore);
+      setRescheduledPrayers(pruned);
+      void AsyncStorage.setItem(PRAYER_RESCHEDULE_STORAGE_KEY, JSON.stringify(pruned));
     } catch {
       setRescheduledPrayers({});
     }
