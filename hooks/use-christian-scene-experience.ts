@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { SURFACE_DETECTION_TIMEOUT_MS } from '@/constants/christian-prayer/scene-config';
 
 export type ChristianSceneMode = 'nativeARReady' | 'immersive3D';
 
 export const DEFAULT_CHRISTIAN_SCENE_MODE: ChristianSceneMode = 'immersive3D';
-
-const SURFACE_DETECTION_TIMEOUT_MS = 1400;
 
 export interface UseChristianSceneExperienceResult {
   mode: ChristianSceneMode;

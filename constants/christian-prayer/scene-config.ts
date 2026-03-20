@@ -3,6 +3,8 @@ import type { ChristianSceneConfig } from './types';
 export const WOODEN_TABLE_MODEL_PATH =
   'assets/models/wooden_table._practical_model_-_yadira.glb';
 
+export const SURFACE_DETECTION_TIMEOUT_MS = 1400;
+
 export const DEFAULT_SCENE_CONFIG: ChristianSceneConfig = {
   modelPath: WOODEN_TABLE_MODEL_PATH,
   scale: [0.8, 0.8, 0.8],

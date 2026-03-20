@@ -12,6 +12,7 @@ import { CameraView } from 'expo-camera';
 import { useARSession } from '@/hooks/use-ar-session';
 import { useChristianSceneExperience } from '@/hooks/use-christian-scene-experience';
 import { CHRISTIAN_PRAYER_THEME as T } from '@/constants/christian-prayer/theme';
+import { SURFACE_DETECTION_TIMEOUT_MS } from '@/constants/christian-prayer/scene-config';
 
 export default function ChristianARScanScreen() {
   const router = useRouter();
@@ -44,7 +45,7 @@ export default function ChristianARScanScreen() {
     startExperience('immersive3D');
     setTimeout(() => {
       router.push('/tradition/christian-prayer/ar-placement');
-    }, 1400);
+    }, SURFACE_DETECTION_TIMEOUT_MS);
   };
 
   const isScanning = sessionState === 'scanning' || sessionState === 'initializing';
