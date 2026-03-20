@@ -9,7 +9,7 @@ REQUIRED_OBJECT_NAMES = [
     "bible_open_a",
     "candle_tall_a",
     "candle_short_a",
-    "corner_base_cloth_a",
+    "prayer_table_wood_a",
 ]
 
 

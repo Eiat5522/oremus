@@ -42,11 +42,11 @@
       "scaleHint": 1
     },
     {
-      "id": "corner_base_cloth_a",
-      "fileName": "corner_base_cloth_a.glb",
+      "id": "prayer_table_wood_a",
+      "fileName": "prayer_table_wood_a.glb",
       "pivot": "bottomCenter",
       "role": "base",
-      "maxTriangles": 6000,
+      "maxTriangles": 8000,
       "maxTextureSize": 1024,
       "scaleHint": 1
     }

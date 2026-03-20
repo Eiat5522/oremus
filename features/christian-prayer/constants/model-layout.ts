@@ -30,7 +30,7 @@ export const CHRISTIAN_PRAYER_CORNER_MODEL_TRANSFORMS: Record<
     rotation: [0, -0.16, 0],
     scale: [0.84, 0.84, 0.84],
   },
-  corner_base_cloth_a: {
+  prayer_table_wood_a: {
     position: [0, -0.84, 0.08],
     rotation: [0, 0, 0],
     scale: [1, 1, 1],

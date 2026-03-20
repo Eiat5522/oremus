@@ -58,11 +58,15 @@ export function ChristianArViewport({
   const candleShortModelModule =
     modelState.assets.find((asset) => asset.id === 'candle_short_a' && asset.status === 'ready')
       ?.moduleId ?? null;
+  const prayerTableModelModule =
+    modelState.assets.find((asset) => asset.id === 'prayer_table_wood_a' && asset.status === 'ready')
+      ?.moduleId ?? null;
   const canUse3dStage =
     !has3dRenderError &&
     modelState.coreReady &&
     crossModelModule !== null &&
-    bibleModelModule !== null;
+    bibleModelModule !== null &&
+    prayerTableModelModule !== null;
 
   useEffect(() => {
     if (slotMissingTrackedRef.current || modelState.isLoading) {
@@ -110,6 +114,7 @@ export function ChristianArViewport({
               candleShortModelModule={candleShortModelModule}
               candleTallModelModule={candleTallModelModule}
               crossModelModule={crossModelModule}
+              prayerTableModelModule={prayerTableModelModule}
               onError={() => {
                 setHas3dRenderError(true);
                 void trackChristianAnalyticsEvent({

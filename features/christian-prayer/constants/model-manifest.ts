@@ -3,7 +3,7 @@ const REQUIRED_CHRISTIAN_MODEL_IDS = [
   'bible_open_a',
   'candle_tall_a',
   'candle_short_a',
-  'corner_base_cloth_a',
+  'prayer_table_wood_a',
 ] as const;
 
 export type ChristianPrayerCornerAssetId = (typeof REQUIRED_CHRISTIAN_MODEL_IDS)[number];

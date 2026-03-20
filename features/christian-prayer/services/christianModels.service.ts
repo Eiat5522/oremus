@@ -8,7 +8,7 @@ import type {
 import { parseChristianPrayerCornerManifest } from '@/features/christian-prayer/constants/model-manifest';
 import { CHRISTIAN_PRAYER_CORNER_MODEL_MODULES } from '@/features/christian-prayer/constants/model-modules';
 
-const CORE_MODEL_IDS = ['cross_wood_a', 'bible_open_a'] as const;
+const CORE_MODEL_IDS = ['cross_wood_a', 'bible_open_a', 'prayer_table_wood_a'] as const;
 const MODEL_RETRY_COUNT = 1;
 
 export type ChristianModelSlotStatus = 'ready' | 'missing' | 'failed';
@@ -114,9 +114,9 @@ export function selectChristianCoreModelReadiness(
   );
 }
 
-export async function loadChristianPrayerCornerModels(
-  options?: { forceRefresh?: boolean },
-): Promise<ChristianPrayerCornerModelSnapshot> {
+export async function loadChristianPrayerCornerModels(options?: {
+  forceRefresh?: boolean;
+}): Promise<ChristianPrayerCornerModelSnapshot> {
   const forceRefresh = options?.forceRefresh === true;
 
   if (!forceRefresh && modelSnapshotCache) {

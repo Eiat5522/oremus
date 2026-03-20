@@ -6,9 +6,9 @@ export type ChristianPrayerCornerModuleRegistry = Record<ChristianPrayerCornerAs
 // Example:
 // cross_wood_a: require('@/assets/models/christian/cross_wood_a.glb')
 export const CHRISTIAN_PRAYER_CORNER_MODEL_MODULES: ChristianPrayerCornerModuleRegistry = {
-  cross_wood_a: null,
-  bible_open_a: null,
+  cross_wood_a: require('@/assets/models/christian/cross_wood_a.glb'),
+  bible_open_a: require('@/assets/models/christian/bible_open_a.glb'),
   candle_tall_a: null,
   candle_short_a: null,
-  corner_base_cloth_a: null,
+  prayer_table_wood_a: require('@/assets/models/christian/prayer_table_wood_a.glb'),
 };

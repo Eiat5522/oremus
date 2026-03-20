@@ -15,7 +15,7 @@
       "bundleIdentifier": "com.anonymous.oremus",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSCameraUsageDescription": "Oremus uses your camera for live Qibla compass guidance.",
+        "NSCameraUsageDescription": "Oremus uses your camera for prayer corner placement and live Qibla guidance.",
         "NSLocationWhenInUseUsageDescription": "Oremus uses your location to calculate the Qibla direction and prayer reminders.",
         "NSMicrophoneUsageDescription": "Oremus uses your microphone for audio features."
       }

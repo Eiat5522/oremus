@@ -1,10 +1,11 @@
 /* eslint-disable react/no-unknown-property */
 import { Canvas, useFrame } from '@react-three/fiber/native';
-import ExpoTHREE from 'expo-three';
+import { Asset } from 'expo-asset';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { Group, Material, Mesh, Object3D } from 'three';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {
   CHRISTIAN_PRAYER_CORNER_MODEL_TRANSFORMS,
@@ -15,6 +16,7 @@ import { resolveChristianCandleEmissiveIntensity } from '@/features/christian-pr
 const MODEL_RETRY_COUNT = 1;
 
 interface ModelSet {
+  prayerTable: Object3D;
   cross: Object3D;
   bible: Object3D;
   candleTall: Object3D | null;
@@ -23,6 +25,7 @@ interface ModelSet {
 
 interface PrayerCorner3DStageProps {
   sceneStyle: ChristianArSceneStyle;
+  prayerTableModelModule: number;
   crossModelModule: number;
   bibleModelModule: number;
   candleTallModelModule?: number | null;
@@ -64,7 +67,10 @@ function applyCandleEmissive(object: Object3D, intensity: number) {
 
     const materials = toMaterialArray(material);
     materials.forEach((entry) => {
-      if (entry instanceof THREE.MeshStandardMaterial || entry instanceof THREE.MeshPhysicalMaterial) {
+      if (
+        entry instanceof THREE.MeshStandardMaterial ||
+        entry instanceof THREE.MeshPhysicalMaterial
+      ) {
         if (entry.emissive.equals(new THREE.Color(0x000000))) {
           entry.emissive = new THREE.Color(0xffcc88);
         }
@@ -101,7 +107,15 @@ async function loadModel(moduleId: number): Promise<Object3D> {
   while (attempts <= MODEL_RETRY_COUNT) {
     attempts += 1;
     try {
-      const loaded = await ExpoTHREE.loadAsync(moduleId);
+      const asset = Asset.fromModule(moduleId);
+      await asset.downloadAsync();
+
+      const uri = asset.localUri ?? asset.uri;
+      if (!uri) {
+        throw new Error('Loaded model does not expose a valid URI');
+      }
+
+      const loaded = await new GLTFLoader().loadAsync(uri);
       const model = normalizeLoadedObject(loaded);
       if (!model) {
         throw new Error('Loaded model does not expose a valid Object3D');
@@ -179,6 +193,7 @@ function PrayerCorner3DSceneContent({
   modelSet: ModelSet;
 }) {
   const groupRef = useRef<Group>(null);
+  const prayerTable = useMemo(() => modelSet.prayerTable.clone(true), [modelSet.prayerTable]);
   const cross = useMemo(() => modelSet.cross.clone(true), [modelSet.cross]);
   const bible = useMemo(() => modelSet.bible.clone(true), [modelSet.bible]);
   const candleTall = useMemo(() => modelSet.candleTall?.clone(true) ?? null, [modelSet.candleTall]);
@@ -189,12 +204,13 @@ function PrayerCorner3DSceneContent({
 
   useEffect(() => {
     return () => {
+      disposeObject3D(prayerTable);
       disposeObject3D(cross);
       disposeObject3D(bible);
       disposeObject3D(candleTall);
       disposeObject3D(candleShort);
     };
-  }, [bible, candleShort, candleTall, cross]);
+  }, [bible, candleShort, candleTall, cross, prayerTable]);
 
   useFrame(({ clock }) => {
     if (!groupRef.current) {
@@ -233,11 +249,18 @@ function PrayerCorner3DSceneContent({
       </mesh>
 
       <group ref={groupRef} position={[0, -0.74, 0]}>
+        <primitive
+          object={prayerTable}
+          {...CHRISTIAN_PRAYER_CORNER_MODEL_TRANSFORMS.prayer_table_wood_a}
+        />
         <primitive object={cross} {...CHRISTIAN_PRAYER_CORNER_MODEL_TRANSFORMS.cross_wood_a} />
         <primitive object={bible} {...CHRISTIAN_PRAYER_CORNER_MODEL_TRANSFORMS.bible_open_a} />
 
         {candleTall ? (
-          <primitive object={candleTall} {...CHRISTIAN_PRAYER_CORNER_MODEL_TRANSFORMS.candle_tall_a} />
+          <primitive
+            object={candleTall}
+            {...CHRISTIAN_PRAYER_CORNER_MODEL_TRANSFORMS.candle_tall_a}
+          />
         ) : (
           <ProceduralCandle
             emissiveIntensity={candleEmissiveStatic}
@@ -263,6 +286,7 @@ function PrayerCorner3DSceneContent({
 
 export function PrayerCorner3DStage({
   sceneStyle,
+  prayerTableModelModule,
   crossModelModule,
   bibleModelModule,
   candleTallModelModule,
@@ -277,7 +301,8 @@ export function PrayerCorner3DStage({
 
     const run = async () => {
       try {
-        const [cross, bible, candleTall, candleShort] = await Promise.all([
+        const [prayerTable, cross, bible, candleTall, candleShort] = await Promise.all([
+          loadModel(prayerTableModelModule),
           loadModel(crossModelModule),
           loadModel(bibleModelModule),
           loadOptionalModel(candleTallModelModule),
@@ -285,6 +310,7 @@ export function PrayerCorner3DStage({
         ]);
 
         if (!isMounted) {
+          disposeObject3D(prayerTable);
           disposeObject3D(cross);
           disposeObject3D(bible);
           disposeObject3D(candleTall);
@@ -292,7 +318,7 @@ export function PrayerCorner3DStage({
           return;
         }
 
-        setModelSet({ cross, bible, candleTall, candleShort });
+        setModelSet({ prayerTable, cross, bible, candleTall, candleShort });
         onStageActivated?.();
       } catch {
         if (isMounted) {
@@ -313,6 +339,7 @@ export function PrayerCorner3DStage({
     crossModelModule,
     onError,
     onStageActivated,
+    prayerTableModelModule,
   ]);
 
   if (!modelSet) {
