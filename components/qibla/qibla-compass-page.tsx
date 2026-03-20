@@ -10,6 +10,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { QiblaAlignmentState } from '@/hooks/use-qibla-alignment';
+import { KaabaModel3D } from '@/components/qibla/kaaba-model-3d';
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 
@@ -303,7 +304,7 @@ export function QiblaCompassPage({
             />
 
             <View style={[styles.kaabaBadge, isAligned && styles.kaabaBadgeAligned]}>
-              <IconSymbol name="kaaba" size={28} color={isAligned ? '#362200' : '#161616'} />
+              <KaabaModel3D fallbackColor={isAligned ? '#362200' : '#161616'} fallbackSize={28} />
             </View>
           </View>
         </View>
@@ -526,6 +527,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.2)',
+    overflow: 'hidden',
   },
   kaabaBadgeAligned: {
     backgroundColor: '#ffe7a8',
