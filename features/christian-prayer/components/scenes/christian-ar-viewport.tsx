@@ -31,11 +31,9 @@ export function ChristianArViewport({
   const slotMissingTrackedRef = useRef(false);
   const stageActivatedTrackedRef = useRef(false);
   const modelState = useChristianPrayerCornerModels();
-  const session = useChristianSessionStore((state) => ({
-    sessionId: state.sessionId,
-    mode: state.mode,
-    currentPhase: state.currentPhase,
-  }));
+  const sessionId = useChristianSessionStore((state) => state.sessionId);
+  const mode = useChristianSessionStore((state) => state.mode);
+  const currentPhase = useChristianSessionStore((state) => state.currentPhase);
   const crossModel = useMemo(
     () =>
       modelState.assets.find(
@@ -59,8 +57,9 @@ export function ChristianArViewport({
     modelState.assets.find((asset) => asset.id === 'candle_short_a' && asset.status === 'ready')
       ?.moduleId ?? null;
   const prayerTableModelModule =
-    modelState.assets.find((asset) => asset.id === 'prayer_table_wood_a' && asset.status === 'ready')
-      ?.moduleId ?? null;
+    modelState.assets.find(
+      (asset) => asset.id === 'prayer_table_wood_a' && asset.status === 'ready',
+    )?.moduleId ?? null;
   const canUse3dStage =
     !has3dRenderError &&
     modelState.coreReady &&
@@ -82,19 +81,19 @@ export function ChristianArViewport({
     missingOrFailedIds.forEach((assetId) => {
       void trackChristianAnalyticsEvent({
         type: 'model_slot_missing',
-        sessionId: session.sessionId,
-        mode: session.mode,
-        phase: session.currentPhase,
+        sessionId,
+        mode,
+        phase: currentPhase,
         payload: { assetId },
       });
     });
   }, [
+    currentPhase,
     modelState.failedAssetIds,
     modelState.isLoading,
     modelState.missingAssetIds,
-    session.currentPhase,
-    session.mode,
-    session.sessionId,
+    mode,
+    sessionId,
   ]);
 
   return (
@@ -119,9 +118,9 @@ export function ChristianArViewport({
                 setHas3dRenderError(true);
                 void trackChristianAnalyticsEvent({
                   type: 'model_preload_failed',
-                  sessionId: session.sessionId,
-                  mode: session.mode,
-                  phase: session.currentPhase,
+                  sessionId,
+                  mode,
+                  phase: currentPhase,
                   payload: { errorCode: 'modelLoadFailed' },
                 });
               }}
@@ -133,9 +132,9 @@ export function ChristianArViewport({
                 stageActivatedTrackedRef.current = true;
                 void trackChristianAnalyticsEvent({
                   type: '3d_stage_activated',
-                  sessionId: session.sessionId,
-                  mode: session.mode,
-                  phase: session.currentPhase,
+                  sessionId,
+                  mode,
+                  phase: currentPhase,
                 });
               }}
               sceneStyle={sceneStyle}

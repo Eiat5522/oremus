@@ -12,9 +12,24 @@ export function useChristianAudioService(audioSettings: ChristianAudioSettings) 
   const [audioError, setAudioError] = useState<string | null>(null);
   const [isNarrating, setIsNarrating] = useState(false);
 
+  const isReleasedPlayerError = useCallback((error: unknown): boolean => {
+    if (!(error instanceof Error)) return false;
+    return (
+      error.message.includes('NativeSharedObjectNotFoundException') ||
+      error.message.includes('Cannot use shared object that was already released') ||
+      error.message.includes('cannot be cast to type expo.modules.audio.AudioPlayer')
+    );
+  }, []);
+
   const stopAmbient = useCallback(() => {
-    player.pause();
-  }, [player]);
+    try {
+      player.pause();
+    } catch (error) {
+      if (!isReleasedPlayerError(error)) {
+        console.warn('Could not pause Christian ambient audio:', error);
+      }
+    }
+  }, [isReleasedPlayerError, player]);
 
   const playAmbient = useCallback(async () => {
     if (!audioSettings.ambientEnabled) {
@@ -29,13 +44,26 @@ export function useChristianAudioService(audioSettings: ChristianAudioSettings) 
       player.play();
       setAudioError(null);
     } catch (error) {
-      setAudioError(error instanceof Error ? error.message : 'Ambient audio is unavailable.');
+      if (!isReleasedPlayerError(error)) {
+        setAudioError(error instanceof Error ? error.message : 'Ambient audio is unavailable.');
+      }
     }
-  }, [audioSettings.ambientEnabled, player, status.currentTime, status.duration]);
+  }, [
+    audioSettings.ambientEnabled,
+    isReleasedPlayerError,
+    player,
+    status.currentTime,
+    status.duration,
+  ]);
 
   const stopNarration = useCallback(async () => {
-    await Speech.stop();
-    setIsNarrating(false);
+    try {
+      await Speech.stop();
+    } catch (error) {
+      console.warn('Could not stop Christian narration:', error);
+    } finally {
+      setIsNarrating(false);
+    }
   }, []);
 
   const replayNarration = useCallback(

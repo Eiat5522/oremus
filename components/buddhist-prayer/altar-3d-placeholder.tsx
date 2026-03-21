@@ -103,10 +103,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     borderRadius: BuddhistPrayerRadius.full,
     backgroundColor: 'rgba(224,185,110,0.2)',
-    shadowColor: BuddhistPrayerColors.goldPrimary,
-    shadowOpacity: 0.65,
-    shadowRadius: 32,
-    shadowOffset: { width: 0, height: 0 },
+    boxShadow: `0px 0px 32px ${BuddhistPrayerColors.goldPrimary}`,
   },
   smoke: {
     position: 'absolute',

@@ -12,6 +12,7 @@ import type { PrayerName } from '@/lib/prayer-times';
 
 const CALIBRATION_STEP_DEGREES = 2;
 const ALIGNMENT_STABILITY_WINDOW_MS = 900;
+const IMMERSIVE_MODE_TRANSITION_DELAY_MS = 500;
 
 type SessionStartState = 'idle' | 'stabilizing' | 'starting';
 
@@ -33,6 +34,7 @@ function QiblaScreen() {
   const router = useRouter();
   const hasAutoRequestedCamera = useRef(false);
   const autoAdvanceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const immersiveModeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasAutoAdvancedRef = useRef(false);
   const alignedAtRef = useRef<number | null>(null);
   const latestAlignmentStateRef = useRef<'notAligned' | 'nearAligned' | 'aligned'>('notAligned');
@@ -198,6 +200,19 @@ function QiblaScreen() {
       trackStructuredFailure,
     ],
   );
+
+  const handleImmersiveMode = React.useCallback(() => {
+    if (immersiveModeTimeoutRef.current) {
+      clearTimeout(immersiveModeTimeoutRef.current);
+    }
+    immersiveModeTimeoutRef.current = setTimeout(() => {
+      immersiveModeTimeoutRef.current = null;
+      router.push({
+        pathname: '/tradition/islam-session',
+        params: { prayerName, sessionId: sessionIdRef.current ?? undefined },
+      });
+    }, IMMERSIVE_MODE_TRANSITION_DELAY_MS);
+  }, [prayerName, router]);
 
   useEffect(() => {
     if (hasAutoRequestedCamera.current) {
@@ -496,6 +511,14 @@ function QiblaScreen() {
   }, []);
 
   useEffect(() => {
+    return () => {
+      if (immersiveModeTimeoutRef.current) {
+        clearTimeout(immersiveModeTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextState) => {
       if (nextState !== 'active' || pendingSettingsRefreshRef.current.size === 0) {
         return;
@@ -617,6 +640,7 @@ function QiblaScreen() {
         alignmentState={alignmentState}
         isTransitioningToPrayer={sessionStartState === 'starting'}
         onStartPrayerNow={() => openPrayerSession('manual')}
+        onEnterImmersiveMode={mode === 'finder' ? handleImmersiveMode : undefined}
       />
     </View>
   );

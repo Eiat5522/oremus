@@ -41,6 +41,7 @@ type QiblaCompassPageProps = {
   onNudgeCalibrationLeft: () => void;
   onNudgeCalibrationRight: () => void;
   onStartPrayerNow: () => void;
+  onEnterImmersiveMode?: () => void;
   prayerLabel?: string;
   calibrationOffset: number;
   alignmentDelta: number | null;
@@ -78,6 +79,7 @@ export function QiblaCompassPage({
   onNudgeCalibrationLeft,
   onNudgeCalibrationRight,
   onStartPrayerNow,
+  onEnterImmersiveMode,
   prayerLabel,
   calibrationOffset,
   alignmentDelta,
@@ -402,17 +404,29 @@ export function QiblaCompassPage({
             ) : null}
           </View>
         ) : (
-          <View style={styles.calibrationRow}>
-            <Pressable onPress={onNudgeCalibrationLeft} style={styles.arrowButton}>
-              <IconSymbol name="chevron.left" size={20} color="#ffffff" />
-            </Pressable>
-            <ThemedText
-              style={styles.calibrationText}
-            >{`Offset ${Math.round(calibrationOffset)}°`}</ThemedText>
-            <Pressable onPress={onNudgeCalibrationRight} style={styles.arrowButton}>
-              <IconSymbol name="chevron.right" size={20} color="#ffffff" />
-            </Pressable>
-          </View>
+          <>
+            <View style={styles.calibrationRow}>
+              <Pressable onPress={onNudgeCalibrationLeft} style={styles.arrowButton}>
+                <IconSymbol name="chevron.left" size={20} color="#ffffff" />
+              </Pressable>
+              <ThemedText
+                style={styles.calibrationText}
+              >{`Offset ${Math.round(calibrationOffset)}°`}</ThemedText>
+              <Pressable onPress={onNudgeCalibrationRight} style={styles.arrowButton}>
+                <IconSymbol name="chevron.right" size={20} color="#ffffff" />
+              </Pressable>
+            </View>
+            {!isSessionMode && onEnterImmersiveMode ? (
+              <Pressable
+                onPress={onEnterImmersiveMode}
+                style={styles.startNowButton}
+                accessibilityRole="button"
+                accessibilityLabel="Enter immersive prayer mode"
+              >
+                <ThemedText style={styles.startNowButtonText}>Enter prayer</ThemedText>
+              </Pressable>
+            ) : null}
+          </>
         )}
       </View>
     </View>

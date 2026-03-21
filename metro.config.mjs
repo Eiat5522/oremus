@@ -14,6 +14,9 @@ if (!config.resolver.assetExts.includes('glb')) {
 if (!config.resolver.assetExts.includes('gltf')) {
 	config.resolver.assetExts.push('gltf');
 }
-config.resolver.blockList = exclusionList([/\/assets\/models\/tmp\/.*/]);
+config.resolver.blockList = exclusionList([
+	/\/assets\/models\/tmp\/.*/,
+	/\/node_modules\/\.[^/]+\/.*/,
+]);
 
 export default config;

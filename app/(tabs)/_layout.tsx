@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     borderTopWidth: 0,
     elevation: 0,
-    shadowOpacity: 0,
+    boxShadow: 'none',
     paddingBottom: 10,
     paddingTop: 10,
   },
@@ -147,12 +147,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FBF6EE',
     borderWidth: 1,
     borderColor: 'rgba(39, 60, 107, 0.08)',
-    // iOS shadow
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.18,
-    shadowRadius: 10,
-    // Android shadow
+    boxShadow: '0px 8px 10px rgba(0, 0, 0, 0.18)',
     elevation: 8,
   },
   centerLogoIcon: {

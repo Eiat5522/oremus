@@ -1,5 +1,4 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
-import * as Notifications from 'expo-notifications';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -26,6 +25,7 @@ import { PrayerAtmosphere } from '@/components/visual/prayer-atmosphere';
 import { Starfield } from '@/components/visual/starfield';
 import { Fonts } from '@/constants/theme';
 import { useIslamPrayerData } from '@/hooks/use-islam-prayer-data';
+import { getNotificationsModule } from '@/lib/notifications';
 import type { PrayerName } from '@/lib/prayer-times';
 import { formatTime } from '@/lib/prayer-times';
 import { isPrayerSessionPassed } from '@/lib/prayer-session';
@@ -35,6 +35,10 @@ type SelectedPrayer = {
   label: string;
   time: Date;
 };
+
+type NotificationsModule = NonNullable<Awaited<ReturnType<typeof getNotificationsModule>>>;
+
+const WEB_REMINDER_UNAVAILABLE_MESSAGE = 'Prayer reminders are not supported on web yet.';
 
 function getAdjustedPrayerReminder(prayer: SelectedPrayer, minutesBefore: number) {
   const prayerTime = new Date(prayer.time);
@@ -128,7 +132,13 @@ export function IslamPrayerListSection() {
 
   const fetchActiveReminders = useCallback(async () => {
     try {
-      const pending = await Notifications.getAllScheduledNotificationsAsync();
+      const notifications = await getNotificationsModule();
+      if (!notifications) {
+        setActiveReminders(new Set());
+        return;
+      }
+
+      const pending = await notifications.getAllScheduledNotificationsAsync();
       const reminderKeys = new Set(
         pending
           .filter((notification) => notification.content.data?.feature === 'islam-prayer-session')
@@ -156,16 +166,16 @@ export function IslamPrayerListSection() {
     }, [fetchActiveReminders, refreshPrayerData]),
   );
 
-  const ensureReminderPermission = useCallback(async () => {
-    await Notifications.setNotificationChannelAsync('prayer-reminders', {
+  const ensureReminderPermission = useCallback(async (notifications: NotificationsModule) => {
+    await notifications.setNotificationChannelAsync('prayer-reminders', {
       name: 'Prayer reminders',
-      importance: Notifications.AndroidImportance.HIGH,
+      importance: notifications.AndroidImportance.HIGH,
     });
 
-    const existingPermission = await Notifications.getPermissionsAsync();
+    const existingPermission = await notifications.getPermissionsAsync();
     let finalStatus = existingPermission.status;
     if (finalStatus !== 'granted') {
-      const requested = await Notifications.requestPermissionsAsync();
+      const requested = await notifications.requestPermissionsAsync();
       finalStatus = requested.status;
     }
 
@@ -177,7 +187,13 @@ export function IslamPrayerListSection() {
       setReminderStatusMessage(null);
 
       try {
-        const granted = await ensureReminderPermission();
+        const notifications = await getNotificationsModule();
+        if (!notifications) {
+          setReminderStatusMessage(WEB_REMINDER_UNAVAILABLE_MESSAGE);
+          return;
+        }
+
+        const granted = await ensureReminderPermission(notifications);
         if (!granted) {
           setReminderStatusMessage('Notifications are blocked. Enable notifications in settings.');
           return;
@@ -189,7 +205,7 @@ export function IslamPrayerListSection() {
           reminderKey: prayerReminderKey,
         } = getAdjustedPrayerReminder(prayer, minutesBefore);
         const reminderId = `${prayer.name}:${scheduleDate.toISOString().slice(0, 10)}:${minutesBefore}`;
-        const pending = await Notifications.getAllScheduledNotificationsAsync();
+        const pending = await notifications.getAllScheduledNotificationsAsync();
         const matchingReminders = pending.filter(
           (notification) =>
             notification.content.data?.feature === 'islam-prayer-session' &&
@@ -203,7 +219,7 @@ export function IslamPrayerListSection() {
         if (matchingReminders.length > 0) {
           await Promise.all(
             matchingReminders.map((notification) =>
-              Notifications.cancelScheduledNotificationAsync(notification.identifier),
+              notifications.cancelScheduledNotificationAsync(notification.identifier),
             ),
           );
           await fetchActiveReminders();
@@ -214,7 +230,7 @@ export function IslamPrayerListSection() {
           }
         }
 
-        await Notifications.scheduleNotificationAsync({
+        await notifications.scheduleNotificationAsync({
           content: {
             title: `${prayer.label} prayer reminder`,
             body: `${prayer.label} is in ${minutesBefore} minutes.`,
@@ -229,7 +245,7 @@ export function IslamPrayerListSection() {
             },
           },
           trigger: {
-            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            type: notifications.SchedulableTriggerInputTypes.DATE,
             date: scheduleDate,
           },
         });
@@ -250,9 +266,15 @@ export function IslamPrayerListSection() {
       setReminderStatusMessage(null);
 
       try {
+        const notifications = await getNotificationsModule();
+        if (!notifications) {
+          setReminderStatusMessage(WEB_REMINDER_UNAVAILABLE_MESSAGE);
+          return;
+        }
+
         const reminderMinutes = todayRescheduled[prayer.name]?.reminderMinutes ?? 15;
         const { prayerTime } = getAdjustedPrayerReminder(prayer, reminderMinutes);
-        const pending = await Notifications.getAllScheduledNotificationsAsync();
+        const pending = await notifications.getAllScheduledNotificationsAsync();
         const matchingReminders = pending.filter(
           (notification) =>
             notification.content.data?.feature === 'islam-prayer-session' &&
@@ -267,7 +289,7 @@ export function IslamPrayerListSection() {
 
         await Promise.all(
           matchingReminders.map((notification) =>
-            Notifications.cancelScheduledNotificationAsync(notification.identifier),
+            notifications.cancelScheduledNotificationAsync(notification.identifier),
           ),
         );
         await fetchActiveReminders();

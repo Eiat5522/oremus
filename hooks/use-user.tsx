@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 const USER_STORAGE_KEY = '@oremus/user';
+const DEFAULT_USER_NAME = 'Guest';
 
 interface UserData {
   name: string;
@@ -19,6 +20,44 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
+function normalizeUserData(value: unknown): UserData | null {
+  if (typeof value === 'string') {
+    const trimmedName = value.trim();
+    return trimmedName ? { name: trimmedName } : null;
+  }
+
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const candidate = value as Partial<UserData>;
+  if (typeof candidate.name !== 'string' || candidate.name.trim().length === 0) {
+    return null;
+  }
+
+  const normalizedUser: UserData = {
+    name: candidate.name.trim(),
+  };
+
+  if (typeof candidate.profileImage === 'string' && candidate.profileImage.trim().length > 0) {
+    normalizedUser.profileImage = candidate.profileImage;
+  }
+
+  return normalizedUser;
+}
+
+function parseStoredUser(rawUser: string | null): UserData | null {
+  if (!rawUser) {
+    return null;
+  }
+
+  try {
+    return normalizeUserData(JSON.parse(rawUser));
+  } catch {
+    return normalizeUserData(rawUser);
+  }
+}
+
 export function UserProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const [user, setUserState] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,9 +66,7 @@ export function UserProvider({ children }: Readonly<{ children: React.ReactNode 
     const loadUser = async () => {
       try {
         const storedUser = await AsyncStorage.getItem(USER_STORAGE_KEY);
-        if (storedUser) {
-          setUserState(JSON.parse(storedUser));
-        }
+        setUserState(parseStoredUser(storedUser));
       } catch (error) {
         console.error('Failed to load user data:', error);
       } finally {
@@ -41,24 +78,31 @@ export function UserProvider({ children }: Readonly<{ children: React.ReactNode 
 
   const setUser = useCallback(async (newUser: UserData) => {
     try {
-      await AsyncStorage.setItem(USER_STORAGE_KEY, JSON.stringify(newUser));
-      setUserState(newUser);
+      const normalizedUser = normalizeUserData(newUser);
+      if (!normalizedUser) {
+        throw new Error('User name is required.');
+      }
+
+      await AsyncStorage.setItem(USER_STORAGE_KEY, JSON.stringify(normalizedUser));
+      setUserState(normalizedUser);
     } catch (error) {
       console.error('Failed to save user data:', error);
       throw error;
     }
   }, []);
 
-  const userName = useMemo(() => user?.name || 'Guest', [user]);
+  const userName = useMemo(() => user?.name || DEFAULT_USER_NAME, [user]);
 
   const setProfileImage = useCallback(
     async (imageUri: string) => {
-      const currentUser = await AsyncStorage.getItem(USER_STORAGE_KEY);
-      const parsed = currentUser ? JSON.parse(currentUser) : { name: 'Guest' };
-      const newUser = { ...parsed, profileImage: imageUri };
+      const currentUser = user ?? parseStoredUser(await AsyncStorage.getItem(USER_STORAGE_KEY));
+      const newUser = {
+        ...(currentUser ?? { name: DEFAULT_USER_NAME }),
+        profileImage: imageUri,
+      };
       await setUser(newUser);
     },
-    [setUser],
+    [setUser, user],
   );
 
   const userProfileImage = useMemo(() => user?.profileImage, [user]);

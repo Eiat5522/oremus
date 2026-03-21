@@ -7,7 +7,6 @@ import {
   ViewStyle,
   TextStyle,
   StyleProp,
-  Platform,
 } from 'react-native';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -46,6 +45,7 @@ export function Button({
       case 'primary':
         return {
           backgroundColor: theme.primary,
+          elevation: 4,
           ...Platform.select({
             ios: {
               shadowColor: 'rgba(17, 82, 212, 1)',
@@ -58,7 +58,6 @@ export function Button({
               boxShadow: '0px 4px 8px rgba(17, 82, 212, 0.2)',
             },
           }),
-          elevation: 4,
         };
       case 'secondary':
         return {

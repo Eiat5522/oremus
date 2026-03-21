@@ -89,7 +89,7 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   useEffect(() => {
-    configureNotifications();
+    void configureNotifications();
   }, []);
 
   return (

@@ -24,7 +24,7 @@ export default function HomeScreen() {
     ],
     [tradition],
   );
-  const displayName = userName.trim().length > 0 && userName !== 'Guest' ? userName : 'Sarah';
+  const displayName = userName.trim().length > 0 ? userName : 'Guest';
 
   return (
     <View style={styles.container}>

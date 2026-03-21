@@ -539,6 +539,12 @@ const styles = StyleSheet.create({
     borderRadius: 96,
     alignItems: 'center',
     justifyContent: 'center',
+   orb: {
+     width: 192,
+     height: 192,
+     borderRadius: 96,
+     alignItems: 'center',
+     justifyContent: 'center',
     ...Platform.select({
       ios: {
         shadowColor: 'rgba(17, 82, 212, 1)',
@@ -553,6 +559,7 @@ const styles = StyleSheet.create({
         boxShadow: '0px 0px 20px rgba(17, 82, 212, 0.5)',
       },
     }),
+   },
   },
   orbInner: {
     width: 160,
