@@ -90,7 +90,7 @@ export default function MeritDedicationScreen() {
         <GoldButton
           title="Return Home"
           variant="ghost"
-          onPress={() => router.replace('/tradition/buddhist')}
+          onPress={() => router.replace('/tradition/buddhist-prayer')}
         />
       </ScrollView>
     </View>

@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import {
   BuddhistPrayerColors,
+  BuddhistPrayerGradients,
   BuddhistPrayerRadius,
   BuddhistPrayerSpacing,
 } from '@/constants/buddhist-prayer/theme';
@@ -35,13 +36,18 @@ export function GoldButton({
   return (
     <Pressable
       onPress={disabled ? undefined : onPress}
-      style={[styles.wrapper, { opacity: disabled ? 0.45 : 1 }]}
+      hitSlop={size === 'sm' ? 8 : undefined}
+      style={({ pressed }) => [
+        styles.wrapper,
+        { opacity: disabled ? 0.45 : 1 },
+        pressed && !disabled ? styles.wrapperPressed : null,
+      ]}
       accessibilityRole="button"
       accessibilityLabel={title}
       accessibilityState={{ disabled }}
     >
       {variant === 'primary' ? (
-        <LinearGradient colors={['#C89B4B', '#8B6328']} style={[styles.button, { height }]}>
+        <LinearGradient colors={BuddhistPrayerGradients.button} style={[styles.button, { height }]}>
           <ThemedText style={[styles.label, { fontSize }]}>{title}</ThemedText>
         </LinearGradient>
       ) : (
@@ -66,6 +72,9 @@ const styles = StyleSheet.create({
   wrapper: {
     borderRadius: BuddhistPrayerRadius.lg,
     overflow: 'hidden',
+  },
+  wrapperPressed: {
+    transform: [{ scale: 0.98 }],
   },
   button: {
     flexDirection: 'row',

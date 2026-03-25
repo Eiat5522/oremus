@@ -371,7 +371,16 @@ export function QiblaCompassPage({
         </View>
       ) : null}
 
-      <View style={[styles.statusCard, { bottom: insets.bottom + (isSessionMode ? 108 : 24) }]}>
+      <View
+        style={[
+          styles.statusCard,
+          isSessionMode
+            ? { bottom: insets.bottom + 108 }
+            : {
+                top: insets.top + (showLiveCamera ? 116 : 236),
+              },
+        ]}
+      >
         <ThemedText style={styles.statusTitle}>{statusTitle}</ThemedText>
         <ThemedText style={styles.statusSubtitle}>{statusSubtitle}</ThemedText>
 
@@ -419,7 +428,7 @@ export function QiblaCompassPage({
             {!isSessionMode && onEnterImmersiveMode ? (
               <Pressable
                 onPress={onEnterImmersiveMode}
-                style={styles.startNowButton}
+                style={[styles.startNowButton, styles.startNowButtonFinder]}
                 accessibilityRole="button"
                 accessibilityLabel="Enter immersive prayer mode"
               >
@@ -618,11 +627,11 @@ const styles = StyleSheet.create({
     right: 16,
     borderRadius: 24,
     paddingHorizontal: 18,
-    paddingVertical: 14,
-    backgroundColor: 'rgba(8,16,24,0.74)',
+    paddingVertical: 12,
+    backgroundColor: 'rgba(8,16,24,0.56)',
     borderWidth: 1,
-    borderColor: 'rgba(255,224,168,0.35)',
-    gap: 10,
+    borderColor: 'rgba(255,224,168,0.24)',
+    gap: 8,
   },
   statusTitle: {
     color: '#fff5d6',
@@ -676,6 +685,9 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,245,214,0.58)',
     paddingHorizontal: 16,
     paddingVertical: 12,
+  },
+  startNowButtonFinder: {
+    marginTop: -2,
   },
   startNowButtonText: {
     color: '#241500',

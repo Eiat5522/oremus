@@ -7,6 +7,8 @@ import type { Group, Object3D } from 'three';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+import { useDeferredNativeMount } from '@/hooks/use-deferred-native-mount';
+
 interface KaabaScene3DProps {
   modelModule: number;
   onReady?: () => void;
@@ -83,6 +85,12 @@ function KaabaSceneContent({ modelModule }: { modelModule: number }) {
 }
 
 export function KaabaScene3D({ modelModule, onReady }: KaabaScene3DProps) {
+  const canMountCanvas = useDeferredNativeMount();
+
+  if (!canMountCanvas) {
+    return null;
+  }
+
   return (
     <Canvas
       camera={{ fov: 48, position: [0, 0.4, 3] }}

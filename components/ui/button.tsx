@@ -4,6 +4,7 @@ import {
   Text,
   StyleSheet,
   ActivityIndicator,
+  Platform,
   ViewStyle,
   TextStyle,
   StyleProp,

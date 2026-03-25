@@ -38,7 +38,8 @@ export function PlacementControls({
       <View style={styles.actionRow}>
         <Pressable
           onPress={onReset}
-          style={styles.resetButton}
+          hitSlop={10}
+          style={({ pressed }) => [styles.resetButton, pressed && styles.resetButtonPressed]}
           accessibilityRole="button"
           accessibilityLabel="Reset placement"
         >
@@ -64,7 +65,8 @@ function ControlButton({
   return (
     <Pressable
       onPress={onPress}
-      style={styles.iconButton}
+      hitSlop={10}
+      style={({ pressed }) => [styles.iconButton, pressed && styles.iconButtonPressed]}
       accessibilityRole="button"
       accessibilityLabel={label}
     >
@@ -82,20 +84,30 @@ const styles = StyleSheet.create({
   },
   controlRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
+    gap: BuddhistPrayerSpacing.sm,
   },
   iconButton: {
+    flex: 1,
     alignItems: 'center',
     gap: 4,
+    minHeight: 56,
+    justifyContent: 'center',
     paddingVertical: BuddhistPrayerSpacing.sm,
     paddingHorizontal: BuddhistPrayerSpacing.sm,
     borderRadius: BuddhistPrayerRadius.md,
     backgroundColor: 'rgba(255,255,255,0.06)',
-    minWidth: 70,
+    borderWidth: 1,
+    borderColor: BuddhistPrayerColors.cardBorder,
+  },
+  iconButtonPressed: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderColor: BuddhistPrayerColors.goldBorder,
   },
   iconLabel: {
-    color: BuddhistPrayerColors.textSecondary,
-    fontSize: 10,
+    color: BuddhistPrayerColors.textPrimary,
+    fontSize: 11,
+    fontWeight: '600',
     textAlign: 'center',
   },
   actionRow: {
@@ -104,15 +116,23 @@ const styles = StyleSheet.create({
     gap: BuddhistPrayerSpacing.md,
   },
   resetButton: {
+    minHeight: 48,
     paddingHorizontal: BuddhistPrayerSpacing.md,
     paddingVertical: BuddhistPrayerSpacing.sm,
     borderRadius: BuddhistPrayerRadius.md,
     borderWidth: 1,
     borderColor: BuddhistPrayerColors.cardBorder,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+  },
+  resetButtonPressed: {
+    backgroundColor: BuddhistPrayerColors.overlayLight,
+    borderColor: BuddhistPrayerColors.goldBorder,
   },
   resetText: {
-    color: BuddhistPrayerColors.textSecondary,
+    color: BuddhistPrayerColors.textPrimary,
     fontSize: 14,
+    fontWeight: '600',
   },
   confirmButton: {
     flex: 1,

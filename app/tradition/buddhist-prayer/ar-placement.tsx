@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     gap: BuddhistPrayerSpacing.sm,
   },
   controlsLabel: {
-    color: BuddhistPrayerColors.textSecondary,
+    color: BuddhistPrayerColors.textPrimary,
     fontSize: 11,
     fontWeight: '700',
     textTransform: 'uppercase',

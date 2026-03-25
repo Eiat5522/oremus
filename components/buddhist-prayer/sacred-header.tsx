@@ -29,7 +29,8 @@ export function SacredHeader({
         {showBackButton ? (
           <Pressable
             onPress={onBack}
-            style={styles.backButton}
+            hitSlop={10}
+            style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}
             accessibilityRole="button"
             accessibilityLabel="Go back"
           >
@@ -60,13 +61,17 @@ const styles = StyleSheet.create({
     gap: BuddhistPrayerSpacing.sm,
   },
   backButton: {
-    width: 36,
-    height: 36,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 22,
+  },
+  backButtonPressed: {
+    backgroundColor: BuddhistPrayerColors.overlayLight,
   },
   placeholder: {
-    width: 36,
+    width: 44,
   },
   titleContainer: {
     flex: 1,
@@ -85,7 +90,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   rightSlot: {
-    width: 36,
+    width: 44,
     alignItems: 'flex-end',
   },
   divider: {

@@ -12,6 +12,7 @@ import {
   type ChristianArSceneStyle,
 } from '@/features/christian-prayer/constants';
 import { resolveChristianCandleEmissiveIntensity } from '@/features/christian-prayer/utils/candle-emissive';
+import { useDeferredNativeMount } from '@/hooks/use-deferred-native-mount';
 
 const MODEL_RETRY_COUNT = 1;
 
@@ -295,6 +296,7 @@ export function PrayerCorner3DStage({
   onStageActivated,
 }: PrayerCorner3DStageProps) {
   const [modelSet, setModelSet] = useState<ModelSet | null>(null);
+  const canMountCanvas = useDeferredNativeMount();
 
   useEffect(() => {
     let isMounted = true;
@@ -342,7 +344,7 @@ export function PrayerCorner3DStage({
     prayerTableModelModule,
   ]);
 
-  if (!modelSet) {
+  if (!modelSet || !canMountCanvas) {
     return null;
   }
 

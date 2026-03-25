@@ -215,11 +215,14 @@ export default function ProfileScreen() {
                     style={[
                       styles.nameInput,
                       useTraditionTheme
-                        ? {
-                            color: uiTheme.actionTextColor,
-                            borderColor: uiTheme.actionCardBorderColor,
-                            backgroundColor: uiTheme.actionCardColor,
-                          }
+                        ? [
+                            styles.nameInputTradition,
+                            {
+                              color: uiTheme.actionTextColor,
+                              borderColor: uiTheme.actionCardBorderColor,
+                              backgroundColor: uiTheme.actionCardColor,
+                            },
+                          ]
                         : {
                             color: theme.text,
                             borderColor: 'rgba(15, 23, 42, 0.12)',
@@ -590,6 +593,11 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 32,
     fontWeight: '700',
+    lineHeight: 40,
+    textAlign: 'center',
+    width: '100%',
+    flexShrink: 1,
+    paddingBottom: 2,
   },
   editNameChip: {
     flexDirection: 'row',
@@ -615,6 +623,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 12,
     fontSize: 16,
+    lineHeight: 20,
+    textAlignVertical: 'center',
+  },
+  nameInputTradition: {
+    fontFamily: Fonts.serif,
+    paddingBottom: 2,
   },
   nameActions: {
     flexDirection: 'row',
