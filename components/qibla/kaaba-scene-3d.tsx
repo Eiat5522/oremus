@@ -8,6 +8,9 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import { useDeferredNativeMount } from '@/hooks/use-deferred-native-mount';
+import { createNativeCanvasRenderer, ensureNativeThreeEnvironment } from '@/lib/three-native';
+
+ensureNativeThreeEnvironment();
 
 interface KaabaScene3DProps {
   modelModule: number;
@@ -94,7 +97,7 @@ export function KaabaScene3D({ modelModule, onReady }: KaabaScene3DProps) {
   return (
     <Canvas
       camera={{ fov: 48, position: [0, 0.4, 3] }}
-      gl={{ antialias: true, alpha: true }}
+      gl={createNativeCanvasRenderer}
       style={styles.canvas}
       onCreated={() => onReady?.()}
     >

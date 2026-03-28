@@ -104,7 +104,12 @@ export default function BuddhistPrayerHomeScreen() {
         style={StyleSheet.absoluteFillObject}
       />
 
-      <SacredHeader title="Buddhist Prayer" subtitle="Begin your practice with intention" />
+      <SacredHeader
+        title="Buddhist Prayer"
+        subtitle="Begin your practice with intention"
+        showBackButton
+        onBack={() => router.back()}
+      />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Hero */}

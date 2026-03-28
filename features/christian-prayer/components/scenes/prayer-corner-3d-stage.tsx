@@ -13,6 +13,9 @@ import {
 } from '@/features/christian-prayer/constants';
 import { resolveChristianCandleEmissiveIntensity } from '@/features/christian-prayer/utils/candle-emissive';
 import { useDeferredNativeMount } from '@/hooks/use-deferred-native-mount';
+import { createNativeCanvasRenderer, ensureNativeThreeEnvironment } from '@/lib/three-native';
+
+ensureNativeThreeEnvironment();
 
 const MODEL_RETRY_COUNT = 1;
 
@@ -350,7 +353,7 @@ export function PrayerCorner3DStage({
 
   return (
     <View pointerEvents="none" style={styles.container}>
-      <Canvas camera={{ position: [0, 1.4, 4.7], fov: 34 }}>
+      <Canvas camera={{ position: [0, 1.4, 4.7], fov: 34 }} gl={createNativeCanvasRenderer}>
         <PrayerCorner3DSceneContent modelSet={modelSet} sceneStyle={sceneStyle} />
       </Canvas>
     </View>

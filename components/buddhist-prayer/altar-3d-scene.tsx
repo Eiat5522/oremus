@@ -10,6 +10,9 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { BuddhistPrayerColors } from '@/constants/buddhist-prayer/theme';
 import type { AltarProps } from '@/constants/buddhist-prayer/types';
 import { useDeferredNativeMount } from '@/hooks/use-deferred-native-mount';
+import { createNativeCanvasRenderer, ensureNativeThreeEnvironment } from '@/lib/three-native';
+
+ensureNativeThreeEnvironment();
 
 type AltarScene3DProps = Required<
   Pick<
@@ -20,7 +23,7 @@ type AltarScene3DProps = Required<
   onReady?: () => void;
 };
 
-type AltarAssetKey = 'buddha' | 'candle' | 'incense' | 'garland' | 'pedestal';
+type AltarAssetKey = 'buddha' | 'candle' | 'incense' | 'pedestal';
 type LoadedAltarAssets = Record<AltarAssetKey, Object3D>;
 
 const CAMERA_POSITION = [0, 1.35, 5.8] as const;
@@ -32,8 +35,6 @@ const ALTAR_MODEL_MODULES: Record<AltarAssetKey, number> = {
   candle: require('@/assets/models/buddhist/candle-holder.glb') as number,
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   incense: require('@/assets/models/buddhist/incense.glb') as number,
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  garland: require('@/assets/models/buddhist/thai-garland.glb') as number,
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   pedestal: require('@/assets/models/buddhist/pedestal-base.glb') as number,
 };
@@ -146,14 +147,13 @@ function IncenseSmoke({
 function AltarSceneContent({
   scale,
   rotation,
-  showHalo,
+  showHalo: _showHalo,
   showIncenseSmoke,
   glowIntensity,
   animated,
   onReady,
 }: AltarScene3DProps) {
   const altarRef = useRef<Group>(null);
-  const haloRef = useRef<Mesh>(null);
   const [assets, setAssets] = useState<LoadedAltarAssets | null>(null);
   const [loadError, setLoadError] = useState<Error | null>(null);
   const baseRotation = useMemo(() => THREE.MathUtils.degToRad(rotation), [rotation]);
@@ -221,22 +221,6 @@ function AltarSceneContent({
     return prepareModel(assets.incense, 0.78);
   }, [assets]);
 
-  const leftGarlandModel = useMemo(() => {
-    if (!assets) {
-      return null;
-    }
-
-    return prepareModel(assets.garland, 1.05);
-  }, [assets]);
-
-  const rightGarlandModel = useMemo(() => {
-    if (!assets) {
-      return null;
-    }
-
-    return prepareModel(assets.garland, 1.05);
-  }, [assets]);
-
   const pedestalModel = useMemo(() => {
     if (!assets) {
       return null;
@@ -262,27 +246,13 @@ function AltarSceneContent({
     altarRef.current.scale.setScalar(scale * pulseScale);
     altarRef.current.rotation.y = baseRotation + (animated ? Math.sin(elapsed * 0.42) * 0.04 : 0);
     altarRef.current.position.y = animated ? Math.sin(elapsed * 0.7) * 0.03 : 0;
-
-    const haloMaterial = haloRef.current?.material;
-    if (haloMaterial instanceof THREE.MeshStandardMaterial) {
-      haloMaterial.opacity = showHalo ? Math.min(0.34, 0.12 + glowIntensity * 0.08) : 0;
-      haloMaterial.emissiveIntensity = showHalo ? Math.min(2.5, 1 + glowIntensity * 1.4) : 0;
-    }
   });
 
   if (loadError) {
     throw loadError;
   }
 
-  if (
-    !buddhaModel ||
-    !leftCandleModel ||
-    !rightCandleModel ||
-    !incenseModel ||
-    !leftGarlandModel ||
-    !rightGarlandModel ||
-    !pedestalModel
-  ) {
+  if (!buddhaModel || !leftCandleModel || !rightCandleModel || !incenseModel || !pedestalModel) {
     return null;
   }
 
@@ -292,7 +262,7 @@ function AltarSceneContent({
       <directionalLight color="#FFF4D7" intensity={1.65} position={[3.6, 4.8, 2.6]} />
       <pointLight
         color={BuddhistPrayerColors.goldPrimary}
-        intensity={showHalo ? Math.max(1.5, glowIntensity * 2.2) : 0.65}
+        intensity={Math.max(0.9, glowIntensity * 1.4)}
         distance={7.2}
         position={[0, 2.2, 1.4]}
       />
@@ -303,18 +273,6 @@ function AltarSceneContent({
       </mesh>
 
       <group ref={altarRef}>
-        <mesh position={[0, 1.24, -0.4]} ref={haloRef}>
-          <sphereGeometry args={[0.96, 36, 36]} />
-          <meshStandardMaterial
-            color="#FFE1A3"
-            emissive="#F3C96C"
-            emissiveIntensity={1.4}
-            transparent
-            opacity={0.2}
-            roughness={0.3}
-          />
-        </mesh>
-
         <group position={[0, -1.04, 0]}>
           <primitive object={pedestalModel} />
         </group>
@@ -351,14 +309,6 @@ function AltarSceneContent({
             showIncenseSmoke={showIncenseSmoke}
           />
         </group>
-
-        <group position={[-0.78, -0.12, 0.28]} rotation={[0.08, 0.4, -0.22]}>
-          <primitive object={leftGarlandModel} />
-        </group>
-
-        <group position={[0.78, -0.12, 0.28]} rotation={[0.08, -0.4, 0.22]}>
-          <primitive object={rightGarlandModel} />
-        </group>
       </group>
     </>
   );
@@ -374,7 +324,7 @@ export const AltarScene3D = memo(function AltarScene3D(props: AltarScene3DProps)
   return (
     <Canvas
       camera={{ fov: 34, position: CAMERA_POSITION }}
-      gl={{ antialias: true, alpha: true }}
+      gl={createNativeCanvasRenderer}
       style={styles.canvas}
     >
       <AltarSceneContent {...props} />

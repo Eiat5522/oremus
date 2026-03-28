@@ -17,7 +17,7 @@ interface Altar3DPlaceholderProps {
 }
 
 export function Altar3DPlaceholder({
-  showHalo = true,
+  showHalo: _showHalo = true,
   showIncenseSmoke = true,
   animated = true,
   style,
@@ -48,7 +48,6 @@ export function Altar3DPlaceholder({
         style={styles.frame}
         testID="altar-fallback"
       >
-        {showHalo ? <View testID="altar-halo-overlay" style={styles.halo} /> : null}
         {showIncenseSmoke ? <View testID="altar-smoke-overlay" style={styles.smoke} /> : null}
         <View style={styles.statueSilhouette} />
         <View style={styles.platformBase} />
@@ -95,15 +94,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     padding: BuddhistPrayerSpacing.md,
     backgroundColor: 'rgba(15,10,6,0.92)',
-  },
-  halo: {
-    position: 'absolute',
-    top: '18%',
-    width: '60%',
-    aspectRatio: 1,
-    borderRadius: BuddhistPrayerRadius.full,
-    backgroundColor: 'rgba(224,185,110,0.2)',
-    boxShadow: `0px 0px 32px ${BuddhistPrayerColors.goldPrimary}`,
   },
   smoke: {
     position: 'absolute',
