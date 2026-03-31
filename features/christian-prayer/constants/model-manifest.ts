@@ -1,4 +1,5 @@
 const REQUIRED_CHRISTIAN_MODEL_IDS = [
+  'jesus_statue_a',
   'cross_wood_a',
   'bible_open_a',
   'candle_tall_a',

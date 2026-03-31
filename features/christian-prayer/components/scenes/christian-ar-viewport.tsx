@@ -34,6 +34,13 @@ export function ChristianArViewport({
   const sessionId = useChristianSessionStore((state) => state.sessionId);
   const mode = useChristianSessionStore((state) => state.mode);
   const currentPhase = useChristianSessionStore((state) => state.currentPhase);
+  const jesusStatueModel = useMemo(
+    () =>
+      modelState.assets.find(
+        (asset) => asset.id === 'jesus_statue_a' && asset.status === 'ready' && asset.moduleId,
+      ) ?? null,
+    [modelState.assets],
+  );
   const crossModel = useMemo(
     () =>
       modelState.assets.find(
@@ -48,6 +55,7 @@ export function ChristianArViewport({
       ) ?? null,
     [modelState.assets],
   );
+  const jesusStatueModelModule = jesusStatueModel?.moduleId ?? null;
   const crossModelModule = crossModel?.moduleId ?? null;
   const bibleModelModule = bibleModel?.moduleId ?? null;
   const candleTallModelModule =
@@ -63,6 +71,7 @@ export function ChristianArViewport({
   const canUse3dStage =
     !has3dRenderError &&
     modelState.coreReady &&
+    jesusStatueModelModule !== null &&
     crossModelModule !== null &&
     bibleModelModule !== null &&
     prayerTableModelModule !== null;
@@ -113,6 +122,7 @@ export function ChristianArViewport({
               candleShortModelModule={candleShortModelModule}
               candleTallModelModule={candleTallModelModule}
               crossModelModule={crossModelModule}
+              jesusStatueModelModule={jesusStatueModelModule}
               prayerTableModelModule={prayerTableModelModule}
               onError={() => {
                 setHas3dRenderError(true);

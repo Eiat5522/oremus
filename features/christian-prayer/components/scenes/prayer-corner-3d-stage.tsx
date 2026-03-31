@@ -23,6 +23,7 @@ interface ModelSet {
   prayerTable: Object3D;
   cross: Object3D;
   bible: Object3D;
+  jesusStatue: Object3D;
   candleTall: Object3D | null;
   candleShort: Object3D | null;
 }
@@ -32,6 +33,7 @@ interface PrayerCorner3DStageProps {
   prayerTableModelModule: number;
   crossModelModule: number;
   bibleModelModule: number;
+  jesusStatueModelModule: number;
   candleTallModelModule?: number | null;
   candleShortModelModule?: number | null;
   onError: (errorCode: 'modelLoadFailed') => void;
@@ -79,6 +81,31 @@ function applyCandleEmissive(object: Object3D, intensity: number) {
           entry.emissive = new THREE.Color(0xffcc88);
         }
         entry.emissiveIntensity = intensity;
+        entry.needsUpdate = true;
+      }
+    });
+  });
+}
+
+function applyHeroMaterialTuning(object: Object3D) {
+  object.traverse((child) => {
+    if (!(child instanceof THREE.Mesh)) {
+      return;
+    }
+
+    const materials = toMaterialArray(child.material);
+    materials.forEach((entry) => {
+      if (
+        entry instanceof THREE.MeshStandardMaterial ||
+        entry instanceof THREE.MeshPhysicalMaterial
+      ) {
+        // Brightness boost (like Buddhist Buddha 1.18×)
+        if (entry.color) {
+          entry.color.multiplyScalar(1.15);
+        }
+        // Warm emissive glow
+        entry.emissive = new THREE.Color(0xd4a74a);
+        entry.emissiveIntensity = 0.1;
         entry.needsUpdate = true;
       }
     });
@@ -197,9 +224,15 @@ function PrayerCorner3DSceneContent({
   modelSet: ModelSet;
 }) {
   const groupRef = useRef<Group>(null);
+  const jesusRef = useRef<Group>(null);
   const prayerTable = useMemo(() => modelSet.prayerTable.clone(true), [modelSet.prayerTable]);
   const cross = useMemo(() => modelSet.cross.clone(true), [modelSet.cross]);
   const bible = useMemo(() => modelSet.bible.clone(true), [modelSet.bible]);
+  const jesusStatue = useMemo(() => {
+    const clone = modelSet.jesusStatue.clone(true);
+    applyHeroMaterialTuning(clone);
+    return clone;
+  }, [modelSet.jesusStatue]);
   const candleTall = useMemo(() => modelSet.candleTall?.clone(true) ?? null, [modelSet.candleTall]);
   const candleShort = useMemo(
     () => modelSet.candleShort?.clone(true) ?? null,
@@ -211,10 +244,11 @@ function PrayerCorner3DSceneContent({
       disposeObject3D(prayerTable);
       disposeObject3D(cross);
       disposeObject3D(bible);
+      disposeObject3D(jesusStatue);
       disposeObject3D(candleTall);
       disposeObject3D(candleShort);
     };
-  }, [bible, candleShort, candleTall, cross, prayerTable]);
+  }, [bible, candleShort, candleTall, cross, jesusStatue, prayerTable]);
 
   useFrame(({ clock }) => {
     if (!groupRef.current) {
@@ -225,6 +259,17 @@ function PrayerCorner3DSceneContent({
     const candleEmissive = resolveChristianCandleEmissiveIntensity(sceneStyle, elapsed);
     groupRef.current.position.y = Math.sin(elapsed * 0.45) * 0.02;
     groupRef.current.rotation.y = Math.sin(elapsed * 0.25) * 0.04;
+
+    // Subtle pulse on Jesus statue (like Buddhist Buddha ±3%)
+    if (jesusRef.current) {
+      const pulseScale = 1 + Math.sin(elapsed * 1.1) * 0.025;
+      const base = CHRISTIAN_PRAYER_CORNER_MODEL_TRANSFORMS.jesus_statue_a.scale;
+      jesusRef.current.scale.set(
+        base[0] * pulseScale,
+        base[1] * pulseScale,
+        base[2] * pulseScale,
+      );
+    }
 
     if (candleTall) {
       applyCandleEmissive(candleTall, candleEmissive);
@@ -246,6 +291,13 @@ function PrayerCorner3DSceneContent({
         distance={5.6}
         position={[0, 1.5, 1.1]}
       />
+      {/* Halo glow behind Jesus statue */}
+      <pointLight
+        color="#FFF4D7"
+        intensity={0.6 + sceneStyle.haloIntensity * 0.5}
+        distance={4.8}
+        position={[0, 1.2, -0.6]}
+      />
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.1, 0]}>
         <circleGeometry args={[2.2, 42]} />
@@ -257,6 +309,12 @@ function PrayerCorner3DSceneContent({
           object={prayerTable}
           {...CHRISTIAN_PRAYER_CORNER_MODEL_TRANSFORMS.prayer_table_wood_a}
         />
+        <group ref={jesusRef}>
+          <primitive
+            object={jesusStatue}
+            {...CHRISTIAN_PRAYER_CORNER_MODEL_TRANSFORMS.jesus_statue_a}
+          />
+        </group>
         <primitive object={cross} {...CHRISTIAN_PRAYER_CORNER_MODEL_TRANSFORMS.cross_wood_a} />
         <primitive object={bible} {...CHRISTIAN_PRAYER_CORNER_MODEL_TRANSFORMS.bible_open_a} />
 
@@ -293,6 +351,7 @@ export function PrayerCorner3DStage({
   prayerTableModelModule,
   crossModelModule,
   bibleModelModule,
+  jesusStatueModelModule,
   candleTallModelModule,
   candleShortModelModule,
   onError,
@@ -306,24 +365,27 @@ export function PrayerCorner3DStage({
 
     const run = async () => {
       try {
-        const [prayerTable, cross, bible, candleTall, candleShort] = await Promise.all([
-          loadModel(prayerTableModelModule),
-          loadModel(crossModelModule),
-          loadModel(bibleModelModule),
-          loadOptionalModel(candleTallModelModule),
-          loadOptionalModel(candleShortModelModule),
-        ]);
+        const [prayerTable, cross, bible, jesusStatue, candleTall, candleShort] =
+          await Promise.all([
+            loadModel(prayerTableModelModule),
+            loadModel(crossModelModule),
+            loadModel(bibleModelModule),
+            loadModel(jesusStatueModelModule),
+            loadOptionalModel(candleTallModelModule),
+            loadOptionalModel(candleShortModelModule),
+          ]);
 
         if (!isMounted) {
           disposeObject3D(prayerTable);
           disposeObject3D(cross);
           disposeObject3D(bible);
+          disposeObject3D(jesusStatue);
           disposeObject3D(candleTall);
           disposeObject3D(candleShort);
           return;
         }
 
-        setModelSet({ prayerTable, cross, bible, candleTall, candleShort });
+        setModelSet({ prayerTable, cross, bible, jesusStatue, candleTall, candleShort });
         onStageActivated?.();
       } catch {
         if (isMounted) {
@@ -342,6 +404,7 @@ export function PrayerCorner3DStage({
     candleShortModelModule,
     candleTallModelModule,
     crossModelModule,
+    jesusStatueModelModule,
     onError,
     onStageActivated,
     prayerTableModelModule,

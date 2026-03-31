@@ -122,7 +122,8 @@ function QiblaScreen() {
       details: Record<string, string | number | boolean | null>,
     ) => {
       if (__DEV__) {
-        console.error('[QiblaSessionFlow]', {
+        const log = type === 'session_start_failed' ? console.error : console.warn;
+        log('[QiblaSessionFlow]', {
           type,
           ...details,
         });

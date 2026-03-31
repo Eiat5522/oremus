@@ -74,6 +74,11 @@ export function PrayerCornerScene({
           centerpiece
         ) : (
           <>
+            {/* Jesus statue silhouette */}
+            <View style={styles.statueSilhouette}>
+              <View style={styles.statueHead} />
+              <View style={styles.statueTorso} />
+            </View>
             <View style={styles.crossVertical} />
             <View style={styles.crossHorizontal} />
             <View style={styles.bibleRow}>
@@ -144,19 +149,41 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 10,
   },
+  statueSilhouette: {
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  statueHead: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(242, 196, 124, 0.7)',
+  },
+  statueTorso: {
+    width: 36,
+    height: 56,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 18,
+    borderBottomRightRadius: 18,
+    backgroundColor: 'rgba(242, 196, 124, 0.55)',
+    marginTop: 2,
+  },
   crossVertical: {
-    width: 14,
-    height: 120,
-    borderRadius: 8,
+    width: 10,
+    height: 80,
+    borderRadius: 6,
     backgroundColor: ChristianPrayerPalette.gold,
+    opacity: 0.55,
   },
   crossHorizontal: {
     position: 'absolute',
-    top: '34%',
-    width: 78,
-    height: 14,
-    borderRadius: 8,
+    top: '26%',
+    width: 52,
+    height: 10,
+    borderRadius: 6,
     backgroundColor: ChristianPrayerPalette.gold,
+    opacity: 0.55,
   },
   bibleRow: {
     flexDirection: 'row',

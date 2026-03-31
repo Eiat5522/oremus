@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
+import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
@@ -214,6 +215,17 @@ export function usePrayerLocationSettings(options: UsePrayerLocationSettingsOpti
       mounted = false;
     };
   }, [enabled, loadSavedPrayerLocation, requestLocationPermission]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!enabled) {
+        return;
+      }
+
+      void loadSavedPrayerLocation();
+
+  }, [enabled, loadSavedPrayerLocation]),
+  );
 
   const prayerCoords = useMemo(() => {
     if (coords) {

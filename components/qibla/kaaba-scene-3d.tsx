@@ -26,12 +26,57 @@ function normalizeGltfScene(input: unknown): Object3D | null {
 
 function centerModel(object: Object3D) {
   const box = new THREE.Box3().setFromObject(object);
-  const center = box.getCenter(new THREE.Vector3());
   const size = box.getSize(new THREE.Vector3());
   const maxDim = Math.max(size.x, size.y, size.z);
   const scale = 1.6 / maxDim;
-  object.position.sub(center);
+
+  // Apply scale first, then recompute the bbox so the center offset is
+  // relative to the already-scaled model. Without this, models whose root node
+  // has a rotation matrix (e.g. Z-up → Y-up conversion) end up placed hundreds
+  // of world-units off-screen after scaling.
   object.scale.setScalar(scale);
+  const scaledBox = new THREE.Box3().setFromObject(object);
+  const center = scaledBox.getCenter(new THREE.Vector3());
+  object.position.sub(center);
+}
+
+function isBackdropMaterial(material: THREE.Material | THREE.Material[]) {
+  const materials = Array.isArray(material) ? material : [material];
+
+  return materials.some((entry) => {
+    const namedLikeBackdrop = /color_d06|background|backdrop|placeholder/i.test(entry.name);
+    if (namedLikeBackdrop) return true;
+
+    if (!('color' in entry) || !(entry.color instanceof THREE.Color)) {
+      return false;
+    }
+
+    const { r, g, b } = entry.color;
+    // Empirical thresholds for the flat gold backdrop material in the Kaaba model.
+    // These values may need adjustment if the model source changes.
+    const looksLikeFlatGold = r > 0.7 && g > 0.45 && g < 0.75 && b < 0.2;
+    return looksLikeFlatGold;
+  });
+}
+
+function removeBackdropMeshes(object: Object3D) {
+  const removable: Object3D[] = [];
+
+  object.traverse((node) => {
+    if (!(node instanceof THREE.Mesh)) return;
+    if (!isBackdropMaterial(node.material)) return;
+
+    removable.push(node);
+  });
+
+  removable.forEach((node) => {
+    if (node instanceof THREE.Mesh) {
+      node.geometry?.dispose();
+      const materials = Array.isArray(node.material) ? node.material : [node.material];
+      materials.forEach((mat) => mat?.dispose());
+    }
+    node.parent?.remove(node);
+  });
 }
 
 function RotatingKaaba({ model }: { model: Object3D }) {
@@ -64,12 +109,15 @@ function KaabaSceneContent({ modelModule }: { modelModule: number }) {
       const gltf = await new GLTFLoader().loadAsync(uri);
       const obj = normalizeGltfScene(gltf);
       if (!cancelled && obj) {
+        removeBackdropMeshes(obj);
         centerModel(obj);
         setModel(obj);
       }
     }
 
-    load().catch(() => {});
+    load().catch((err) => {
+      if (__DEV__) console.warn('[KaabaScene3D] model load failed:', err);
+    });
     return () => {
       cancelled = true;
     };

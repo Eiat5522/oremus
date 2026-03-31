@@ -49,10 +49,10 @@ const THEMES: Record<TraditionThemeKey, TraditionUiTheme> = {
     actionIconColor: '#D8E3FF',
     backgroundImage: require('@/assets/images/background/general-waterpaint.jpg'),
     overlayGradient: ['rgba(14, 20, 42, 0.08)', 'rgba(12, 17, 40, 0.55)', 'rgba(8, 11, 24, 0.88)'],
-    tabBarColor: 'rgba(20, 29, 58, 0.8)',
-    tabBarBorderColor: 'rgba(228, 233, 255, 0.2)',
+    tabBarColor: 'rgba(35, 48, 88, 0.88)',
+    tabBarBorderColor: 'rgba(228, 233, 255, 0.32)',
     tabActiveTint: '#F4F6FF',
-    tabInactiveTint: 'rgba(211, 220, 255, 0.65)',
+    tabInactiveTint: 'rgba(211, 220, 255, 0.72)',
     actions: [
       { id: 'history', label: 'History', icon: 'hourglass', route: '/tradition/general' },
       {

@@ -25,6 +25,11 @@ type AltarScene3DProps = Required<
 
 type AltarAssetKey = 'buddha' | 'candle' | 'incense' | 'pedestal';
 type LoadedAltarAssets = Record<AltarAssetKey, Object3D>;
+type ModelPreparationOptions = {
+  brightnessBoost?: number;
+  emissiveColor?: string;
+  emissiveIntensity?: number;
+};
 
 const CAMERA_POSITION = [0, 1.35, 5.8] as const;
 const FLOOR_ROTATION_X = -Math.PI / 2;
@@ -65,8 +70,52 @@ async function loadAltarAsset(modelModule: number) {
   return scene;
 }
 
-function prepareModel(source: Object3D, targetHeight: number) {
+function tuneMaterial(
+  material: THREE.Material,
+  { brightnessBoost = 1, emissiveColor, emissiveIntensity }: ModelPreparationOptions,
+) {
+  if (!(material instanceof THREE.MeshStandardMaterial)) {
+    return;
+  }
+
+  if (brightnessBoost !== 1) {
+    material.color.multiplyScalar(brightnessBoost);
+  }
+
+  if (emissiveColor) {
+    material.emissive.set(emissiveColor);
+    // Default to 0.5 when emissiveColor is set but intensity is not specified,
+    // ensuring the emissive glow is actually visible
+    material.emissiveIntensity = emissiveIntensity ?? 0.5;
+  }
+}
+
+function prepareModel(
+  source: Object3D,
+  targetHeight: number,
+  options: ModelPreparationOptions = {},
+) {
   const model = source.clone(true);
+
+  model.traverse((child) => {
+    if (!(child instanceof THREE.Mesh)) {
+      return;
+    }
+
+    if (Array.isArray(child.material)) {
+      child.material = child.material.map((material) => {
+        const clonedMaterial = material.clone();
+        tuneMaterial(clonedMaterial, options);
+        return clonedMaterial;
+      });
+      return;
+    }
+
+    const clonedMaterial = child.material.clone();
+    tuneMaterial(clonedMaterial, options);
+    child.material = clonedMaterial;
+  });
+
   const initialBox = new THREE.Box3().setFromObject(model);
   const initialSize = initialBox.getSize(new THREE.Vector3());
   const height = Math.max(initialSize.y, 0.001);
@@ -194,7 +243,11 @@ function AltarSceneContent({
       return null;
     }
 
-    return prepareModel(assets.buddha, 2.2);
+    return prepareModel(assets.buddha, 2.2, {
+      brightnessBoost: 1.18,
+      emissiveColor: '#D4A74A',
+      emissiveIntensity: 0.12,
+    });
   }, [assets]);
 
   const leftCandleModel = useMemo(() => {

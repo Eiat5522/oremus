@@ -6,6 +6,15 @@
   "notes": "Drop exported GLB files into this directory and map each asset id in the model module registry.",
   "assets": [
     {
+      "id": "jesus_statue_a",
+      "fileName": "jesus_statue_a.glb",
+      "pivot": "bottomCenter",
+      "role": "hero",
+      "maxTriangles": 12000,
+      "maxTextureSize": 1024,
+      "scaleHint": 1
+    },
+    {
       "id": "cross_wood_a",
       "fileName": "cross_wood_a.glb",
       "pivot": "bottomCenter",
