@@ -1,25 +1,29 @@
 import 'react-native-reanimated';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { useOnboarding } from '@/hooks/use-onboarding';
 import { TraditionProvider, useTradition } from '@/hooks/use-tradition';
 import { UserProvider } from '@/hooks/use-user';
 import { configureNotifications } from '@/lib/notifications';
 
 export const unstable_settings = {
-  initialRouteName: 'onboarding/index',
+  initialRouteName: 'onboarding',
 };
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
-  const { tradition, isLoading } = useTradition();
+  const { tradition, isLoading: traditionLoading } = useTradition();
+  const { isOnboardingCompleted, isLoading: onboardingLoading } = useOnboarding();
+
+  const isLoading = traditionLoading || onboardingLoading;
 
   useEffect(() => {
     if (!isLoading) {
@@ -31,14 +35,14 @@ function RootLayoutNav() {
     return null;
   }
 
+  const shouldOnboard = !isOnboardingCompleted || !tradition;
+
   return (
     <ThemeProvider value={DarkTheme}>
       <View style={{ flex: 1, backgroundColor: '#000000' }}>
-        <Stack
-          screenOptions={{ headerShown: false }}
-          initialRouteName={tradition ? '(tabs)' : 'onboarding/index'}
-        >
-          <Stack.Screen name="onboarding/index" />
+        {shouldOnboard && <Redirect href="/onboarding/splash-gate" />}
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="onboarding" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="active-session/index" options={{ presentation: 'fullScreenModal' }} />
           <Stack.Screen name="tradition/qibla" />
