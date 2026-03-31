@@ -264,11 +264,7 @@ function PrayerCorner3DSceneContent({
     if (jesusRef.current) {
       const pulseScale = 1 + Math.sin(elapsed * 1.1) * 0.025;
       const base = CHRISTIAN_PRAYER_CORNER_MODEL_TRANSFORMS.jesus_statue_a.scale;
-      jesusRef.current.scale.set(
-        base[0] * pulseScale,
-        base[1] * pulseScale,
-        base[2] * pulseScale,
-      );
+      jesusRef.current.scale.set(base[0] * pulseScale, base[1] * pulseScale, base[2] * pulseScale);
     }
 
     if (candleTall) {
@@ -365,15 +361,16 @@ export function PrayerCorner3DStage({
 
     const run = async () => {
       try {
-        const [prayerTable, cross, bible, jesusStatue, candleTall, candleShort] =
-          await Promise.all([
+        const [prayerTable, cross, bible, jesusStatue, candleTall, candleShort] = await Promise.all(
+          [
             loadModel(prayerTableModelModule),
             loadModel(crossModelModule),
             loadModel(bibleModelModule),
             loadModel(jesusStatueModelModule),
             loadOptionalModel(candleTallModelModule),
             loadOptionalModel(candleShortModelModule),
-          ]);
+          ],
+        );
 
         if (!isMounted) {
           disposeObject3D(prayerTable);
@@ -416,7 +413,11 @@ export function PrayerCorner3DStage({
 
   return (
     <View pointerEvents="none" style={styles.container}>
-      <Canvas camera={{ position: [0, 1.4, 4.7], fov: 34 }} gl={createNativeCanvasRenderer}>
+      <Canvas
+        camera={{ position: [0, 1.4, 4.7], fov: 34 }}
+        gl={createNativeCanvasRenderer}
+        style={styles.canvas}
+      >
         <PrayerCorner3DSceneContent modelSet={modelSet} sceneStyle={sceneStyle} />
       </Canvas>
     </View>
@@ -426,5 +427,8 @@ export function PrayerCorner3DStage({
 const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
+  },
+  canvas: {
+    flex: 1,
   },
 });
