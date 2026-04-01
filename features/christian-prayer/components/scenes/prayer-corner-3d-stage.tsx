@@ -40,6 +40,12 @@ interface PrayerCorner3DStageProps {
   onStageActivated?: () => void;
 }
 
+interface ModelPreparationOptions {
+  brightnessBoost?: number;
+  emissiveColor?: string;
+  emissiveIntensity?: number;
+}
+
 function normalizeLoadedObject(input: unknown): Object3D | null {
   if (!input || typeof input !== 'object') {
     return null;
@@ -110,6 +116,73 @@ function applyHeroMaterialTuning(object: Object3D) {
       }
     });
   });
+}
+
+function tuneMaterial(
+  material: Material,
+  { brightnessBoost = 1, emissiveColor, emissiveIntensity }: ModelPreparationOptions,
+) {
+  if (
+    !(material instanceof THREE.MeshStandardMaterial) &&
+    !(material instanceof THREE.MeshPhysicalMaterial)
+  ) {
+    return;
+  }
+
+  if (brightnessBoost !== 1 && material.color) {
+    material.color.multiplyScalar(brightnessBoost);
+  }
+
+  if (emissiveColor) {
+    material.emissive.set(emissiveColor);
+    material.emissiveIntensity = emissiveIntensity ?? 0.1;
+  }
+
+  material.needsUpdate = true;
+}
+
+function prepareModel(
+  source: Object3D,
+  targetHeight: number,
+  options: ModelPreparationOptions = {},
+) {
+  const model = source.clone(true);
+
+  model.traverse((child) => {
+    if (!(child instanceof THREE.Mesh)) {
+      return;
+    }
+
+    if (Array.isArray(child.material)) {
+      child.material = child.material.map((entry) => {
+        const clonedMaterial = entry.clone();
+        tuneMaterial(clonedMaterial, options);
+        return clonedMaterial;
+      });
+      return;
+    }
+
+    const clonedMaterial = child.material.clone();
+    tuneMaterial(clonedMaterial, options);
+    child.material = clonedMaterial;
+  });
+
+  const initialBounds = new THREE.Box3().setFromObject(model);
+  const initialSize = initialBounds.getSize(new THREE.Vector3());
+  const height = Math.max(initialSize.y, 0.001);
+  const scale = targetHeight / height;
+
+  model.scale.multiplyScalar(scale);
+
+  const normalizedBounds = new THREE.Box3().setFromObject(model);
+  const center = normalizedBounds.getCenter(new THREE.Vector3());
+  const min = normalizedBounds.min.clone();
+
+  model.position.x -= center.x;
+  model.position.z -= center.z;
+  model.position.y -= min.y;
+
+  return model;
 }
 
 function disposeObject3D(object: Object3D | null) {
@@ -219,23 +292,42 @@ function ProceduralCandle({
 function PrayerCorner3DSceneContent({
   sceneStyle,
   modelSet,
+  onReady,
 }: {
   sceneStyle: ChristianArSceneStyle;
   modelSet: ModelSet;
+  onReady?: () => void;
 }) {
   const groupRef = useRef<Group>(null);
   const jesusRef = useRef<Group>(null);
-  const prayerTable = useMemo(() => modelSet.prayerTable.clone(true), [modelSet.prayerTable]);
-  const cross = useMemo(() => modelSet.cross.clone(true), [modelSet.cross]);
-  const bible = useMemo(() => modelSet.bible.clone(true), [modelSet.bible]);
+  const readyTrackedRef = useRef(false);
+  const prayerTable = useMemo(
+    () => prepareModel(modelSet.prayerTable, 1.08, { brightnessBoost: 1.04 }),
+    [modelSet.prayerTable],
+  );
+  const cross = useMemo(
+    () => prepareModel(modelSet.cross, 1.78, { brightnessBoost: 1.08 }),
+    [modelSet.cross],
+  );
+  const bible = useMemo(
+    () => prepareModel(modelSet.bible, 0.26, { brightnessBoost: 1.06 }),
+    [modelSet.bible],
+  );
   const jesusStatue = useMemo(() => {
-    const clone = modelSet.jesusStatue.clone(true);
+    const clone = prepareModel(modelSet.jesusStatue, 1.56, {
+      brightnessBoost: 1.12,
+      emissiveColor: '#D4A74A',
+      emissiveIntensity: 0.1,
+    });
     applyHeroMaterialTuning(clone);
     return clone;
   }, [modelSet.jesusStatue]);
-  const candleTall = useMemo(() => modelSet.candleTall?.clone(true) ?? null, [modelSet.candleTall]);
+  const candleTall = useMemo(
+    () => (modelSet.candleTall ? prepareModel(modelSet.candleTall, 0.7) : null),
+    [modelSet.candleTall],
+  );
   const candleShort = useMemo(
-    () => modelSet.candleShort?.clone(true) ?? null,
+    () => (modelSet.candleShort ? prepareModel(modelSet.candleShort, 0.56) : null),
     [modelSet.candleShort],
   );
 
@@ -251,6 +343,11 @@ function PrayerCorner3DSceneContent({
   }, [bible, candleShort, candleTall, cross, jesusStatue, prayerTable]);
 
   useFrame(({ clock }) => {
+    if (!readyTrackedRef.current) {
+      readyTrackedRef.current = true;
+      onReady?.();
+    }
+
     if (!groupRef.current) {
       return;
     }
@@ -383,7 +480,6 @@ export function PrayerCorner3DStage({
         }
 
         setModelSet({ prayerTable, cross, bible, jesusStatue, candleTall, candleShort });
-        onStageActivated?.();
       } catch {
         if (isMounted) {
           onError('modelLoadFailed');
@@ -418,7 +514,11 @@ export function PrayerCorner3DStage({
         gl={createNativeCanvasRenderer}
         style={styles.canvas}
       >
-        <PrayerCorner3DSceneContent modelSet={modelSet} sceneStyle={sceneStyle} />
+        <PrayerCorner3DSceneContent
+          modelSet={modelSet}
+          onReady={onStageActivated}
+          sceneStyle={sceneStyle}
+        />
       </Canvas>
     </View>
   );

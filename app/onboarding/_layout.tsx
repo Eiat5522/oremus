@@ -21,8 +21,7 @@ export default function OnboardingLayout() {
       <Stack.Screen name="feature-location" />
       <Stack.Screen name="feature-camera" />
       <Stack.Screen name="feature-notifications" />
-      <Stack.Screen name="tradition" />
-      <Stack.Screen name="completion" />
+      <Stack.Screen name="choose-path" />
     </Stack>
   );
 }

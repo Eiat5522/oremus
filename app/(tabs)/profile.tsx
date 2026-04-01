@@ -358,7 +358,7 @@ export default function ProfileScreen() {
                 icon="slider.horizontal.3"
                 title="Change Tradition"
                 color={useTraditionTheme ? uiTheme.actionIconColor : theme.primary}
-                onPress={() => router.push('/onboarding')}
+                onPress={() => router.push('/settings/select-tradition')}
                 themed={useTraditionTheme}
                 themedBorderColor={uiTheme.actionCardBorderColor}
                 themedChevronColor={uiTheme.subtitleColor}

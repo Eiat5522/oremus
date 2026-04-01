@@ -645,7 +645,7 @@ export function ChristianArPlaceScreen() {
               </View>
               <PrimaryButton
                 label="Confirm Placement"
-                onPress={() => router.push('/christian/ar-ready' as never)}
+                onPress={() => router.replace('/christian/ar-ready' as never)}
               />
             </>
           )}
@@ -680,21 +680,23 @@ export function ChristianArReadyScreen() {
         title="Prayer Corner Ready"
         onClose={() => router.push('/christian/exit-confirm' as never)}
       />
-      <View style={styles.flexCenter}>
+      <View style={styles.flex}>
         <ExperienceSceneFrame experienceMode="ar" floatingPrompts={['quiet', 'scripture', 'peace']}>
           <View />
         </ExperienceSceneFrame>
-        <FloatingConfirmationCard
-          title="Everything is settled."
-          body={session.modeContent.arrivalPrompt}
-        />
-        <View style={styles.actionStack}>
-          <PrimaryButton label="Begin Prayer Session" onPress={beginPrayerFlow} />
-          <SecondaryButton
-            label="Adjust Placement"
-            onPress={() => router.replace('/christian/ar-place' as never)}
+        <BottomSheetContainer>
+          <FloatingConfirmationCard
+            title="Everything is settled."
+            body={session.modeContent.arrivalPrompt}
           />
-        </View>
+          <View style={styles.actionStack}>
+            <PrimaryButton label="Begin Prayer Session" onPress={beginPrayerFlow} />
+            <SecondaryButton
+              label="Adjust Placement"
+              onPress={() => router.replace('/christian/ar-place' as never)}
+            />
+          </View>
+        </BottomSheetContainer>
       </View>
     </ChristianFlowScreen>
   );

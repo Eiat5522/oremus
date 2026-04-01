@@ -21,9 +21,22 @@ SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
   const { tradition, isLoading: traditionLoading } = useTradition();
-  const { isOnboardingCompleted, isLoading: onboardingLoading } = useOnboarding();
+  const {
+    isOnboardingCompleted,
+    isLoading: onboardingLoading,
+    completeOnboarding,
+  } = useOnboarding();
 
   const isLoading = traditionLoading || onboardingLoading;
+
+  // Migration: existing users who already have a tradition selected but pre-date
+  // the onboarding feature (no flag in AsyncStorage). Auto-mark as completed so
+  // they are not trapped in the onboarding flow.
+  useEffect(() => {
+    if (!isLoading && tradition && !isOnboardingCompleted) {
+      completeOnboarding();
+    }
+  }, [isLoading, tradition, isOnboardingCompleted, completeOnboarding]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -83,6 +96,10 @@ function RootLayoutNav() {
             options={{ presentation: 'fullScreenModal' }}
           />
           <Stack.Screen name="tradition/general" options={{ presentation: 'modal' }} />
+          <Stack.Screen
+            name="settings/select-tradition"
+            options={{ presentation: 'fullScreenModal' }}
+          />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
         </Stack>
         <StatusBar style="light" />

@@ -1,4 +1,3 @@
-import { ProgressDots } from '@/components/onboarding/progress-dots';
 import { Image } from 'expo-image';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Fonts } from '@/constants/theme';
@@ -7,16 +6,20 @@ import { Tradition, TRADITION_OPTIONS } from '@/constants/traditions';
 import { useTradition } from '@/hooks/use-tradition';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export default function TraditionOnboardingScreen() {
+export default function SelectTraditionScreen() {
   const { tradition, setTradition } = useTradition();
   const [selectedTradition, setSelectedTradition] = useState<Tradition>(tradition || 'general');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const previewTheme = getTraditionUiTheme(selectedTradition);
+  const previewTheme = useMemo(
+    () => getTraditionUiTheme(selectedTradition),
+    [selectedTradition],
+  );
 
   useEffect(() => {
     if (tradition) {
@@ -24,13 +27,25 @@ export default function TraditionOnboardingScreen() {
     }
   }, [tradition]);
 
-  const handleContinue = async () => {
+  useEffect(() => {
+    if (!toastMessage) {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      setToastMessage(null);
+    }, 3200);
+
+    return () => clearTimeout(timeoutId);
+  }, [toastMessage]);
+
+  const handleSave = async () => {
     try {
       await setTradition(selectedTradition);
-      router.push('/onboarding/completion' as any);
+      router.replace('/(tabs)');
     } catch (error) {
       console.error('Failed to save tradition preference:', error);
-      router.push('/onboarding/completion' as any);
+      setToastMessage('Unable to save your tradition right now. Your previous setting is unchanged.');
     }
   };
 
@@ -47,11 +62,20 @@ export default function TraditionOnboardingScreen() {
         style={StyleSheet.absoluteFillObject}
       />
 
-      <View style={[styles.dotsContainer, { paddingTop: insets.top + 12 }]}>
-        <ProgressDots currentStep={4} />
-      </View>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+        <TouchableOpacity
+          style={[
+            styles.backButton,
+            {
+              backgroundColor: previewTheme.actionCardColor,
+              borderColor: previewTheme.actionCardBorderColor,
+            },
+          ]}
+          onPress={() => router.back()}
+        >
+          <IconSymbol name="arrow.left.ios" size={20} color={previewTheme.actionTextColor} />
+        </TouchableOpacity>
 
-      <View style={styles.header}>
         <View style={styles.headerText}>
           <Text
             style={[
@@ -136,16 +160,28 @@ export default function TraditionOnboardingScreen() {
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 24 }]}>
+        {toastMessage ? (
+          <View
+            style={[
+              styles.toast,
+              {
+                backgroundColor: previewTheme.actionCardColor,
+                borderColor: previewTheme.actionCardBorderColor,
+              },
+            ]}
+          >
+            <Text style={[styles.toastText, { color: previewTheme.actionTextColor }]}>
+              {toastMessage}
+            </Text>
+          </View>
+        ) : null}
         <TouchableOpacity
-          onPress={handleContinue}
+          onPress={handleSave}
           activeOpacity={0.8}
-          style={[styles.continueButton, { backgroundColor: previewTheme.actionIconColor }]}
+          style={[styles.saveButton, { backgroundColor: previewTheme.actionIconColor }]}
         >
-          <Text style={styles.continueButtonText}>Continue</Text>
+          <Text style={styles.saveButtonText}>Save</Text>
         </TouchableOpacity>
-        <Text style={[styles.footerNote, { color: previewTheme.subtitleColor }]}>
-          You can change this later in settings
-        </Text>
       </View>
     </View>
   );
@@ -159,13 +195,18 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     top: -28,
   },
-  dotsContainer: {
-    paddingHorizontal: 24,
-    paddingBottom: 8,
-  },
   header: {
     paddingHorizontal: 24,
     paddingBottom: 20,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+    borderWidth: 1,
   },
   headerText: {
     gap: 8,
@@ -231,19 +272,26 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     gap: 16,
   },
-  continueButton: {
+  toast: {
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  toastText: {
+    fontSize: 13,
+    lineHeight: 18,
+    textAlign: 'center',
+  },
+  saveButton: {
     height: 56,
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  continueButtonText: {
+  saveButtonText: {
     color: '#06261D',
     fontSize: 16,
     fontWeight: '700',
-  },
-  footerNote: {
-    textAlign: 'center',
-    fontSize: 12,
   },
 });

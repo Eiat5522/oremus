@@ -28,6 +28,7 @@ export function ChristianArViewport({
   floatingPrompts,
 }: ChristianArViewportProps) {
   const [has3dRenderError, setHas3dRenderError] = useState(false);
+  const [is3dStageActive, setIs3dStageActive] = useState(false);
   const slotMissingTrackedRef = useRef(false);
   const stageActivatedTrackedRef = useRef(false);
   const modelState = useChristianPrayerCornerModels();
@@ -77,6 +78,19 @@ export function ChristianArViewport({
     prayerTableModelModule !== null;
 
   useEffect(() => {
+    setIs3dStageActive(false);
+    stageActivatedTrackedRef.current = false;
+  }, [
+    bibleModelModule,
+    candleShortModelModule,
+    candleTallModelModule,
+    crossModelModule,
+    has3dRenderError,
+    jesusStatueModelModule,
+    prayerTableModelModule,
+  ]);
+
+  useEffect(() => {
     if (slotMissingTrackedRef.current || modelState.isLoading) {
       return;
     }
@@ -115,45 +129,45 @@ export function ChristianArViewport({
 
       <View style={styles.mask} />
       <PrayerCornerScene
-        centerpiece={
-          canUse3dStage ? (
-            <PrayerCorner3DStage
-              bibleModelModule={bibleModelModule}
-              candleShortModelModule={candleShortModelModule}
-              candleTallModelModule={candleTallModelModule}
-              crossModelModule={crossModelModule}
-              jesusStatueModelModule={jesusStatueModelModule}
-              prayerTableModelModule={prayerTableModelModule}
-              onError={() => {
-                setHas3dRenderError(true);
-                void trackChristianAnalyticsEvent({
-                  type: 'model_preload_failed',
-                  sessionId,
-                  mode,
-                  phase: currentPhase,
-                  payload: { errorCode: 'modelLoadFailed' },
-                });
-              }}
-              onStageActivated={() => {
-                if (stageActivatedTrackedRef.current) {
-                  return;
-                }
-
-                stageActivatedTrackedRef.current = true;
-                void trackChristianAnalyticsEvent({
-                  type: '3d_stage_activated',
-                  sessionId,
-                  mode,
-                  phase: currentPhase,
-                });
-              }}
-              sceneStyle={sceneStyle}
-            />
-          ) : null
-        }
         floatingPrompts={floatingPrompts}
         sceneStyle={sceneStyle}
       >
+        {canUse3dStage ? (
+          <PrayerCorner3DStage
+            bibleModelModule={bibleModelModule}
+            candleShortModelModule={candleShortModelModule}
+            candleTallModelModule={candleTallModelModule}
+            crossModelModule={crossModelModule}
+            jesusStatueModelModule={jesusStatueModelModule}
+            prayerTableModelModule={prayerTableModelModule}
+            onError={() => {
+              setHas3dRenderError(true);
+              setIs3dStageActive(false);
+              void trackChristianAnalyticsEvent({
+                type: 'model_preload_failed',
+                sessionId,
+                mode,
+                phase: currentPhase,
+                payload: { errorCode: 'modelLoadFailed' },
+              });
+            }}
+            onStageActivated={() => {
+              setIs3dStageActive(true);
+              if (stageActivatedTrackedRef.current) {
+                return;
+              }
+
+              stageActivatedTrackedRef.current = true;
+              void trackChristianAnalyticsEvent({
+                type: '3d_stage_activated',
+                sessionId,
+                mode,
+                phase: currentPhase,
+              });
+            }}
+            sceneStyle={sceneStyle}
+          />
+        ) : null}
         <View style={styles.guidanceWrap}>
           <View style={styles.guidanceCard}>
             <ThemedText style={styles.status}>{placementState.status}</ThemedText>
@@ -169,7 +183,7 @@ export function ChristianArViewport({
               ? '3D assets: checking manifest'
               : modelState.error
                 ? `3D assets: ${modelState.error}`
-                : `3D assets: ${modelState.readyAssetCount}/${modelState.assets.length} ready${canUse3dStage ? ' (3D active)' : ' (fallback)'}`}
+                : `3D assets: ${modelState.readyAssetCount}/${modelState.assets.length} ready${is3dStageActive ? ' (3D active)' : canUse3dStage ? ' (warming up)' : ' (fallback)'}`}
           </ThemedText>
         </View>
       ) : null}
@@ -179,6 +193,7 @@ export function ChristianArViewport({
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     minHeight: 360,
     borderRadius: 30,
     overflow: 'hidden',

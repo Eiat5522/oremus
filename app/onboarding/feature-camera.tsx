@@ -1,14 +1,12 @@
-import { FeatureScreen } from '@/components/onboarding/feature-screen';
-import { ProgressDots } from '@/components/onboarding/progress-dots';
-import { FEATURE_CAMERA } from '@/constants/onboarding';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { FeatureScreen } from '@/components/onboarding/feature-screen';
+import { OnboardingShell } from '@/components/onboarding/onboarding-shell';
+import { FEATURE_CAMERA } from '@/constants/onboarding';
 
 export default function FeatureCameraScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
 
   const handleEnable = async () => {
     try {
@@ -25,16 +23,8 @@ export default function FeatureCameraScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.dotsContainer, { paddingTop: insets.top + 12 }]}>
-        <ProgressDots currentStep={2} />
-      </View>
+    <OnboardingShell currentStep={2}>
       <FeatureScreen content={FEATURE_CAMERA} onPrimaryCta={handleEnable} onSkip={handleSkip} />
-    </View>
+    </OnboardingShell>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#101622' },
-  dotsContainer: { paddingHorizontal: 24, paddingBottom: 8 },
-});

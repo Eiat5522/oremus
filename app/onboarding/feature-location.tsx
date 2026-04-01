@@ -1,15 +1,12 @@
-import { FeatureScreen } from '@/components/onboarding/feature-screen';
-import { ProgressDots } from '@/components/onboarding/progress-dots';
-import { FEATURE_LOCATION } from '@/constants/onboarding';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FeatureScreen } from '@/components/onboarding/feature-screen';
+import { OnboardingShell } from '@/components/onboarding/onboarding-shell';
+import { FEATURE_LOCATION } from '@/constants/onboarding';
 
 export default function FeatureLocationScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
 
   const handleEnable = async () => {
     try {
@@ -25,16 +22,8 @@ export default function FeatureLocationScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.dotsContainer, { paddingTop: insets.top + 12 }]}>
-        <ProgressDots currentStep={1} />
-      </View>
+    <OnboardingShell currentStep={1}>
       <FeatureScreen content={FEATURE_LOCATION} onPrimaryCta={handleEnable} onSkip={handleSkip} />
-    </View>
+    </OnboardingShell>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#101622' },
-  dotsContainer: { paddingHorizontal: 24, paddingBottom: 8 },
-});

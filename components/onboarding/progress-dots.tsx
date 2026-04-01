@@ -2,17 +2,17 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
-const SPIRIT_BLUE = '#1152d4';
-const INACTIVE_COLOR = 'rgba(255,255,255,0.2)';
+const SPIRIT_BLUE = '#4f8cff';
+const INACTIVE_COLOR = 'rgba(255,255,255,0.22)';
 
 const DOT_SIZE = 8;
 const ACTIVE_WIDTH = 24;
 const ANIMATION_DURATION = 300;
 
 interface ProgressDotsProps {
-  /** Zero-based index of the current active step (0-5). */
+  /** Zero-based index of the current active step (0-4). */
   currentStep: number;
-  /** Total number of steps. Defaults to 6. */
+  /** Total number of steps. Defaults to 5. */
   totalSteps?: number;
 }
 
@@ -30,7 +30,7 @@ function Dot({ isActive }: { isActive: boolean }) {
   return <Animated.View style={[styles.dot, animatedStyle]} />;
 }
 
-export function ProgressDots({ currentStep, totalSteps = 6 }: ProgressDotsProps) {
+export function ProgressDots({ currentStep, totalSteps = 5 }: ProgressDotsProps) {
   return (
     <View style={styles.container}>
       {Array.from({ length: totalSteps }, (_, i) => (
@@ -46,6 +46,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 9999,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   dot: {
     height: DOT_SIZE,
