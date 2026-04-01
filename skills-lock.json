@@ -16,6 +16,11 @@
       "sourceType": "github",
       "computedHash": "342295a1d79b24a1e8ff4c048da51b9a1dc22d9c01dea183af389c0e4a1297e6"
     },
+    "systematic-debugging": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "72e9ab72627e4fd8ed26a582e82309a98ecdc4f6e1c99418430ac05682c9e91d"
+    },
     "threejs-animation": {
       "source": "cloudai-x/threejs-skills",
       "sourceType": "github",
