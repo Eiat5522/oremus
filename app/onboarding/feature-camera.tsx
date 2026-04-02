@@ -15,11 +15,11 @@ export default function FeatureCameraScreen() {
     } catch {
       // Permission request failed — continue anyway
     }
-    router.push('/onboarding/feature-notifications');
+    router.replace('/onboarding/feature-notifications');
   };
 
   const handleSkip = () => {
-    router.push('/onboarding/feature-notifications');
+    router.replace('/onboarding/feature-notifications');
   };
 
   return (

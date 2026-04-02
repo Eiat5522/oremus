@@ -1,6 +1,6 @@
 import 'react-native-reanimated';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
-import { Redirect, Stack } from 'expo-router';
+import { Redirect, Stack, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -21,6 +21,7 @@ SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
   const { tradition, isLoading: traditionLoading } = useTradition();
+  const segments = useSegments();
   const {
     isOnboardingCompleted,
     isLoading: onboardingLoading,
@@ -49,11 +50,13 @@ function RootLayoutNav() {
   }
 
   const shouldOnboard = !isOnboardingCompleted || !tradition;
+  const isInOnboarding = segments[0] === 'onboarding';
 
   return (
     <ThemeProvider value={DarkTheme}>
       <View style={{ flex: 1, backgroundColor: '#000000' }}>
-        {shouldOnboard && <Redirect href="/onboarding/splash-gate" />}
+        {shouldOnboard && !isInOnboarding && <Redirect href="/onboarding/splash-gate" />}
+        {!shouldOnboard && isInOnboarding && <Redirect href="/(tabs)" />}
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="onboarding" />
           <Stack.Screen name="(tabs)" />

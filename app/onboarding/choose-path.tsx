@@ -117,8 +117,8 @@ export default function ChoosePathScreen() {
                         borderColor: isSelected
                           ? previewTheme.actionIconColor
                           : 'rgba(255,255,255,0.1)',
-                        transform: pressed ? [{ scale: 0.992 }] : undefined,
                       },
+                      pressed && styles.traditionCardPressed,
                       isSelected && styles.traditionCardSelected,
                     ]}
                   >
@@ -270,6 +270,9 @@ const styles = StyleSheet.create({
   traditionCardSelected: {
     shadowOpacity: 0.28,
     elevation: 12,
+  },
+  traditionCardPressed: {
+    transform: [{ scale: 0.992 }],
   },
   iconContainer: {
     width: 52,
