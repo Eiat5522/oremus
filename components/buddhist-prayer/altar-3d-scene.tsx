@@ -53,7 +53,6 @@ function normalizeGltfScene(input: unknown): Object3D | null {
 
 async function loadAltarAsset(modelModule: number) {
   const asset = Asset.fromModule(modelModule);
-  await asset.downloadAsync();
   const uri = asset.localUri ?? asset.uri;
 
   if (!uri) {

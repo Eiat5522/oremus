@@ -563,7 +563,7 @@ class SocialBlockerActivity : Activity() {
         BlockerContent(
           badgeLabel = "$appName is paused",
           title = "Pause. Realign.",
-          message = "You've chosen to protect your focus.\nComplete a session in Oremus to continue.",
+          message = "You've chosen to protect your focus.\\nComplete a session in Oremus to continue.",
           buttonLabel = "Begin Session",
           footerLabel = "Open Oremus to continue",
           backgroundDrawableRes = R.drawable.focus_gate_block_islam,
@@ -583,7 +583,7 @@ class SocialBlockerActivity : Activity() {
         BlockerContent(
           badgeLabel = "$appName is paused",
           title = "Pause. Realign.",
-          message = "You've chosen to protect your focus.\nComplete a session in Oremus to continue.",
+          message = "You've chosen to protect your focus.\\nComplete a session in Oremus to continue.",
           buttonLabel = "Begin Prayer",
           footerLabel = "Open Oremus to continue",
           backgroundDrawableRes = R.drawable.focus_gate_block_christianity,
@@ -603,7 +603,7 @@ class SocialBlockerActivity : Activity() {
         BlockerContent(
           badgeLabel = "$appName is paused",
           title = "Pause. Realign.",
-          message = "You've chosen to protect your focus.\nComplete a session in Oremus to continue.",
+          message = "You've chosen to protect your focus.\\nComplete a session in Oremus to continue.",
           buttonLabel = "Begin Meditation",
           footerLabel = "Open Oremus to continue",
           backgroundDrawableRes = R.drawable.focus_gate_block_buddhism,
@@ -623,7 +623,7 @@ class SocialBlockerActivity : Activity() {
         BlockerContent(
           badgeLabel = "$appName is paused",
           title = "Pause. Realign.",
-          message = "You've chosen to protect your focus.\nComplete a session in Oremus to continue.",
+          message = "You've chosen to protect your focus.\\nComplete a session in Oremus to continue.",
           buttonLabel = "Begin Session",
           footerLabel = "Open Oremus to continue",
           backgroundDrawableRes = R.drawable.focus_gate_block_islam,

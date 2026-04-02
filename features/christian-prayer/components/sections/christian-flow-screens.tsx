@@ -645,7 +645,7 @@ export function ChristianArPlaceScreen() {
               </View>
               <PrimaryButton
                 label="Confirm Placement"
-                onPress={() => router.replace('/christian/ar-ready' as never)}
+                onPress={() => router.push('/christian/ar-ready' as never)}
               />
             </>
           )}

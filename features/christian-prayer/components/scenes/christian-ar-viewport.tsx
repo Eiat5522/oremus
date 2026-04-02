@@ -129,45 +129,47 @@ export function ChristianArViewport({
 
       <View style={styles.mask} />
       <PrayerCornerScene
+        centerpiece={
+          canUse3dStage ? (
+            <PrayerCorner3DStage
+              bibleModelModule={bibleModelModule}
+              candleShortModelModule={candleShortModelModule}
+              candleTallModelModule={candleTallModelModule}
+              crossModelModule={crossModelModule}
+              jesusStatueModelModule={jesusStatueModelModule}
+              prayerTableModelModule={prayerTableModelModule}
+              onError={() => {
+                setHas3dRenderError(true);
+                setIs3dStageActive(false);
+                void trackChristianAnalyticsEvent({
+                  type: 'model_preload_failed',
+                  sessionId,
+                  mode,
+                  phase: currentPhase,
+                  payload: { errorCode: 'modelLoadFailed' },
+                });
+              }}
+              onStageActivated={() => {
+                setIs3dStageActive(true);
+                if (stageActivatedTrackedRef.current) {
+                  return;
+                }
+
+                stageActivatedTrackedRef.current = true;
+                void trackChristianAnalyticsEvent({
+                  type: '3d_stage_activated',
+                  sessionId,
+                  mode,
+                  phase: currentPhase,
+                });
+              }}
+              sceneStyle={sceneStyle}
+            />
+          ) : null
+        }
         floatingPrompts={floatingPrompts}
         sceneStyle={sceneStyle}
       >
-        {canUse3dStage ? (
-          <PrayerCorner3DStage
-            bibleModelModule={bibleModelModule}
-            candleShortModelModule={candleShortModelModule}
-            candleTallModelModule={candleTallModelModule}
-            crossModelModule={crossModelModule}
-            jesusStatueModelModule={jesusStatueModelModule}
-            prayerTableModelModule={prayerTableModelModule}
-            onError={() => {
-              setHas3dRenderError(true);
-              setIs3dStageActive(false);
-              void trackChristianAnalyticsEvent({
-                type: 'model_preload_failed',
-                sessionId,
-                mode,
-                phase: currentPhase,
-                payload: { errorCode: 'modelLoadFailed' },
-              });
-            }}
-            onStageActivated={() => {
-              setIs3dStageActive(true);
-              if (stageActivatedTrackedRef.current) {
-                return;
-              }
-
-              stageActivatedTrackedRef.current = true;
-              void trackChristianAnalyticsEvent({
-                type: '3d_stage_activated',
-                sessionId,
-                mode,
-                phase: currentPhase,
-              });
-            }}
-            sceneStyle={sceneStyle}
-          />
-        ) : null}
         <View style={styles.guidanceWrap}>
           <View style={styles.guidanceCard}>
             <ThemedText style={styles.status}>{placementState.status}</ThemedText>
