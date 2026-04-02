@@ -795,12 +795,14 @@ export function ChristianStillnessScreen({
         onClose={() => router.push('/christian/exit-confirm' as never)}
       />
       <View style={styles.experienceContent}>
-        <ExperienceSceneFrame
-          experienceMode={experienceMode}
-          floatingPrompts={['arrival', 'quiet']}
-        >
-          <View />
-        </ExperienceSceneFrame>
+        <View style={styles.sceneViewportTall}>
+          <ExperienceSceneFrame
+            experienceMode={experienceMode}
+            floatingPrompts={['arrival', 'quiet']}
+          >
+            <View />
+          </ExperienceSceneFrame>
+        </View>
         <StillnessOverlay
           body={session.modeContent.stillnessPrompt}
           remainingSeconds={remainingSeconds}
@@ -845,12 +847,14 @@ export function ChristianScriptureScreen({
   return (
     <ChristianFlowScreen>
       <TopOverlayHeader title="Scripture Reading" />
-      <ExperienceSceneFrame
-        experienceMode={experienceMode}
-        floatingPrompts={[selectedVerse.reference, selectedVerse.theme]}
-      >
-        <View />
-      </ExperienceSceneFrame>
+      <View style={styles.sceneViewport}>
+        <ExperienceSceneFrame
+          experienceMode={experienceMode}
+          floatingPrompts={[selectedVerse.reference, selectedVerse.theme]}
+        >
+          <View />
+        </ExperienceSceneFrame>
+      </View>
       <FloatingScriptureCard intro={modeContent.scriptureIntro} verse={selectedVerse} />
       <View style={styles.actionStack}>
         <PrimaryButton label="Continue To Reflection" onPress={advanceToNextPhase} />
@@ -892,9 +896,11 @@ export function ChristianReflectionScreen({
   return (
     <ChristianFlowScreen>
       <TopOverlayHeader title="Reflection" />
-      <ExperienceSceneFrame experienceMode={experienceMode} floatingPrompts={['reflection']}>
-        <View />
-      </ExperienceSceneFrame>
+      <View style={styles.sceneViewport}>
+        <ExperienceSceneFrame experienceMode={experienceMode} floatingPrompts={['reflection']}>
+          <View />
+        </ExperienceSceneFrame>
+      </View>
       {session.audioSettings.reflectionPromptsEnabled ? (
         <ReflectionPromptCard prompt={session.modeContent.reflectionPrompt} />
       ) : null}
@@ -978,9 +984,11 @@ export function ChristianPrayerPhasesScreen({
   return (
     <ChristianFlowScreen>
       <TopOverlayHeader title="Guided Prayer" />
-      <ExperienceSceneFrame experienceMode={experienceMode} floatingPrompts={[currentPhase]}>
-        <View />
-      </ExperienceSceneFrame>
+      <View style={styles.sceneViewport}>
+        <ExperienceSceneFrame experienceMode={experienceMode} floatingPrompts={[currentPhase]}>
+          <View />
+        </ExperienceSceneFrame>
+      </View>
       <PrayerStepper currentPhase={currentPhase} phases={CHRISTIAN_GUIDED_PRAYER_PHASES} />
       <PrayerPhaseCard phase={currentPhase} prompt={modeContent.prayerPrompts[currentPhase]} />
       <View style={styles.actionStack}>
@@ -1084,9 +1092,14 @@ export function ChristianBlessingScreen({
   return (
     <ChristianFlowScreen>
       <TopOverlayHeader title="Blessing" />
-      <ExperienceSceneFrame experienceMode={experienceMode} floatingPrompts={['peace', 'blessing']}>
-        <View />
-      </ExperienceSceneFrame>
+      <View style={styles.sceneViewport}>
+        <ExperienceSceneFrame
+          experienceMode={experienceMode}
+          floatingPrompts={['peace', 'blessing']}
+        >
+          <View />
+        </ExperienceSceneFrame>
+      </View>
       <BlessingCard text={modeContent.blessing} />
       <PrimaryButton label="Complete Session" onPress={() => void finishSession()} />
     </ChristianFlowScreen>
@@ -1271,7 +1284,20 @@ const styles = StyleSheet.create({
   experienceContent: {
     flex: 1,
     gap: ChristianPrayerSpacing.md,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+  },
+  sceneViewport: {
+    width: '100%',
+    minHeight: 360,
+    borderRadius: 30,
+    overflow: 'hidden',
+  },
+  sceneViewportTall: {
+    width: '100%',
+    flex: 1,
+    minHeight: 420,
+    borderRadius: 30,
+    overflow: 'hidden',
   },
   sectionBlock: {
     gap: 6,

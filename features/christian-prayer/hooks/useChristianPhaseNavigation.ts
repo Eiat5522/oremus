@@ -32,15 +32,40 @@ export function useChristianPhaseNavigation() {
   );
 
   const beginPrayerFlow = useCallback(() => {
-    markSessionStarted('openingStillness');
-    router.replace(getChristianPhaseRoute('openingStillness', experienceMode) as never);
+    const nextRoute = getChristianPhaseRoute('openingStillness', experienceMode);
+    const debugContext = {
+      currentPhase,
+      experienceMode,
+      mode,
+      nextRoute,
+      sessionId,
+    };
+
+    console.info('[ChristianPrayer] beginPrayerFlow:start', debugContext);
+
     void trackChristianAnalyticsEvent({
       type: 'session_started',
       sessionId,
       mode,
       phase: 'openingStillness',
+    }).catch((error) => {
+      console.warn('[ChristianPrayer] beginPrayerFlow analytics failed', {
+        ...debugContext,
+        error,
+      });
     });
-  }, [experienceMode, markSessionStarted, mode, router, sessionId]);
+
+    try {
+      markSessionStarted('openingStillness');
+      router.replace(nextRoute as never);
+      console.info('[ChristianPrayer] beginPrayerFlow:navigated', debugContext);
+    } catch (error) {
+      console.warn('[ChristianPrayer] beginPrayerFlow failed', {
+        ...debugContext,
+        error,
+      });
+    }
+  }, [currentPhase, experienceMode, markSessionStarted, mode, router, sessionId]);
 
   const advanceToNextPhase = useCallback(() => {
     const nextPhase = getChristianNextPhase(currentPhase);

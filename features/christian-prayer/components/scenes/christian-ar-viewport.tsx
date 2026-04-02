@@ -1,5 +1,5 @@
 import { CameraView } from 'expo-camera';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { Component, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -13,6 +13,44 @@ import {
 import { useChristianPrayerCornerModels } from '@/features/christian-prayer/hooks/useChristianPrayerCornerModels';
 import { trackChristianAnalyticsEvent } from '@/features/christian-prayer/services/christianAnalytics.service';
 import { useChristianSessionStore } from '@/features/christian-prayer/store/useChristianSessionStore';
+
+// ---------------------------------------------------------------------------
+// Error boundary – catches Three.js / Canvas runtime errors so the viewport
+// falls back to the 2D placeholder instead of crashing the whole screen.
+// Follows the same pattern as the Buddhist SceneErrorBoundary.
+// ---------------------------------------------------------------------------
+
+interface SceneErrorBoundaryProps {
+  children: ReactNode;
+  onError: () => void;
+}
+
+interface SceneErrorBoundaryState {
+  hasError: boolean;
+}
+
+class SceneErrorBoundary extends Component<SceneErrorBoundaryProps, SceneErrorBoundaryState> {
+  state: SceneErrorBoundaryState = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch() {
+    this.props.onError();
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null;
+    }
+    return this.props.children;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// ChristianArViewport
+// ---------------------------------------------------------------------------
 
 interface ChristianArViewportProps {
   placementState: ArPlacementState;
@@ -119,18 +157,76 @@ export function ChristianArViewport({
     sessionId,
   ]);
 
+  // -----------------------------------------------------------------------
+  // Buddhist-style layered rendering:
+  //   Layer 0 – Camera (or dark fallback)
+  //   Layer 1 – Semi-transparent mask
+  //   Layer 2 – PrayerCornerScene with 2D fallback silhouettes (placeholder)
+  //             Visible while 3D stage is NOT active.
+  //   Layer 3 – PrayerCorner3DStage (real 3D models)
+  //             Starts at opacity 0; flips to opacity 1 when onStageActivated
+  //             fires, meaning all GLTF models are loaded and the first frame
+  //             has rendered. Wrapped in SceneErrorBoundary so a Three.js
+  //             crash falls back to the 2D placeholder permanently.
+  //   Layer 4 – Guidance card overlay
+  //   Layer 5 – Dev asset status badge
+  // -----------------------------------------------------------------------
+
+  const shouldShowPlaceholder = has3dRenderError || !is3dStageActive;
+
+  const handleStageError = () => {
+    setHas3dRenderError(true);
+    setIs3dStageActive(false);
+    void trackChristianAnalyticsEvent({
+      type: 'model_preload_failed',
+      sessionId,
+      mode,
+      phase: currentPhase,
+      payload: { errorCode: 'modelLoadFailed' },
+    });
+  };
+
+  const handleStageActivated = () => {
+    setIs3dStageActive(true);
+    if (stageActivatedTrackedRef.current) {
+      return;
+    }
+
+    stageActivatedTrackedRef.current = true;
+    void trackChristianAnalyticsEvent({
+      type: '3d_stage_activated',
+      sessionId,
+      mode,
+      phase: currentPhase,
+    });
+  };
+
   return (
     <View style={styles.container}>
+      {/* Layer 0 – Camera background */}
       {cameraGranted ? (
         <CameraView style={StyleSheet.absoluteFillObject} facing="back" />
       ) : (
         <View style={styles.cameraFallback} />
       )}
 
+      {/* Layer 1 – Mask overlay */}
       <View style={styles.mask} />
-      <PrayerCornerScene
-        centerpiece={
-          canUse3dStage ? (
+
+      {/* Layer 2 – 2D placeholder (PrayerCornerScene with fallback silhouettes) */}
+      {shouldShowPlaceholder ? (
+        <View style={styles.sceneLayer}>
+          <PrayerCornerScene floatingPrompts={floatingPrompts} sceneStyle={sceneStyle} />
+        </View>
+      ) : null}
+
+      {/* Layer 3 – 3D stage (real GLTF models inside Canvas) */}
+      {canUse3dStage ? (
+        <View
+          pointerEvents="none"
+          style={[styles.sceneLayer, is3dStageActive ? styles.sceneVisible : styles.sceneHidden]}
+        >
+          <SceneErrorBoundary onError={handleStageError}>
             <PrayerCorner3DStage
               bibleModelModule={bibleModelModule}
               candleShortModelModule={candleShortModelModule}
@@ -138,46 +234,23 @@ export function ChristianArViewport({
               crossModelModule={crossModelModule}
               jesusStatueModelModule={jesusStatueModelModule}
               prayerTableModelModule={prayerTableModelModule}
-              onError={() => {
-                setHas3dRenderError(true);
-                setIs3dStageActive(false);
-                void trackChristianAnalyticsEvent({
-                  type: 'model_preload_failed',
-                  sessionId,
-                  mode,
-                  phase: currentPhase,
-                  payload: { errorCode: 'modelLoadFailed' },
-                });
-              }}
-              onStageActivated={() => {
-                setIs3dStageActive(true);
-                if (stageActivatedTrackedRef.current) {
-                  return;
-                }
-
-                stageActivatedTrackedRef.current = true;
-                void trackChristianAnalyticsEvent({
-                  type: '3d_stage_activated',
-                  sessionId,
-                  mode,
-                  phase: currentPhase,
-                });
-              }}
+              onError={handleStageError}
+              onStageActivated={handleStageActivated}
               sceneStyle={sceneStyle}
             />
-          ) : null
-        }
-        floatingPrompts={floatingPrompts}
-        sceneStyle={sceneStyle}
-      >
-        <View style={styles.guidanceWrap}>
-          <View style={styles.guidanceCard}>
-            <ThemedText style={styles.status}>{placementState.status}</ThemedText>
-            <ThemedText style={styles.guidance}>{placementState.guidance}</ThemedText>
-          </View>
+          </SceneErrorBoundary>
         </View>
-      </PrayerCornerScene>
+      ) : null}
 
+      {/* Layer 4 – Guidance card */}
+      <View style={styles.guidanceWrap}>
+        <View style={styles.guidanceCard}>
+          <ThemedText style={styles.status}>{placementState.status}</ThemedText>
+          <ThemedText style={styles.guidance}>{placementState.guidance}</ThemedText>
+        </View>
+      </View>
+
+      {/* Layer 5 – Dev asset status badge */}
       {__DEV__ ? (
         <View style={styles.assetStatusWrap}>
           <ThemedText style={styles.assetStatusText}>
@@ -208,6 +281,15 @@ const styles = StyleSheet.create({
   mask: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: ChristianPrayerPalette.cameraMask,
+  },
+  sceneLayer: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  sceneHidden: {
+    opacity: 0,
+  },
+  sceneVisible: {
+    opacity: 1,
   },
   guidanceWrap: {
     position: 'absolute',

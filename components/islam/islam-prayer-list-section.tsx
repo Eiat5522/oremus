@@ -247,6 +247,7 @@ export function IslamPrayerListSection() {
           trigger: {
             type: notifications.SchedulableTriggerInputTypes.DATE,
             date: scheduleDate,
+            channelId: 'prayer-reminders',
           },
         });
 
