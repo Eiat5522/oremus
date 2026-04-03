@@ -3,6 +3,18 @@ import { spawn } from 'node:child_process';
 
 const expoArgs = process.argv.slice(2);
 
+function shouldUseActiveArchOnly(args) {
+  if (args[0] !== 'run:android') {
+    return false;
+  }
+
+  if (process.env.EXPO_NO_ACTIVE_ARCH_ONLY === '1') {
+    return false;
+  }
+
+  return !args.includes('--active-arch-only');
+}
+
 function pointsToMountedWindowsPath(value) {
   return typeof value === 'string' && value.startsWith('/mnt/') && value.length > 5;
 }
@@ -68,9 +80,19 @@ function buildEnv() {
   return env;
 }
 
+const normalizedExpoArgs = shouldUseActiveArchOnly(expoArgs)
+  ? [...expoArgs, '--active-arch-only']
+  : expoArgs;
+
+if (normalizedExpoArgs !== expoArgs) {
+  console.log(
+    'Using --active-arch-only for local Android builds. Set EXPO_NO_ACTIVE_ARCH_ONLY=1 to disable.',
+  );
+}
+
 const child = spawn(
   process.platform === 'win32' ? 'npx.cmd' : 'npx',
-  ['expo', ...expoArgs],
+  ['expo', ...normalizedExpoArgs],
   {
     env: buildEnv(),
     stdio: 'inherit',
