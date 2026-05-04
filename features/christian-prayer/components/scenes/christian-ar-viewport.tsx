@@ -201,6 +201,20 @@ export function ChristianArViewport({
     });
   };
 
+  const livePrayerCornerCenterpiece = canUse3dStage ? (
+    <PrayerCorner3DStage
+      bibleModelModule={bibleModelModule}
+      candleShortModelModule={candleShortModelModule}
+      candleTallModelModule={candleTallModelModule}
+      crossModelModule={crossModelModule}
+      jesusStatueModelModule={jesusStatueModelModule}
+      prayerTableModelModule={prayerTableModelModule}
+      onError={handleStageError}
+      onStageActivated={handleStageActivated}
+      sceneStyle={sceneStyle}
+    />
+  ) : null;
+
   return (
     <View style={styles.container}>
       {/* Layer 0 – Camera background */}
@@ -216,7 +230,11 @@ export function ChristianArViewport({
       {/* Layer 2 – 2D placeholder (PrayerCornerScene with fallback silhouettes) */}
       {shouldShowPlaceholder ? (
         <View style={styles.sceneLayer}>
-          <PrayerCornerScene floatingPrompts={floatingPrompts} sceneStyle={sceneStyle} />
+          <PrayerCornerScene
+            centerpiece={livePrayerCornerCenterpiece}
+            floatingPrompts={floatingPrompts}
+            sceneStyle={sceneStyle}
+          />
         </View>
       ) : null}
 
@@ -227,17 +245,7 @@ export function ChristianArViewport({
           style={[styles.sceneLayer, is3dStageActive ? styles.sceneVisible : styles.sceneHidden]}
         >
           <SceneErrorBoundary onError={handleStageError}>
-            <PrayerCorner3DStage
-              bibleModelModule={bibleModelModule}
-              candleShortModelModule={candleShortModelModule}
-              candleTallModelModule={candleTallModelModule}
-              crossModelModule={crossModelModule}
-              jesusStatueModelModule={jesusStatueModelModule}
-              prayerTableModelModule={prayerTableModelModule}
-              onError={handleStageError}
-              onStageActivated={handleStageActivated}
-              sceneStyle={sceneStyle}
-            />
+            {livePrayerCornerCenterpiece}
           </SceneErrorBoundary>
         </View>
       ) : null}

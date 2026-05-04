@@ -16,10 +16,7 @@ export default function SelectTraditionScreen() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const previewTheme = useMemo(
-    () => getTraditionUiTheme(selectedTradition),
-    [selectedTradition],
-  );
+  const previewTheme = useMemo(() => getTraditionUiTheme(selectedTradition), [selectedTradition]);
 
   useEffect(() => {
     if (tradition) {
@@ -45,7 +42,9 @@ export default function SelectTraditionScreen() {
       router.replace('/(tabs)');
     } catch (error) {
       console.error('Failed to save tradition preference:', error);
-      setToastMessage('Unable to save your tradition right now. Your previous setting is unchanged.');
+      setToastMessage(
+        'Unable to save your tradition right now. Your previous setting is unchanged.',
+      );
     }
   };
 

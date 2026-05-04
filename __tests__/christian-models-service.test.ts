@@ -26,7 +26,7 @@ describe('christianModels.service', () => {
     const snapshot = await loadChristianPrayerCornerModels({ forceRefresh: true });
 
     expect(snapshot.error).toBeNull();
-    expect(snapshot.assets).toHaveLength(5);
+    expect(snapshot.assets).toHaveLength(6);
     expect(snapshot.missingAssetIds.length).toBeGreaterThan(0);
     expect(snapshot.coreReady).toBe(false);
   });
@@ -36,6 +36,19 @@ describe('christianModels.service', () => {
       selectChristianCoreModelReadiness({
         error: null,
         assets: [
+          {
+            id: 'jesus_statue_a',
+            fileName: 'jesus_statue_a.glb',
+            pivot: 'bottomCenter',
+            role: 'hero',
+            maxTriangles: 12000,
+            maxTextureSize: 1024,
+            scaleHint: 1,
+            status: 'ready',
+            moduleId: 0,
+            localUri: 'file://jesus.glb',
+            attempts: 1,
+          },
           {
             id: 'cross_wood_a',
             fileName: 'cross_wood_a.glb',
@@ -57,6 +70,19 @@ describe('christianModels.service', () => {
       selectChristianCoreModelReadiness({
         error: null,
         assets: [
+          {
+            id: 'jesus_statue_a',
+            fileName: 'jesus_statue_a.glb',
+            pivot: 'bottomCenter',
+            role: 'hero',
+            maxTriangles: 12000,
+            maxTextureSize: 1024,
+            scaleHint: 1,
+            status: 'ready',
+            moduleId: 0,
+            localUri: 'file://jesus.glb',
+            attempts: 1,
+          },
           {
             id: 'cross_wood_a',
             fileName: 'cross_wood_a.glb',
@@ -91,6 +117,19 @@ describe('christianModels.service', () => {
       selectChristianCoreModelReadiness({
         error: null,
         assets: [
+          {
+            id: 'jesus_statue_a',
+            fileName: 'jesus_statue_a.glb',
+            pivot: 'bottomCenter',
+            role: 'hero',
+            maxTriangles: 12000,
+            maxTextureSize: 1024,
+            scaleHint: 1,
+            status: 'ready',
+            moduleId: 0,
+            localUri: 'file://jesus.glb',
+            attempts: 1,
+          },
           {
             id: 'cross_wood_a',
             fileName: 'cross_wood_a.glb',

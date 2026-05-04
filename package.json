@@ -11,7 +11,8 @@
     "ios": "node ./scripts/run-expo.mjs run:ios",
     "web": "node ./scripts/run-expo.mjs start --web",
     "lint": "node ./scripts/run-expo.mjs lint",
-    "test": "jest --watchAll",
+    "test": "node ./scripts/run-jest.mjs",
+    "test:watch": "node ./scripts/run-jest.mjs --watchAll",
     "postinstall": "node ./scripts/apply-expo-gl-patch.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

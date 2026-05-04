@@ -108,7 +108,11 @@ export default function ARMeritScreen() {
           variant="outline"
           onPress={() => router.push('/tradition/buddhist-prayer/ar-completion')}
         />
-        <GoldButton title="Return Home" variant="ghost" onPress={() => router.replace('/(tabs)')} />
+        <GoldButton
+          title="Return Home"
+          variant="ghost"
+          onPress={() => router.replace('/tradition/buddhist')}
+        />
       </ScrollView>
     </View>
   );
